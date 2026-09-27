@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <!--
-  Customer & Car Compare Analytics — v9
+  Customer & Car Compare Analytics — v11
+  v11: + ยกเลิกปุ่มเลือกนิยามยอดรถยนต์ — วิเคราะห์ด้วยยอดรถยนต์เข้า 24 ชม. ทั้งแอป · ปรับ UI ทุกหน้าทุกขนาดจอ
+  v10: + หน้ารายปี: การ์ด KPI แสดงปีที่เลือก (ค่าเริ่มต้น = ปีล่าสุด) เทียบปีก่อน แบบช่วงเดียวกัน (YTD) หรือทั้งปี
+       + รายงานรายปี A4 (KPI, กราฟรายเดือน, ตารางรายเดือนฐานเดียวกัน, บทวิเคราะห์ + Welch t-test)
   v9: + ใบรายงานไม่มีช่องลงนาม · เนื้อหาเต็มหน้ากระดาษ (สรุปรายปี/YTD, วันในสัปดาห์, สถิติวันเดียวกันในรอบปี)
       + Error handling: โหลดไม่ครบไม่ทำข้อมูลหาย · ดึงซ้ำจนครบ · บันทึกแล้วอ่านกลับสด · JSONP ตอบผิดรูปแบบแจ้งทันที
       + วันที่ซ้ำใช้รายการหลังสุด · ค่าติดลบ = ไม่มีข้อมูล · รายวันตามวันล่าสุดอัตโนมัติ · escape ชื่อวันหยุด
@@ -287,13 +290,13 @@
   .rp-tbl td{ padding:2.5px 6px; border-bottom:1px solid #f1eff8; }
   .rp-tbl .num{ text-align:right; }
   .rp-dot{ font-size:9px; margin-right:5px; } /* ใช้ตัวอักษร ● แทนกล่องสี — html2canvas วางตำแหน่ง inline-block เพี้ยน */
-  #rpC .rp-tbl td, #rpD .rp-tbl td{ padding:1.3px 6px; } #rpC .rp-tbl th, #rpD .rp-tbl th{ padding:2px 6px; } #rpC .rp-list, #rpD .rp-list{ line-height:1.45; } #rpC .rp-box, #rpD .rp-box{ padding:7px 12px; } #rpC .rp-t, #rpD .rp-t{ margin-bottom:2px; }
+  #rpC .rp-tbl td, #rpD .rp-tbl td{ padding:1.3px 6px; } #rpY .rp-tbl td{ padding:1.8px 6px; font-size:10.5px; } #rpY .rp-list{ line-height:1.5; } #rpC .rp-tbl th, #rpD .rp-tbl th{ padding:2px 6px; } #rpC .rp-list, #rpD .rp-list{ line-height:1.45; } #rpC .rp-box, #rpD .rp-box{ padding:7px 12px; } #rpC .rp-t, #rpD .rp-t{ margin-bottom:2px; }
   #rpC .rp-kpi, #rpD .rp-kpi{ padding:7px 12px; } #rpC .rp-kpi .v, #rpD .rp-kpi .v{ font-size:18px; line-height:1.3; }
   .rp-list{ margin:0; font-size:10.8px; line-height:1.6; }
   .rp-li{ display:flex; gap:6px; } .rp-li .n{ flex-shrink:0; min-width:14px; font-weight:600; color:#6d28d9; }
   .rp-foot{ position:absolute; left:28px; right:28px; bottom:10px; display:flex; justify-content:space-between; font-size:9.5px; color:#6e6a86; border-top:1px solid #ece9f7; padding-top:5px; }
 
-  /* ---------- v9.0: แถบบน + แถบกรอง บนมือถือ ---------- */
+  /* ---------- v11.0: แถบบน + แถบกรอง บนมือถือ ---------- */
   .m-logo{ width:36px; height:36px; border-radius:11px; flex-shrink:0; box-shadow:0 6px 14px -6px rgba(124,58,237,.55); }
   .m-range{ font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
   .m-range b{ color:var(--p1); font-weight:600; }
@@ -302,7 +305,8 @@
   /* ---------- v8 ---------- */
   .rp-brand{ background:#fff; border-radius:14px; padding:7px 14px; height:62px; display:flex; align-items:center; box-shadow:0 6px 16px rgba(20,8,50,.28); flex-shrink:0; }
   .rp-brand img{ height:46px; width:auto; display:block; }
-  .ins-list{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:6px 22px; font-size:14px; line-height:1.65; }
+  @media (min-width:1280px){ .insight-head{ border-right:1px solid rgba(192,38,211,.2); } }
+  .ins-list{ list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:6px 22px; font-size:14px; line-height:1.65; }
   .ins-list li{ position:relative; padding-left:16px; }
   .ins-list li::before{ content:''; position:absolute; left:0; top:.62em; width:7px; height:7px; border-radius:50%; background:linear-gradient(135deg,#a855f7,#db2777); }
   .seg .seg-day{ display:inline-flex; align-items:center; gap:6px; font-weight:500; }
@@ -348,7 +352,6 @@
     #filterBar{ padding:10px; gap:10px; }
     #filterBar .seg{ width:100%; display:grid; gap:4px; }
     #rangeSeg{ grid-template-columns:repeat(3,1fr); }
-    #carSeg{ grid-template-columns:repeat(2,1fr); }
     #filterBar .seg button{ padding:8px 4px; text-align:center; white-space:nowrap; }
     #filterBar .seg.hidden{ display:none; }
     #customRange{ width:100%; }
@@ -357,7 +360,7 @@
     #filterBar .range-info .chip{ white-space:nowrap; }
   }
 </style>
-<style id="tw">*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:Prompt,sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width:640px){.container{max-width:640px}}@media (min-width:768px){.container{max-width:768px}}@media (min-width:1024px){.container{max-width:1024px}}@media (min-width:1280px){.container{max-width:1280px}}@media (min-width:1536px){.container{max-width:1536px}}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0}.top-0{top:0}.z-30{z-index:30}.z-40{z-index:40}.m-3{margin:.75rem}.mb-1{margin-bottom:.25rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.ml-1{margin-left:.25rem}.ml-auto{margin-left:auto}.mr-2{margin-right:.5rem}.mt-0{margin-top:0}.mt-0\.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.mt-1\.5{margin-top:.375rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.mt-6{margin-top:1.5rem}.inline-block{display:inline-block}.inline{display:inline}.flex{display:flex}.inline-flex{display:inline-flex}.table{display:table}.grid{display:grid}.contents{display:contents}.hidden{display:none}.h-screen{height:100vh}.min-h-screen{min-height:100vh}.w-full{width:100%}.min-w-0{min-width:0}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.resize{resize:both}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-2\.5{gap:.625rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-3>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.75rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.75rem*var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.self-start{align-self:flex-start}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis}.truncate,.whitespace-nowrap{white-space:nowrap}.rounded-2xl{border-radius:1rem}.rounded-xl{border-radius:.75rem}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-3\.5{padding:.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pb-3{padding-bottom:.75rem}.pb-4{padding-bottom:1rem}.pl-1{padding-left:.25rem}.pt-3{padding-top:.75rem}.pt-5{padding-top:1.25rem}.text-center{text-align:center}.text-right{text-align:right}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[11px\]{font-size:11px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.leading-tight{line-height:1.25}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.ease-in-out{transition-timing-function:cubic-bezier(.4,0,.2,1)}.ease-out{transition-timing-function:cubic-bezier(0,0,.2,1)}@media (min-width:640px){.sm\:col-span-2{grid-column:span 2/span 2}.sm\:flex{display:flex}.sm\:inline-flex{display:inline-flex}.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width:768px){.md\:inline{display:inline}.md\:flex{display:flex}.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.md\:flex-row{flex-direction:row}.md\:items-center{align-items:center}.md\:self-center{align-self:center}.md\:p-6{padding:1.5rem}.md\:px-6{padding-left:1.5rem;padding-right:1.5rem}.md\:pr-5{padding-right:1.25rem}.md\:text-right{text-align:right}}@media (min-width:1024px){.lg\:sticky{position:sticky}.lg\:top-0{top:0}.lg\:col-span-4{grid-column:span 4/span 4}.lg\:block{display:block}.lg\:inline-flex{display:inline-flex}.lg\:hidden{display:none}.lg\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.lg\:grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}.lg\:px-8{padding-left:2rem;padding-right:2rem}}@media (min-width:1280px){.xl\:col-span-1{grid-column:span 1/span 1}.xl\:col-span-2{grid-column:span 2/span 2}.xl\:col-span-3{grid-column:span 3/span 3}.xl\:inline{display:inline}.xl\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.xl\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.xl\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.xl\:grid-cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}.xl\:gap-4{gap:1rem}.xl\:gap-5{gap:1.25rem}}@media (min-width:1536px){.\32xl\:flex{display:flex}.\32xl\:grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.\32xl\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.\32xl\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.\32xl\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}}</style>
+<style id="tw">*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:Prompt,sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width:640px){.container{max-width:640px}}@media (min-width:768px){.container{max-width:768px}}@media (min-width:1024px){.container{max-width:1024px}}@media (min-width:1280px){.container{max-width:1280px}}@media (min-width:1536px){.container{max-width:1536px}}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0}.top-0{top:0}.z-30{z-index:30}.z-40{z-index:40}.m-3{margin:.75rem}.mb-1{margin-bottom:.25rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.ml-1{margin-left:.25rem}.ml-auto{margin-left:auto}.mr-2{margin-right:.5rem}.mt-0{margin-top:0}.mt-0\.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.mt-1\.5{margin-top:.375rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.mt-6{margin-top:1.5rem}.inline-block{display:inline-block}.inline{display:inline}.flex{display:flex}.inline-flex{display:inline-flex}.table{display:table}.grid{display:grid}.contents{display:contents}.hidden{display:none}.h-screen{height:100vh}.min-h-screen{min-height:100vh}.w-full{width:100%}.min-w-0{min-width:0}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.resize{resize:both}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-2\.5{gap:.625rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.gap-x-5{-moz-column-gap:1.25rem;column-gap:1.25rem}.gap-y-3{row-gap:.75rem}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-3>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.75rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.75rem*var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.self-start{align-self:flex-start}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis}.truncate,.whitespace-nowrap{white-space:nowrap}.rounded-2xl{border-radius:1rem}.rounded-xl{border-radius:.75rem}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-3\.5{padding:.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pb-3{padding-bottom:.75rem}.pb-4{padding-bottom:1rem}.pl-1{padding-left:.25rem}.pt-3{padding-top:.75rem}.pt-5{padding-top:1.25rem}.text-center{text-align:center}.text-right{text-align:right}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[11px\]{font-size:11px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.leading-tight{line-height:1.25}.opacity-80{opacity:.8}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.ease-in-out{transition-timing-function:cubic-bezier(.4,0,.2,1)}.ease-out{transition-timing-function:cubic-bezier(0,0,.2,1)}@media (min-width:640px){.sm\:col-span-2{grid-column:span 2/span 2}.sm\:flex{display:flex}.sm\:inline-flex{display:inline-flex}.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width:768px){.md\:inline{display:inline}.md\:flex{display:flex}.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.md\:p-6{padding:1.5rem}.md\:px-6{padding-left:1.5rem;padding-right:1.5rem}}@media (min-width:1024px){.lg\:sticky{position:sticky}.lg\:top-0{top:0}.lg\:col-span-4{grid-column:span 4/span 4}.lg\:block{display:block}.lg\:inline-flex{display:inline-flex}.lg\:hidden{display:none}.lg\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.lg\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.lg\:px-8{padding-left:2rem;padding-right:2rem}}@media (min-width:1280px){.xl\:col-span-1{grid-column:span 1/span 1}.xl\:col-span-2{grid-column:span 2/span 2}.xl\:col-span-3{grid-column:span 3/span 3}.xl\:inline{display:inline}.xl\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.xl\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.xl\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.xl\:grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}.xl\:grid-cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}.xl\:flex-row{flex-direction:row}.xl\:items-center{align-items:center}.xl\:gap-4{gap:1rem}.xl\:gap-5{gap:1.25rem}.xl\:self-center{align-self:center}.xl\:whitespace-nowrap{white-space:nowrap}.xl\:pr-5{padding-right:1.25rem}.xl\:text-right{text-align:right}}@media (min-width:1536px){.\32xl\:flex{display:flex}}</style>
 </head>
 <body>
 <div id="toasts"></div>
@@ -431,6 +434,8 @@
               <button data-export="dailycsv"><span data-i="sheet"></span>สรุปประจำวัน CSV (Excel)</button>
               <button data-export="dailyline"><span data-i="clipboard"></span>คัดลอกสรุปประจำวัน (LINE)</button>
               <div class="menu-sep"></div>
+              <button data-export="yearpdf"><span data-i="calYear"></span>รายงานรายปี PDF (ปีล่าสุด เทียบปีก่อน)</button>
+              <div class="menu-sep"></div>
               <button data-export="cmppdf"><span data-i="fileText"></span>รายงานเปรียบเทียบงวด PDF (1 หน้า)</button>
               <button data-export="cmpjpg"><span data-i="image"></span>รายงานเปรียบเทียบงวด JPEG</button>
             </div>
@@ -454,7 +459,6 @@
           <button data-range="year">ปีล่าสุด</button>
           <button data-range="custom">กำหนดเอง</button>
         </div>
-        <div class="seg hidden" id="carSeg" title="นิยามยอดรถยนต์ที่ใช้คำนวณ"><button data-cb="24">รถยนต์ 24 ชม.</button><button data-cb="1022">รถยนต์ 10–22 น.</button></div>
         <div id="customRange" class="hidden flex items-center gap-2 flex-wrap">
           <input type="date" id="dFrom" class="field" style="width:auto;padding:6px 10px">
           <span class="muted text-sm">ถึง</span>
@@ -562,7 +566,7 @@
 
     <footer class="px-4 md:px-6 lg:px-8 py-4 text-xs muted flex flex-wrap justify-between gap-2" style="border-top:1px solid var(--border)">
       <span>SBK Customer & Car Compare Analytics · Single File Web App</span>
-      <span>v9.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
+      <span>v11.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
     </footer>
   </div>
 </div>
@@ -1394,9 +1398,7 @@ function generateSample() {
 // ---------- v4: ตัวชี้วัดทั้งหมด + การเปรียบเทียบอิสระ (Compare Studio) ----------
 const METRICS = [
   { k: 'cust', label: 'ยอดลูกค้าเข้า', unit: 'คน', color: '#8b5cf6' },
-  { k: 'car', label: 'ยอดรถยนต์ (นิยามที่เลือก)', unit: 'คัน', color: '#f59e0b' },
-  { k: 'car24', label: 'รถยนต์เข้า 24 ชม.', unit: 'คัน', color: '#fb923c' },
-  { k: 'car1022', label: 'รถยนต์เข้า 10–22 น.', unit: 'คัน', color: '#eab308' },
+  { k: 'car', label: 'ยอดรถยนต์เข้า 24 ชม.', unit: 'คัน', color: '#f59e0b' }, // v11: วิเคราะห์ด้วยยอดรถยนต์ 24 ชม. อย่างเดียว
   { k: 'custOut', label: 'ยอดลูกค้าออก', unit: 'คน', color: '#a78bfa' },
   { k: 'carOut', label: 'รถยนต์ออก 24 ชม.', unit: 'คัน', color: '#f97316' },
   { k: 'moto', label: 'รถจักรยานยนต์ (จยย.)', unit: 'คัน', color: '#10b981' },
@@ -1604,7 +1606,7 @@ const STORE_KEY = 'sbk_customer_car_compare_v1'; // ใช้ key เดิม �
 const S = {
   page: 'dashboard', theme: 'light', order: 'dmy', org: 'ศูนย์การค้าซีคอน บางแค',
   all: [], rows: [], prev: [], range: 'all', from: null, to: null, rangeStart: null, rangeEnd: null, prevLabel: '',
-  gran: 'auto', monthMode: 'avg', yearMetric: 'cust',
+  gran: 'auto', monthMode: 'avg', yearMetric: 'cust', yearSel: null, yearBasis: 'ytd',
   holMode: false, carBasis: '24', source: 'local', sheetHol: {}, customHol: {}, customHolText: '', quiet: false,
   dc: { dow: null, a: null, b: null },
   st: { mode: 'month', a: null, a2: null, b: null, b2: null, dayType: 'all', dow: 'all', align: true, metric: 'cust' },
@@ -1721,11 +1723,14 @@ function goto(page) {
   // v8: "รายวัน (ล่าสุด)" มีเฉพาะหน้าภาพรวม — หน้าอื่นกลับไปใช้ช่วง "ทั้งหมด" (การวิเคราะห์รายเดือน/ปี ต้องใช้หลายวัน)
   if (page !== 'dashboard' && S.range === 'day') { S.range = 'all'; applyFilter(); }
   const dBtn = document.querySelector('#rangeSeg [data-range=day]'); if (dBtn) dBtn.style.display = page === 'dashboard' ? '' : 'none';
+  // หน้ารายปีเลือกปีเอง → ซ่อนปุ่มช่วงเวลา เหลือเฉพาะนิยามยอดรถยนต์
+  ['#rangeSeg', '#filterBar .range-info'].forEach(sel => { const el = document.querySelector(sel); if (el) el.style.display = page === 'yearly' ? 'none' : ''; });
+  if (page === 'yearly') $('#customRange').classList.add('hidden'); else if (S.range === 'custom') $('#customRange').classList.remove('hidden');
   $$('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + page));
   renderNav();
   const p = PAGES[page] || PAGES.dashboard; if (!PAGES[page]) page = S.page = 'dashboard';
   $('#bc').textContent = p.bc; $('#pageTitle').innerHTML = `<span class="t-full">${p.title}</span><span class="t-short">${p.m || p.title}</span>`; /* มือถือใช้ชื่อสั้น ไม่ให้ถูกตัด */ $('#pageSub').textContent = p.sub; document.title = p.bc + ' · SBK Customer & Car Compare';
-  $('#filterBar').classList.toggle('hidden', NO_FILTER.includes(page) || !S.all.length);
+  $('#filterBar').classList.toggle('hidden', NO_FILTER.includes(page) || page === 'yearly' || !S.all.length);
   $('#pageActions').innerHTML = page === 'sheets' ? '' : `<button class="btn" data-action="refresh" title="ดึงข้อมูลล่าสุดจาก Google Drive">${I('refresh')}<span class="hidden xl:inline">ดึงข้อมูลล่าสุด</span></button>`;
   document.body.classList.remove('side-open'); $('#overlay').classList.add('hidden');
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1759,8 +1764,6 @@ function applyFilter() {
   S.prev = pStart ? all.filter(r => r.key >= pStart && r.key <= pEnd) : [];
   // UI ของแถบกรอง
   $$('#rangeSeg button').forEach(b => b.classList.toggle('on', b.dataset.range === S.range));
-  $('#carSeg').classList.toggle('hidden', !S.all.some(r => r.car24 !== null && r.car24 !== undefined));
-  $$('#carSeg button').forEach(b => b.classList.toggle('on', b.dataset.cb === S.carBasis));
   $('#customRange').classList.toggle('hidden', S.range !== 'custom');
   $('#dFrom').min = $('#dTo').min = first; $('#dFrom').max = $('#dTo').max = last;
   $('#dFrom').value = start; $('#dTo').value = end;
@@ -1783,11 +1786,11 @@ function updateStatus() {
 // Error boundary: ถ้าหน้าใดคำนวณ/วาดผิดพลาด แสดงการ์ดแจ้งเตือนแทนหน้าว่าง และหน้าอื่นยังใช้งานได้
 function render() {
   try { destroyCharts(); } catch (e) { S.charts = {}; }
-  // v9.0: บรรทัดย่อยใต้ชื่อหน้า (มือถือ/แท็บเล็ต) — บอกจำนวนวันและวันล่าสุดของข้อมูล แทน breadcrumb ที่ยาวเกินจอ
+  // v11.0: บรรทัดย่อยใต้ชื่อหน้า (มือถือ/แท็บเล็ต) — บอกจำนวนวันและวันล่าสุดของข้อมูล แทน breadcrumb ที่ยาวเกินจอ
   try {
     const mr = $('#mRange');
     if (mr) {
-      const R = NO_FILTER.includes(S.page) ? S.all : S.rows;
+      const R = NO_FILTER.includes(S.page) || S.page === 'yearly' ? S.all : S.rows;
       mr.innerHTML = R.length ? `<b>${N(R.length)} วัน</b> · ${dTH(R[0].key)} – ${dTH(R[R.length - 1].key)}` : (S.all.length ? 'ไม่มีข้อมูลในช่วงที่เลือก' : 'ยังไม่มีข้อมูล');
     }
   } catch (e) { /* ไม่ให้บรรทัดย่อยทำให้ทั้งหน้าพัง */ }
@@ -1796,7 +1799,7 @@ function render() {
     if (S.page === 'sheets') { renderSheetsPage(); return; }
     if (!body) return;
     if (!S.all.length) { body.innerHTML = emptyHTML(); return; }
-    if (!NO_FILTER.includes(S.page) && !S.rows.length) { body.innerHTML = emptyHTML('ไม่มีข้อมูลในช่วงเวลาที่เลือก', 'กรุณาเลือกช่วงเวลาอื่นจากแถบด้านบน', false); return; }
+    if (!NO_FILTER.includes(S.page) && S.page !== 'yearly' && !S.rows.length) { body.innerHTML = emptyHTML('ไม่มีข้อมูลในช่วงเวลาที่เลือก', 'กรุณาเลือกช่วงเวลาอื่นจากแถบด้านบน', false); return; }
     ({ dashboard: renderDashboard, weekday: renderWeekday, monthly: renderMonthly, yearly: renderYearly, raw: renderRaw, daycmp: renderDayCmp, studio: renderStudio, quality: renderQuality })[S.page](body);
   } catch (e) {
     console.error('[render]', S.page, e);
@@ -1812,10 +1815,10 @@ function emptyHTML(title, sub, btns = true) {
     ${btns ? `<div class="flex flex-wrap justify-center gap-2 mt-5"><button class="btn btn-primary" data-action="reconnect">${I('refresh')}เชื่อมต่อ / ลองใหม่</button><button class="btn" data-page="sheets">${I('sheet')}ตั้งค่าการเชื่อมต่อ</button></div>` : ''}</div>`;
 }
 function insightHTML(items, title = 'AI INSIGHT') {
-  return `<div class="insight flex flex-col md:flex-row md:items-center gap-4">
-    <div class="flex items-center gap-4 md:pr-5" style="border-right:1px solid rgba(192,38,211,.2)"><div class="insight-ic">${I('bulb')}</div><div class="font-bold text-lg g-text whitespace-nowrap">${title}</div></div>
+  return `<div class="insight flex flex-col xl:flex-row xl:items-center gap-4">
+    <div class="insight-head flex items-center gap-4 xl:pr-5"><div class="insight-ic">${I('bulb')}</div><div class="font-bold text-lg g-text whitespace-nowrap">${title}</div></div>
     <ul class="ins-list flex-1">${items.map(t => `<li>${t}</li>`).join('')}</ul>
-    <div class="text-xs muted md:text-right whitespace-nowrap self-start md:self-center">Rule-based · อ้างอิง ${N(S.rows.length)} วัน</div></div>`;
+    <div class="text-xs muted xl:text-right xl:whitespace-nowrap self-start xl:self-center">Rule-based · อ้างอิง ${N(S.rows.length)} วัน</div></div>`;
 }
 const ICO_COLOR = { 'ico-v': '#8b5cf6', 'ico-o': '#f59e0b', 'ico-i': '#6366f1', 'ico-b': '#3b82f6', 'ico-p': '#ec4899', 'ico-g': '#10b981' };
 function kpiCard(o) {
@@ -1881,9 +1884,9 @@ function renderDashboard(body) {
   body.innerHTML = `
   <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 xl:gap-4">
     ${kpiCard({ ico: 'ico-v', icon: 'users', label: 'ยอดลูกค้ารวม', value: N(c.total), unit: 'คน', chip: chipHTML(prev.length ? growth(c.mean, pc) : null), note: prev.length ? 'เฉลี่ย/วัน ' + note : note, spark: 'spC' })}
-    ${kpiCard({ ico: 'ico-o', icon: 'car', label: 'ยอดรถยนต์รวม (' + (S.carBasis === '1022' ? '10–22 น.' : '24 ชม.') + ')', value: N(v.total), unit: 'คัน', chip: chipHTML(prev.length ? growth(v.mean, pv) : null), note: prev.length ? 'เฉลี่ย/วัน ' + note : note, spark: 'spV' })}
+    ${kpiCard({ ico: 'ico-o', icon: 'car', label: 'ยอดรถยนต์รวม (24 ชม.)', value: N(v.total), unit: 'คัน', chip: chipHTML(prev.length ? growth(v.mean, pv) : null), note: prev.length ? 'เฉลี่ย/วัน ' + note : note, spark: 'spV' })}
     ${kpiCard({ ico: 'ico-i', icon: 'activity', label: 'ลูกค้าเฉลี่ย/วัน', value: N(c.mean), unit: 'คน', chip: `<span class="chip chip-v">SD ${N(c.sd)}</span>`, note: `สูงสุด ${N(c.max)} · ต่ำสุด ${N(c.min)}`, spark: 'spCA' })}
-    ${kpiCard({ ico: 'ico-b', icon: 'car', label: 'รถยนต์เฉลี่ย/วัน (' + (S.carBasis === '1022' ? '10–22 น.' : '24 ชม.') + ')', value: N(v.mean), unit: 'คัน', chip: `<span class="chip chip-o">SD ${N(v.sd)}</span>`, note: `สูงสุด ${N(v.max)} · ต่ำสุด ${N(v.min)}`, spark: 'spVA' })}
+    ${kpiCard({ ico: 'ico-b', icon: 'car', label: 'รถยนต์เฉลี่ย/วัน (24 ชม.)', value: N(v.mean), unit: 'คัน', chip: `<span class="chip chip-o">SD ${N(v.sd)}</span>`, note: `สูงสุด ${N(v.max)} · ต่ำสุด ${N(v.min)}`, spark: 'spVA' })}
     ${kpiCard({ ico: 'ico-p', icon: 'percent', label: 'อัตราส่วน ลูกค้า:รถยนต์', value: N(ratio, 2), unit: 'คน/คัน', chip: chipHTML(prev.length ? growth(ratio, pr) : null), note: 'ยอดรวมลูกค้า ÷ ยอดรวมรถยนต์', spark: 'spR' })}
     ${kpiCard({ ico: 'ico-g', icon: 'link', label: 'สหสัมพันธ์ (Pearson r)', value: N(r, 3), unit: '', chip: `<span class="chip ${Math.abs(r) >= .7 ? 'chip-up' : 'chip-flat'}">${corrLabel(r)}</span>`, note: `R² = ${N(r === null ? null : r * r, 3)}` })}
   </div>
@@ -2021,7 +2024,7 @@ function renderWeekday(body) {
     `${LE} มีเพียง <b>${P(we.days / rows.length, 1, false)}</b> ของจำนวนวัน แต่สร้างยอดลูกค้า <b>${P(we.cust.total / (we.cust.total + wd.cust.total), 1, false)}</b>`
   ];
   body.innerHTML = `${hmBar}
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
     ${cmp('ลูกค้าเฉลี่ย / วัน', 'users', 'ico-v', wd.cust.mean, we.cust.mean, 'คน/วัน')}
     ${cmp('รถยนต์เฉลี่ย / วัน', 'car', 'ico-o', wd.car.mean, we.car.mean, 'คัน/วัน')}
     ${cmp('Ratio ลูกค้าต่อรถยนต์', 'percent', 'ico-p', wd.ratio, we.ratio, 'คน/คัน', 2)}
@@ -2140,8 +2143,131 @@ function renderMonthly(body) {
 /* =====================================================================
    RENDER — แท็บ 4 : Yearly Analysis
    ===================================================================== */
+/* =====================================================================
+   v10: รายปี — ปีที่เลือก (ค่าเริ่มต้น = ปีล่าสุด) เทียบกับปีก่อนหน้า
+   วิธีเทียบ: ytd = ช่วงเดียวกัน (1 ม.ค. → วันล่าสุดของปีที่เลือก) · full = ทั้งปี (ใช้เมื่อครบปีทั้งคู่)
+   ใช้ข้อมูลทั้งหมด (S.all) — ปีเป็นหน่วยวิเคราะห์ จึงไม่ถูกตัดด้วยตัวกรองช่วงเวลา
+   ===================================================================== */
+function yearCompare(ySel, basis) {
+  const years = [...new Set(S.all.map(r => r.y))].sort((a, b) => b - a);
+  if (!years.length) return null;
+  const Y = years.includes(ySel) ? ySel : years[0];
+  const cur0 = S.all.filter(r => r.y === Y), prev0 = S.all.filter(r => r.y === Y - 1);
+  const diy = y => ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) ? 366 : 365;
+  const lastMD = cur0.length ? cur0[cur0.length - 1].key.slice(5) : '12-31';
+  const fullYear = cur0.length === diy(Y);
+  // ytd: ตัดปีก่อนหน้าที่ MM-DD เดียวกับวันล่าสุดของปีที่เลือก (ปีที่ครบปีแล้ว = ทั้งปี) · 29 ก.พ. เทียบกันตามปฏิทินจริง
+  const b = basis === 'full' ? 'full' : 'ytd';
+  const cur = cur0, prev = b === 'full' ? prev0 : prev0.filter(r => r.key.slice(5) <= lastMD);
+  const st = rows => { const s = summarizeGroup(rows); const mx = rows.length ? rows.reduce((a, r) => r.cust > a.cust ? r : a) : null;
+    return { days: rows.length, cust: s.cust.total, car: s.car.total, custAvg: s.cust.mean, carAvg: s.car.mean, ratio: s.ratio, max: mx, sd: s.cust.sd }; };
+  const C = st(cur), Pv = st(prev);
+  const [mm, dd] = lastMD.split('-').map(Number);
+  const rangeTxt = b === 'full' || lastMD === '12-31' ? 'ทั้งปี' : `1 ม.ค. – ${dd} ${TH_MONTHS[mm - 1]}`;
+  // ยอดรวมเทียบได้เมื่อจำนวนวันที่มีข้อมูลเท่ากันเท่านั้น — ไม่งั้นให้ดูค่าเฉลี่ย/วัน (กันตัวเลขหลอกจากวันที่ขาดหาย)
+  const totOk = C.days && Pv.days && C.days === Pv.days;
+  const byMonth = (rows, m) => { const l = rows.filter(r => r.m === m); return l.length ? { days: l.length, cust: mean(l.map(r => r.cust)), car: mean(l.map(r => r.car)), ratio: groupRatio(l), total: sum(l.map(r => r.cust)) } : null; };
+  // รายเดือนใช้ฐานเดียวกับการเทียบ: YTD → ปีก่อนตัดที่วันเดียวกัน (เช่น ก.ย. 2568 เฉพาะ 1–25 ก.ย.) และแสดงถึงเดือนล่าสุดของปีที่เลือก
+  const months = Array.from({ length: 12 }, (_, i) => ({ m: i + 1, c: byMonth(cur, i + 1), p: byMonth(prev, i + 1) })).filter(x => b === 'full' || x.m <= mm || x.c);
+  const w = welchT(cur.map(r => r.cust), prev.map(r => r.cust));
+  return { Y, years, basis: b, cur, prev, C, P: Pv, rangeTxt, lastMD, fullYear, totOk, months, w, hasPrev: prev.length > 0 };
+}
+function yearKpiHTML(Q) {
+  const py = Q.Y - 1 + 543, g = (a, b) => growth(a, b);
+  const ref = (v, u, d = 0) => Q.hasPrev ? `ปี ${py}${Q.basis === 'ytd' && Q.rangeTxt !== 'ทั้งปี' ? ' ช่วงเดียวกัน' : ''}: ${N(v, d)} ${u}` : `ไม่มีข้อมูลปี ${py}`;
+  const na = '<span class="chip chip-flat" title="จำนวนวันที่มีข้อมูลไม่เท่ากัน — ดูการเปลี่ยนแปลงจากค่าเฉลี่ย/วัน">วันไม่เท่า</span>';
+  return `<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 xl:gap-4">
+    ${kpiCard({ ico: 'ico-v', icon: 'users', label: `ลูกค้ารวม ปี ${Q.Y + 543}`, value: N(Q.C.cust), unit: 'คน', chip: Q.totOk ? chipHTML(g(Q.C.cust, Q.P.cust)) : Q.hasPrev ? na : '', note: ref(Q.P.cust, 'คน') })}
+    ${kpiCard({ ico: 'ico-o', icon: 'car', label: `รถยนต์รวม ปี ${Q.Y + 543}`, value: N(Q.C.car), unit: 'คัน', chip: Q.totOk ? chipHTML(g(Q.C.car, Q.P.car)) : Q.hasPrev ? na : '', note: ref(Q.P.car, 'คัน') })}
+    ${kpiCard({ ico: 'ico-i', icon: 'activity', label: 'ลูกค้าเฉลี่ย/วัน', value: N(Q.C.custAvg), unit: 'คน', chip: Q.hasPrev ? chipHTML(g(Q.C.custAvg, Q.P.custAvg)) : '', note: ref(Q.P.custAvg, 'คน') })}
+    ${kpiCard({ ico: 'ico-b', icon: 'car', label: 'รถยนต์เฉลี่ย/วัน', value: N(Q.C.carAvg), unit: 'คัน', chip: Q.hasPrev ? chipHTML(g(Q.C.carAvg, Q.P.carAvg)) : '', note: ref(Q.P.carAvg, 'คัน') })}
+    ${kpiCard({ ico: 'ico-p', icon: 'percent', label: 'อัตราส่วน ลูกค้า:รถยนต์', value: N(Q.C.ratio, 2), unit: 'คน/คัน', chip: Q.hasPrev ? chipHTML(g(Q.C.ratio, Q.P.ratio)) : '', note: ref(Q.P.ratio, 'คน/คัน', 2) })}
+    ${kpiCard({ ico: 'ico-g', icon: 'trophy', label: 'ลูกค้าสูงสุด/วัน', value: N(Q.C.max && Q.C.max.cust), unit: 'คน', chip: Q.hasPrev && Q.P.max ? chipHTML(g(Q.C.max.cust, Q.P.max.cust)) : '', note: `${Q.C.max ? dTH(Q.C.max.key) + ' (' + TH_DAYS_S[Q.C.max.dow] + ')' : '-'}${Q.P.max ? ` · ปี ${py}: ${N(Q.P.max.cust)}` : ''}` })}
+  </div>`;
+}
+function yearControlsHTML(Q) {
+  return `<div class="card p-4 flex flex-wrap items-center gap-x-5 gap-y-3">
+    <div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-medium">ปีที่วิเคราะห์</span>
+      <div class="seg">${Q.years.map(y => `<button data-ysel="${y}" class="${y === Q.Y ? 'on' : ''}">${y + 543}${y === Q.years[0] ? ' <span class="text-[11px] opacity-80">(ล่าสุด)</span>' : ''}</button>`).join('')}</div></div>
+    <div class="flex items-center gap-2 flex-wrap"><span class="text-sm font-medium">เทียบปี ${Q.Y - 1 + 543}</span>
+      <div class="seg"><button data-ybasis="ytd" class="${Q.basis === 'ytd' ? 'on' : ''}" title="1 ม.ค. ถึงวันล่าสุดของปีที่เลือก — ยุติธรรมเมื่อปีปัจจุบันยังไม่จบ">ช่วงเดียวกัน (YTD)</button><button data-ybasis="full" class="${Q.basis === 'full' ? 'on' : ''}" title="ทั้งปีของทั้งสองปี">ทั้งปี</button></div></div>
+    <div class="flex items-center gap-2 ml-auto flex-wrap">
+      <span class="chip chip-v" title="ช่วงที่ใช้เทียบ · จำนวนวันที่มีข้อมูล ปีที่เลือก / ปีก่อน">${Q.rangeTxt} · ${N(Q.C.days)}/${N(Q.P.days)} วัน</span>
+      <button class="btn btn-primary" data-export="yearpdf" style="padding:7px 12px" title="รายงานรายปี A4">${I('download')}PDF</button>
+      <button class="btn" data-export="yearjpg" style="padding:7px 12px" title="รายงานรายปี A4 (ภาพ)">${I('image')}JPEG</button>
+    </div>
+  </div>`;
+}
+function yearInsights(Q, html = true) {
+  const py = Q.Y - 1 + 543, y = Q.Y + 543, g = (a, b) => growth(a, b);
+  const pc = x => ok(x) ? (html ? `<b style="color:var(${x >= 0 ? '--up' : '--down'})">${P(x)}</b>` : P(x)) : '-';
+  const B = t => html ? `<b>${t}</b>` : t;
+  const out = [];
+  out.push(`ปี ${y} (${Q.rangeTxt}) ลูกค้ารวม ${B(N(Q.C.cust))} คน · รถยนต์ ${B(N(Q.C.car))} คัน จากข้อมูล ${Q.C.days} วัน`);
+  if (!Q.hasPrev) { out.push(`ไม่มีข้อมูลปี ${py} สำหรับเปรียบเทียบ`); return out; }
+  out.push(`ลูกค้าเฉลี่ย/วัน ${B(N(Q.C.custAvg))} เทียบ ${N(Q.P.custAvg)} คน (${pc(g(Q.C.custAvg, Q.P.custAvg))}) · รถยนต์เฉลี่ย/วัน ${pc(g(Q.C.carAvg, Q.P.carAvg))}`);
+  if (Q.totOk) out.push(`ยอดรวมช่วงเดียวกัน: ลูกค้า ${pc(g(Q.C.cust, Q.P.cust))} · รถยนต์ ${pc(g(Q.C.car, Q.P.car))} (จำนวนวันเท่ากัน ${Q.C.days} วัน)`);
+  else out.push(`จำนวนวันที่มีข้อมูลไม่เท่ากัน (${Q.C.days} vs ${Q.P.days} วัน) — ใช้ค่าเฉลี่ย/วันในการเปรียบเทียบ`);
+  const mm = Q.months.filter(x => x.c && x.p).map(x => ({ m: x.m, g: g(x.c.cust, x.p.cust) })).filter(x => ok(x.g));
+  if (mm.length >= 2) {
+    const up = mm.reduce((a, x) => x.g > a.g ? x : a), dn = mm.reduce((a, x) => x.g < a.g ? x : a);
+    out.push(`เดือนที่เติบโตมากที่สุด ${B(TH_MONTHS_LONG[up.m - 1])} (${pc(up.g)}) · ลดลงมากที่สุด ${B(TH_MONTHS_LONG[dn.m - 1])} (${pc(dn.g)})`);
+    const upN = mm.filter(x => x.g > 0).length; out.push(`ลูกค้าเฉลี่ย/วัน สูงกว่าปีก่อน ${B(upN)} จาก ${mm.length} เดือน`);
+  }
+  const gr = g(Q.C.ratio, Q.P.ratio);
+  if (ok(gr) && Math.abs(gr) >= 0.01) out.push(`Ratio ${N(Q.C.ratio, 2)} เทียบ ${N(Q.P.ratio, 2)} คน/คัน (${pc(gr)}) → ${gr > 0 ? 'ลูกค้าต่อรถ 1 คันมากขึ้น (มาด้วยวิธีอื่นมากขึ้น)' : 'ลูกค้าพึ่งพารถยนต์มากขึ้น'}`);
+  out.push('ลูกค้า: ' + sigText(Q.w).replace(/<\/?b>/g, html ? '$&' : ''));
+  return out;
+}
+function buildYearReport() {
+  const Q = yearCompare(S.yearSel, S.yearBasis); if (!Q) throw new Error('ไม่มีข้อมูลรายปี');
+  const y = Q.Y + 543, py = Q.Y - 1 + 543, g = (a, b) => growth(a, b);
+  const mixW = (hex, pct) => { const n = parseInt(hex.slice(1), 16), f = pct / 100; return `rgb(${[16, 8, 0].map(sh => Math.round(((n >> sh) & 255) * f + 255 * (1 - f))).join(',')})`; };
+  const gTxt = x => ok(x) ? `<b style="color:${x >= 0 ? '#047857' : '#b91c1c'}">${x >= 0 ? '▲' : '▼'} ${P(Math.abs(x), 1, false)}</b>` : '<span style="color:#94a3b8">—</span>';
+  const kp = (l, v, u, col, extra) => `<div class="rp-kpi" style="background:linear-gradient(135deg, ${mixW(col, 22)}, ${mixW(col, 6)});border:1px solid ${mixW(col, 32)}"><div class="l">${l}</div><div class="v">${v} <small>${u}</small></div><div class="x" style="font-size:10px">${extra || ''}</div></div>`;
+  const ins = yearInsights(Q, true).map(t => t.replace(/style="color:var\(--up\)"/g, 'style="color:#047857"').replace(/style="color:var\(--down\)"/g, 'style="color:#b91c1c"'));
+  const basisTxt = Q.basis === 'ytd' && Q.rangeTxt !== 'ทั้งปี' ? `ช่วงเดียวกัน ${Q.rangeTxt}` : 'ทั้งปี';
+  $('#report').innerHTML = `<div class="rp-page" id="rpY">
+    ${rpHeader({ title: `รายงานเปรียบเทียบยอดลูกค้าและยอดรถยนต์ รายปี ${y}`, sub: `ปี ${y} เทียบกับปี ${py} · ${basisTxt}`, period: `ปี ${y} vs ${py}`, doc: 'YR', page: '1/1' })}
+    <div class="rp-body">
+      <div class="rp-grid6">
+        ${kp(`ลูกค้ารวม ปี ${y}`, N(Q.C.cust), 'คน', '#8b5cf6', `ปี ${py}: ${N(Q.P.cust)} · ${Q.totOk ? gTxt(g(Q.C.cust, Q.P.cust)) : 'วันไม่เท่า'}`)}
+        ${kp(`รถยนต์รวม ปี ${y}`, N(Q.C.car), 'คัน', '#f59e0b', `ปี ${py}: ${N(Q.P.car)} · ${Q.totOk ? gTxt(g(Q.C.car, Q.P.car)) : 'วันไม่เท่า'}`)}
+        ${kp('ลูกค้าเฉลี่ย / วัน', N(Q.C.custAvg), 'คน', '#6366f1', `ปี ${py}: ${N(Q.P.custAvg)} · ${gTxt(g(Q.C.custAvg, Q.P.custAvg))}`)}
+        ${kp('รถยนต์เฉลี่ย / วัน', N(Q.C.carAvg), 'คัน', '#3b82f6', `ปี ${py}: ${N(Q.P.carAvg)} · ${gTxt(g(Q.C.carAvg, Q.P.carAvg))}`)}
+        ${kp('Ratio ลูกค้า : รถยนต์', N(Q.C.ratio, 2), 'คน/คัน', '#ec4899', `ปี ${py}: ${N(Q.P.ratio, 2)} · ${gTxt(g(Q.C.ratio, Q.P.ratio))}`)}
+        ${kp('ลูกค้าสูงสุด / วัน', N(Q.C.max && Q.C.max.cust), 'คน', '#10b981', Q.C.max ? dTH(Q.C.max.key) : '')}
+      </div>
+      <div style="display:grid;grid-template-columns:1.25fr 1fr;gap:12px;margin-top:10px">
+        <div class="rp-box"><div class="rp-t">ลูกค้าเฉลี่ยต่อวัน รายเดือน: ปี ${y} เทียบ ${py}</div><canvas id="rpYChart" width="560" height="165" style="width:560px;height:165px"></canvas></div>
+        <div class="rp-box"><div class="rp-t">สรุปผลการวิเคราะห์</div><div class="rp-list">${ins.map((t, i) => `<div class="rp-li"><span class="n">${i + 1}.</span><span>${t}</span></div>`).join('')}</div></div>
+      </div>
+      <div class="rp-box rp-fill" style="margin-top:10px"><div class="rp-t">ตารางเปรียบเทียบรายเดือน (ค่าเฉลี่ยต่อวัน)</div>
+        <table class="rp-tbl"><thead><tr><th>เดือน</th><th class="num">วัน ${y}</th><th class="num">ลูกค้า ${y}</th><th class="num">ลูกค้า ${py}</th><th class="num">%</th><th class="num">รถยนต์ ${y}</th><th class="num">รถยนต์ ${py}</th><th class="num">%</th><th class="num">Ratio ${y}</th><th class="num">Ratio ${py}</th><th class="num">ลูกค้ารวม ${y}</th></tr></thead><tbody>
+        ${Q.months.filter(x => x.c || x.p).map(x => `<tr><td>${TH_MONTHS_LONG[x.m - 1]}</td><td class="num">${x.c ? x.c.days : '-'}</td><td class="num"><b>${x.c ? N(x.c.cust) : '-'}</b></td><td class="num">${x.p ? N(x.p.cust) : '-'}</td><td class="num">${x.c && x.p ? gTxt(g(x.c.cust, x.p.cust)) : '—'}</td>
+          <td class="num"><b>${x.c ? N(x.c.car) : '-'}</b></td><td class="num">${x.p ? N(x.p.car) : '-'}</td><td class="num">${x.c && x.p ? gTxt(g(x.c.car, x.p.car)) : '—'}</td><td class="num">${x.c ? N(x.c.ratio, 2) : '-'}</td><td class="num">${x.p ? N(x.p.ratio, 2) : '-'}</td><td class="num">${x.c ? N(x.c.total) : '-'}</td></tr>`).join('')}
+        <tr style="background:#faf9ff"><td><b>รวม/เฉลี่ย (${basisTxt})</b></td><td class="num"><b>${Q.C.days}</b></td><td class="num"><b>${N(Q.C.custAvg)}</b></td><td class="num">${N(Q.P.custAvg)}</td><td class="num">${gTxt(g(Q.C.custAvg, Q.P.custAvg))}</td><td class="num"><b>${N(Q.C.carAvg)}</b></td><td class="num">${N(Q.P.carAvg)}</td><td class="num">${gTxt(g(Q.C.carAvg, Q.P.carAvg))}</td><td class="num"><b>${N(Q.C.ratio, 2)}</b></td><td class="num">${N(Q.P.ratio, 2)}</td><td class="num"><b>${N(Q.C.cust)}</b></td></tr>
+        </tbody></table>
+        <div style="font-size:9.5px;color:#6e6a86;margin-top:5px">รายเดือนใช้ฐานเดียวกับการเทียบ (${basisTxt}) · แถวรวม = ${basisTxt} · % = (ปี ${y} − ปี ${py}) ÷ ปี ${py} · ค่าเฉลี่ยนับเฉพาะวันที่มีข้อมูล</div></div>
+    </div>
+    ${rpFooter('1/1')}
+  </div>`;
+  if (S.charts.rpYChart) { S.charts.rpYChart.destroy(); delete S.charts.rpYChart; }
+  const prevColor = Chart.defaults.color, prevBorder = Chart.defaults.borderColor;
+  Chart.defaults.color = '#6e6a86'; Chart.defaults.borderColor = 'rgba(110,106,134,.13)';
+  try {
+    S.charts.rpYChart = new Chart($('#rpYChart'), { data: { labels: TH_MONTHS, datasets: [
+      { type: 'bar', label: `ปี ${y}`, data: Q.months.map(x => x.c ? x.c.cust : null), backgroundColor: '#8b5cf6', borderRadius: 3, order: 2 },
+      { type: 'line', label: `ปี ${py}`, data: Q.months.map(x => x.p ? x.p.cust : null), borderColor: '#f59e0b', backgroundColor: '#f59e0b', borderWidth: 2, borderDash: [5, 4], tension: .35, pointRadius: 2.5, order: 1 }] },
+      options: { responsive: false, animation: false, devicePixelRatio: 2, plugins: { legend: { position: 'top', align: 'end', labels: { font: { size: 9.5 }, boxWidth: 8, boxHeight: 8 } } },
+        scales: { x: { grid: { display: false }, ticks: { font: { size: 9 } } }, y: { ticks: { font: { size: 9 }, callback: tickK } } } } });
+  } finally { Chart.defaults.color = prevColor; Chart.defaults.borderColor = prevBorder; }
+  return `รายงานรายปี_${y}_เทียบ_${py}`;
+}
+
 function renderYearly(body) {
-  const ys = yearlySummary(S.rows), ytd = ytdCompare(S.rows);
+  // v10: หน้ารายปีใช้ข้อมูลทั้งหมดเสมอ (ปีเป็นหน่วยวิเคราะห์) — ตัวกรองช่วงเวลาไม่มีผลและถูกซ่อนในหน้านี้
+  const ys = yearlySummary(S.all, S.all), ytd = ytdCompare(S.all);
   const metric = S.yearMetric;
   const card = (y, i) => `<div class="card kpi-tint p-5 relative overflow-hidden" style="--kc:${YEAR_COLORS[(i + 1) % YEAR_COLORS.length]}">
       <div style="position:absolute;right:-30px;top:-30px;width:120px;height:120px;border-radius:99px;background:${YEAR_COLORS[(i + 1) % YEAR_COLORS.length]}1f"></div>
@@ -2157,7 +2283,7 @@ function renderYearly(body) {
     const l = ytd.res[ytd.res.length - 1], p = ytd.res[ytd.res.length - 2];
     const [mm, dd] = ytd.md.split('-').map(Number);
     ytdHTML = `<div class="card p-5">${cardHead('เทียบช่วงเดียวกันของปี (YTD)', `1 ม.ค. – ${dd} ${TH_MONTHS[mm - 1]} ของแต่ละปี`)}
-      <div class="space-y-4">${ytd.res.map((r, i) => `<div><div class="flex justify-between text-sm"><span class="font-medium">ปี ${r.y + 543} <span class="muted text-xs">(${r.days} วัน)</span></span><span class="font-bold">${N(r.cust)} คน</span></div>
+      <div class="space-y-4">${ytd.res.map((r, i) => ({ r, i })).reverse().map(({ r, i }) => `<div><div class="flex justify-between text-sm"><span class="font-medium">ปี ${r.y + 543} <span class="muted text-xs">(${r.days} วัน)</span></span><span class="font-bold">${N(r.cust)} คน</span></div>
         <div class="bar-track mt-1"><div class="bar-fill" style="width:${(r.cust / Math.max(...ytd.res.map(x => x.cust)) * 100).toFixed(1)}%;background:${YEAR_COLORS[(i + 1) % YEAR_COLORS.length]}"></div></div>
         <div class="text-xs muted mt-1">รถยนต์ ${N(r.car)} คัน · Ratio ${N(r.car ? r.cust / r.car : null, 2)}</div></div>`).join('')}</div>
       <div class="grid grid-cols-2 gap-3 mt-5">
@@ -2172,9 +2298,11 @@ function renderYearly(body) {
   if (ytd) { const l = ytd.res[ytd.res.length - 1], p = ytd.res[ytd.res.length - 2]; ins.push(`เทียบช่วงเดียวกัน (YTD) ลูกค้า <b>${P(growth(l.cust, p.cust))}</b>`); }
   if (ly.days < ly.diy) ins.push(`ปี ${ly.y + 543} ยังมีข้อมูลไม่ครบปี — ควรเทียบด้วยค่าเฉลี่ย/วันหรือ YTD`);
 
+  const Q = yearCompare(S.yearSel, S.yearBasis);
   body.innerHTML = `
-  <div class="grid grid-cols-1 md:grid-cols-2 ${['2xl:grid-cols-1', '2xl:grid-cols-1', '2xl:grid-cols-2', '2xl:grid-cols-3', '2xl:grid-cols-4'][Math.min(ys.length, 4)]} gap-4">${ys.map(card).join('')}</div>
-  ${insightHTML(ins)}
+  ${yearControlsHTML(Q)}
+  ${yearKpiHTML(Q)}
+  ${insightHTML(yearInsights(Q), `ปี ${Q.Y + 543} เทียบ ${Q.Y - 1 + 543}`)}
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
     <div class="card p-5 ${ytd ? 'xl:col-span-2' : 'xl:col-span-3'}">
       ${cardHead('เปรียบเทียบรายเดือนข้ามปี', `ค่าเฉลี่ยต่อวันของแต่ละเดือน · ${metric === 'cust' ? 'ยอดลูกค้า (คน/วัน)' : metric === 'car' ? 'ยอดรถยนต์ (คัน/วัน)' : 'Ratio (คน/คัน)'}`,
@@ -2187,7 +2315,7 @@ function renderYearly(body) {
     ${cardHead('ตารางสรุปรายปี', 'YoY คำนวณทั้งแบบยอดรวม และแบบเฉลี่ยต่อวัน (แนะนำเมื่อจำนวนวันไม่เท่ากัน)')}
     <div class="scroll-x"><table class="tbl">
       <thead><tr><th>ปี (พ.ศ.)</th><th class="num">วันข้อมูล</th><th class="num">ลูกค้ารวม</th><th class="num">YoY รวม</th><th class="num">เฉลี่ย/วัน</th><th class="num">YoY เฉลี่ย</th><th class="num">สูงสุด/วัน</th><th class="num">ต่ำสุด/วัน</th><th class="num">SD</th><th class="num">รถยนต์รวม</th><th class="num">YoY รวม</th><th class="num">เฉลี่ย/วัน</th><th class="num">YoY เฉลี่ย</th><th class="num">Ratio</th></tr></thead>
-      <tbody>${ys.map(y => `<tr><td class="font-semibold">${y.y + 543}</td><td class="num">${y.days}/${y.diy}</td>
+      <tbody>${ys.slice().reverse().map(y => `<tr><td class="font-semibold">${y.y + 543}${y.y === Q.Y ? ' <span class="chip chip-v">ที่เลือก</span>' : ''}</td><td class="num">${y.days}/${y.diy}</td>
         <td class="num">${N(y.custTotal)}</td><td class="num">${y.yoyTotalNA ? NA_CHIP : chipHTML(y.yoyCustTotal)}</td><td class="num">${N(y.custAvg)}</td><td class="num">${chipHTML(y.yoyCustAvg)}</td>
         <td class="num">${N(y.s.cust.max)}<div class="text-[11px] muted">${dTH(y.s.cust.maxRow.key)}</div></td><td class="num">${N(y.s.cust.min)}<div class="text-[11px] muted">${dTH(y.s.cust.minRow.key)}</div></td><td class="num muted">${N(y.s.cust.sd)}</td>
         <td class="num">${N(y.carTotal)}</td><td class="num">${y.yoyTotalNA ? NA_CHIP : chipHTML(y.yoyCarTotal)}</td><td class="num">${N(y.carAvg)}</td><td class="num">${chipHTML(y.yoyCarAvg)}</td><td class="num">${N(y.ratio, 2)}</td></tr>`).join('')}</tbody>
@@ -2293,7 +2421,7 @@ function renderDayCmp(body) {
   if (hlist.length) { const top = hlist.reduce((a, r) => r.cust > a.cust ? r : a); ins.push(`วันหยุดที่ลูกค้ามากที่สุด: <b>${esc(top.hol)}</b> ${dTH(top.key)} (${N(top.cust)} คน)`); }
 
   body.innerHTML = `
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
     ${grp('วันทำงาน (จ.–ศ.)', 'ไม่รวมวันหยุดนักขัตฤกษ์', 'ico-v', 'users', W, true)}
     ${grp('เสาร์–อาทิตย์', 'ไม่รวมวันหยุดนักขัตฤกษ์ที่ตรงเสาร์/อาทิตย์', 'ico-p', 'calendar', E, false)}
     ${grp('วันหยุดนักขัตฤกษ์', 'ตามปฏิทินวันหยุดราชการ + ที่เพิ่มเอง', 'ico-o', 'sparkles', H, false)}
@@ -2319,7 +2447,7 @@ function renderDayCmp(body) {
   <div class="card p-5">
     ${cardHead(`เทียบวันเดียวกันของสัปดาห์: วัน${dn} เทียบ วัน${dn}`, 'WoW = เทียบ 7 วันก่อน · เฉลี่ย 4 สัปดาห์ = ค่าเฉลี่ยวันเดียวกัน 4 สัปดาห์ก่อนหน้า · ปีก่อน = 364 วันก่อน (วันเดียวกันของสัปดาห์)',
       `<div class="seg">${[1, 2, 3, 4, 5, 6, 0].map(d => `<button data-dow="${d}" class="${S.dc.dow === d ? 'on' : ''}">${TH_DAYS[d]}</button>`).join('')}</div>`)}
-    ${ls ? `<div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-5">
+    ${ls ? `<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-3 mb-5">
       <div class="rounded-2xl p-3" style="background:var(--soft)"><div class="text-xs muted">วัน${dn}ล่าสุด · ${dTH(ls.r.key)}</div><div class="text-xl font-bold">${N(ls.r.cust)} <span class="text-xs muted font-normal">คน</span></div><div class="text-xs muted">รถยนต์ ${N(ls.r.car)} คัน ${ls.r.hol ? '· ' + esc(ls.r.hol) : ''}</div></div>
       <div class="rounded-2xl p-3" style="background:var(--soft)"><div class="text-xs muted">เทียบสัปดาห์ก่อน ${ls.p ? '(' + dTH(ls.p.key) + ')' : ''}</div><div class="mt-1">${chipHTML(ls.wowC)}</div><div class="text-xs muted mt-1">รถยนต์ ${P(ls.wowV)}</div></div>
       <div class="rounded-2xl p-3" style="background:var(--soft)"><div class="text-xs muted">เทียบเฉลี่ย ${ls.n4 || 4} สัปดาห์ก่อน</div><div class="mt-1">${chipHTML(ls.a4C)}</div><div class="text-xs muted mt-1">เฉลี่ย ${N(ls.a4c)} คน</div></div>
@@ -2505,7 +2633,7 @@ function refreshView() {
   S.quiet = true;
   try {
     if (S.page === 'raw' && $('#rawTbl') && S.rows.length) drawRawTable();
-    else { $('#filterBar').classList.toggle('hidden', NO_FILTER.includes(S.page) || !S.all.length); render(); }
+    else { $('#filterBar').classList.toggle('hidden', NO_FILTER.includes(S.page) || S.page === 'yearly' || !S.all.length); render(); }
   } finally { S.quiet = false; }
   window.scrollTo(0, y);
 }
@@ -2900,7 +3028,7 @@ function renderQuality(body) {
   const box = (ico, icon, t, n, sub, good) => `<div class="card kpi-tint p-4 flex items-center gap-3" style="--kc:${good ? '#10b981' : ICO_COLOR[ico]}"><div class="ico ${good ? 'ico-g' : ico}">${I(good ? 'check' : icon)}</div><div><div class="kpi-label">${t}</div><div class="text-2xl font-bold">${N(n)}</div><div class="text-xs muted">${sub}</div></div></div>`;
   const srvW = SH.warnings || [], feErr = S.sheetErrors || [];
   body.innerHTML = `
-  <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+  <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
     ${box('ico-p', 'calendar', 'วันที่ขาดหาย', q.missing.length, `${fullMonths.length} เดือนไม่มีไฟล์`, !q.missing.length)}
     ${box('ico-o', 'activity', 'ค่าผิดปกติ (Outlier)', q.outliers.length, 'robust z > 3.5', !q.outliers.length)}
     ${box('ico-p', 'alert', 'ค่าเป็น 0 / รถ > ลูกค้า', q.zeros.length + q.carGtCust.length, 'ควรตรวจการกรอก', !(q.zeros.length + q.carGtCust.length))}
@@ -2934,9 +3062,9 @@ function exportCSV() {
   if (!S.rows.length) { toast('ยังไม่มีข้อมูลสำหรับส่งออก', 'warn'); return; }
   const q = v => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
   const v = x => x === null || x === undefined ? '' : x;
-  const lines = [`วันที่ (พ.ศ.),วันที่ (ค.ศ.),วัน,ประเภท,วันหยุด,ยอดลูกค้า,ยอดรถยนต์ (${S.carBasis === '1022' ? '10-22 น.' : '24 ชม.'}),Ratio,รถยนต์ 24 ชม.,รถยนต์ 10-22 น.,ลูกค้าออก,รถยนต์ออก 24 ชม.,จยย.,แท็กซี่,เดลิเวอรี่,แหล่งข้อมูล,ชีต,หมายเหตุ`];
+  const lines = [`วันที่ (พ.ศ.),วันที่ (ค.ศ.),วัน,ประเภท,วันหยุด,ยอดลูกค้า,ยอดรถยนต์ (24 ชม.),Ratio,ลูกค้าออก,รถยนต์ออก 24 ชม.,จยย.,แท็กซี่,เดลิเวอรี่,แหล่งข้อมูล,ชีต,หมายเหตุ`];
   S.rows.forEach(r => lines.push([q(dTH(r.key)), r.key, TH_DAYS[r.dow], { wd: 'วันทำงาน', we: 'เสาร์-อาทิตย์', hol: 'วันหยุดนักขัตฤกษ์' }[r.type], q(r.hol), r.cust, r.car, r.ratio === null ? '' : r.ratio.toFixed(4),
-    v(r.car24), v(r.car1022), v(r.custOut), v(r.carOut), v(r.moto), v(r.taxi), v(r.deli), r.src === 'file' ? 'ไฟล์รายเดือน' : r.src === 'manual' ? 'บันทึกเอง' : 'ข้อมูลที่วาง', q(r.sheet), q(r.note || r.manualNote)].join(',')));
+    v(r.custOut), v(r.carOut), v(r.moto), v(r.taxi), v(r.deli), r.src === 'file' ? 'ไฟล์รายเดือน' : r.src === 'manual' ? 'บันทึกเอง' : 'ข้อมูลที่วาง', q(r.sheet), q(r.note || r.manualNote)].join(',')));
   // ใส่ BOM (﻿) เพื่อให้ Excel เปิดภาษาไทยได้ไม่เพี้ยน
   const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
   download(blob, `Customer_Car_Daily_${S.rangeStart}_${S.rangeEnd}.csv`);
@@ -2964,7 +3092,7 @@ function buildReport() {
   // v7: ค่าผิดปกติต้องคำนวณเทียบกับ "ข้อมูลทั้งหมด" (ตรงกับหน้าตรวจคุณภาพ) แล้วค่อยเลือกเฉพาะที่อยู่ในช่วงรายงาน — ช่วงสั้นจะมีตัวอย่างไม่พอ
   try { q.outliers = dataQuality(S.all, holMap()).outliers.filter(o => o.key >= S.rangeStart && o.key <= S.rangeEnd); } catch (e) { /* ใช้ผลเดิม */ }
   const calDays = daysBetween(S.rangeStart, S.rangeEnd) + 1, cover = rows.length / calDays;
-  const basis = S.carBasis === '1022' ? 'รถยนต์เข้า 10.00–22.00 น.' : 'รถยนต์เข้า ทั้งหมด 24 ชม.';
+  const basis = 'รถยนต์เข้า ทั้งหมด 24 ชม.';
   const now = new Date(); const nowKey = makeDate(now.getFullYear(), now.getMonth() + 1, now.getDate()).key;
   const tm = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
   const docNo = `CCA-${String(now.getFullYear() + 543).slice(2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
@@ -3128,7 +3256,7 @@ function dailyInsights(D, html = true) {
 }
 function dailyLineText(D) {
   const r = D.r, [b1, b2, b3, , b5] = D.base, g = (a, b) => ok(growth(a, b)) ? P(growth(a, b)) : '-';
-  const basis = S.carBasis === '1022' ? '10.00–22.00 น.' : '24 ชม.';
+  const basis = '24 ชม.';
   const L = [`📊 สรุปยอดประจำวัน — ${S.org}`, `วัน${TH_DAYS[r.dow]}ที่ ${dTH(r.key, true)} (${r.hol ? r.hol : DAYTYPE_TH[dayTypeOf(r)]})`, '',
     `👥 ลูกค้าเข้า: ${N(r.cust)} คน`, `🚗 รถยนต์ (${basis}): ${N(r.car)} คัน`, `⚖️ Ratio: ${N(r.ratio, 2)} คน/คัน`, ''];
   [b1, b2, b3, b5].forEach(b => { if (b.n) L.push(`• เทียบ${b.label}: ลูกค้า ${g(r.cust, b.cust)} · รถยนต์ ${g(r.car, b.car)}`); });
@@ -3178,7 +3306,7 @@ function renderDaily(body) {
       <div class="flex flex-wrap gap-1.5 mt-2">${typeChip(r)} ${srcChip(r)} <span class="chip ${D.status.c}" title="เทียบวัน${TH_DAYS[r.dow]}ในรอบ 1 ปี (robust z)">${D.status.t}</span></div>
       <div class="grid grid-cols-3 gap-2 mt-4">
         <div class="day-stat"><div class="l">${I('users', 14)} ลูกค้าเข้า</div><div class="v">${N(r.cust)}</div><div class="u">คน</div></div>
-        <div class="day-stat"><div class="l">${I('car', 14)} รถยนต์</div><div class="v">${N(r.car)}</div><div class="u">คัน · ${S.carBasis === '1022' ? '10–22 น.' : '24 ชม.'}</div></div>
+        <div class="day-stat"><div class="l">${I('car', 14)} รถยนต์</div><div class="v">${N(r.car)}</div><div class="u">คัน · 24 ชม.</div></div>
         <div class="day-stat"><div class="l">${I('percent', 14)} Ratio</div><div class="v">${N(r.ratio, 2)}</div><div class="u">คน/คัน</div></div>
       </div>
       ${D.rankN >= 8 ? `<div class="day-rank mt-3"><div class="flex justify-between gap-2 text-xs"><span>อันดับ <b style="color:var(--p1)">${D.rank}</b> จาก ${D.rankN} วัน${TH_DAYS[r.dow]}ในรอบ 1 ปี${r.hol ? '' : ' (ไม่รวมนักขัตฤกษ์)'}</span><span class="muted">มัธยฐาน ${N(D.med)} คน</span></div>
@@ -3243,7 +3371,7 @@ function buildDailyReport() {
         <div class="rp-box" style="border-left:5px solid ${tone};background:${mixW(tone, 7)}"><div style="font-size:10.5px;color:#6e6a86">วัน${TH_DAYS[r.dow]}</div><div style="font-size:18px;font-weight:700;color:${tone};line-height:1.3">${dTH(key, true)}</div>
           <div style="font-size:10.5px">${r.hol ? 'นักขัตฤกษ์: ' + esc(r.hol) : DAYTYPE_TH[dayTypeOf(r)]} · ${D.status.t}</div></div>
         ${kp('ลูกค้าเข้า', N(r.cust), 'คน', '#8b5cf6', `สัปดาห์ก่อน ${gTxt(g(r.cust, b2.cust))} · ปีก่อน ${gTxt(g(r.cust, b5.cust))}`)}
-        ${kp(`รถยนต์ (${S.carBasis === '1022' ? '10–22 น.' : '24 ชม.'})`, N(r.car), 'คัน', '#f59e0b', `สัปดาห์ก่อน ${gTxt(g(r.car, b2.car))} · ปีก่อน ${gTxt(g(r.car, b5.car))}`)}
+        ${kp(`รถยนต์ (24 ชม.)`, N(r.car), 'คัน', '#f59e0b', `สัปดาห์ก่อน ${gTxt(g(r.car, b2.car))} · ปีก่อน ${gTxt(g(r.car, b5.car))}`)}
         ${kp('Ratio ลูกค้า : รถยนต์', N(r.ratio, 2), 'คน/คัน', '#ec4899', `เฉลี่ย 4 สัปดาห์ ${N(b3.ratio, 2)} · ${gTxt(g(r.ratio, b3.ratio))}`)}
         ${kp(`อันดับวัน${TH_DAYS[r.dow]}ในรอบปี`, D.rankN >= 8 ? D.rank : '-', D.rankN >= 8 ? 'จาก ' + D.rankN + ' วัน' : '', '#10b981', `มัธยฐาน ${N(D.med)} คน`)}
       </div>
@@ -3331,7 +3459,7 @@ function buildCmpReport() {
   const calDays = R => daysBetween(R.s, R.e) + 1;
   const dtLabel = { all: 'ทุกประเภทวัน', wd: 'วันทำงาน (จ.–ศ.)', we: 'เสาร์–อาทิตย์', hol: 'วันหยุดนักขัตฤกษ์', off: 'วันหยุดทั้งหมด' };
   const modeLabel = { day: 'วันต่อวัน', week: 'รายสัปดาห์', month: 'รายเดือน', year: 'รายปี', custom: 'ช่วงกำหนดเอง' }[st.mode];
-  const basis = S.carBasis === '1022' ? 'รถยนต์เข้า 10.00–22.00 น.' : 'รถยนต์เข้า 24 ชม.';
+  const basis = 'รถยนต์เข้า 24 ชม.';
   const now = new Date(), tm = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
   const nowKey = makeDate(now.getFullYear(), now.getMonth() + 1, now.getDate()).key;
   const docNo = `CMP-${String(now.getFullYear() + 543).slice(2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
@@ -3438,15 +3566,15 @@ function buildCmpReport() {
   return `รายงานเปรียบเทียบ_${NM.a}_vs_${NM.b}`.replace(/[\\/:*?"<>|\s]+/g, '_');
 }
 async function exportReport(type) {
-  const cmp = type === 'cmppdf' || type === 'cmpjpg', daily = type === 'dailypdf' || type === 'dailyjpg';
-  if (cmp) type = type.slice(3); if (daily) type = type.slice(5);
-  if (!(cmp || daily ? S.all.length : S.rows.length)) { toast('ยังไม่มีข้อมูลสำหรับสร้างรายงาน', 'warn'); return; }
+  const cmp = type === 'cmppdf' || type === 'cmpjpg', daily = type === 'dailypdf' || type === 'dailyjpg', year = type === 'yearpdf' || type === 'yearjpg';
+  if (cmp) type = type.slice(3); if (daily) type = type.slice(5); if (year) type = type.slice(4);
+  if (!(cmp || daily || year ? S.all.length : S.rows.length)) { toast('ยังไม่มีข้อมูลสำหรับสร้างรายงาน', 'warn'); return; }
   if (!window.html2canvas || (type === 'pdf' && !window.jspdf)) { toast('โหลดไลบรารีสร้างรายงานไม่สำเร็จ — กรุณาตรวจสอบอินเทอร์เน็ตแล้วรีเฟรชหน้า', 'error', 6000); return; }
   if (!window.Chart) { toast('ไม่พบไลบรารีกราฟ — ไม่สามารถสร้างรายงานได้', 'error'); return; }
-  const pages = cmp ? ['rpC'] : daily ? ['rpD'] : ['rpP1', 'rpP2'], kind = cmp ? 'รายงานเปรียบเทียบ' : daily ? 'รายงานประจำวัน' : 'รายงาน';
+  const pages = cmp ? ['rpC'] : daily ? ['rpD'] : year ? ['rpY'] : ['rpP1', 'rpP2'], kind = cmp ? 'รายงานเปรียบเทียบ' : daily ? 'รายงานประจำวัน' : year ? 'รายงานรายปี' : 'รายงาน';
   showLoading(`กำลังสร้าง${kind} ${type.toUpperCase()} (${pages.length} หน้า)...`);
   try {
-    const cmpName = cmp ? buildCmpReport() : daily ? buildDailyReport() : (buildReport(), null);
+    const cmpName = cmp ? buildCmpReport() : daily ? buildDailyReport() : year ? buildYearReport() : (buildReport(), null);
     await document.fonts.ready; await nextFrame(); // รอฟอนต์ไทยโหลดครบ ไม่งั้นสระ/วรรณยุกต์จะเพี้ยนในภาพ
     const shots = [];
     for (const id of pages) shots.push(await html2canvas(document.getElementById(id), { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false, windowWidth: 1123, windowHeight: 794 }));
@@ -3458,7 +3586,7 @@ async function exportReport(type) {
     } else shots.forEach((cv, i) => setTimeout(() => download(cv.toDataURL('image/jpeg', 0.95), `${name}_หน้า${i + 1}.jpg`), i * 400));
     toast(`ส่งออก${kind} ${type.toUpperCase()} สำเร็จ (${pages.length} หน้า)`, 'success');
   } catch (e) { console.error(e); toast('สร้างรายงานไม่สำเร็จ: ' + esc(e.message), 'error', 6000); }
-  finally { ['rpChart', 'rpCChart', 'rpDChart', 'rpDChart2'].forEach(k => { if (S.charts[k]) { S.charts[k].destroy(); delete S.charts[k]; } }); $('#report').innerHTML = ''; hideLoading(); }
+  finally { ['rpChart', 'rpCChart', 'rpDChart', 'rpDChart2', 'rpYChart'].forEach(k => { if (S.charts[k]) { S.charts[k].destroy(); delete S.charts[k]; } }); $('#report').innerHTML = ''; hideLoading(); }
 }
 
 /* =====================================================================
@@ -3474,7 +3602,7 @@ function handleEvents() {
     applyFilter(); render();
   });
   document.addEventListener('click', e => {
-    const t = e.target.closest('[data-page],[data-goto],[data-action],[data-export],[data-range],[data-gran],[data-mm],[data-ym],[data-t],[data-sort],[data-pg],[data-hm],[data-cb],[data-dow],[data-dcq],[data-edit],[data-del],[data-stm],[data-stp],[data-std],[data-dnav]');
+    const t = e.target.closest('[data-page],[data-goto],[data-action],[data-export],[data-range],[data-gran],[data-mm],[data-ym],[data-t],[data-sort],[data-pg],[data-hm],[data-cb],[data-dow],[data-dcq],[data-edit],[data-del],[data-stm],[data-stp],[data-std],[data-dnav],[data-ysel],[data-ybasis]');
     if (!t) { if (!e.target.closest('#btnExport')) $('#exportMenu').classList.remove('open'); return; }
     if (t.dataset.page) goto(t.dataset.page);
     else if (t.dataset.goto) goto(t.dataset.goto);
@@ -3494,7 +3622,7 @@ function handleEvents() {
       if (x === 'dailycsv' || (x === 'csv' && dayMode)) exportDailyCSV();
       else if (x === 'dailyline') copyDailyLine();
       else if (x === 'csv') exportCSV();
-      else exportReport(x === 'pdf' && dayMode ? 'dailypdf' : x === 'jpg' && dayMode ? 'dailyjpg' : x);
+      else { const yearPg = S.page === 'yearly'; exportReport(x === 'pdf' && dayMode ? 'dailypdf' : x === 'jpg' && dayMode ? 'dailyjpg' : x === 'pdf' && yearPg ? 'yearpdf' : x === 'jpg' && yearPg ? 'yearjpg' : x); }
     }
     else if (t.dataset.dnav) {
       const i = S.all.findIndex(r => r.key === dailyKey()), j = i + (+t.dataset.dnav);
@@ -3504,13 +3632,11 @@ function handleEvents() {
     else if (t.dataset.gran) { S.gran = t.dataset.gran; render(); }
     else if (t.dataset.mm) { S.monthMode = t.dataset.mm; render(); }
     else if (t.dataset.ym) { S.yearMetric = t.dataset.ym; render(); }
+    else if (t.dataset.ysel) { S.yearSel = +t.dataset.ysel; render(); }
+    else if (t.dataset.ybasis) { S.yearBasis = t.dataset.ybasis; render(); }
     else if (t.dataset.t) { S.table.type = t.dataset.t; S.table.page = 1; $$('#tType button').forEach(b => b.classList.toggle('on', b === t)); drawRawTable(); }
     else if (t.dataset.sort) { const k = t.dataset.sort; S.table.dir = S.table.sort === k ? -S.table.dir : (k === 'key' ? 1 : -1); S.table.sort = k; drawRawTable(); }
     else if (t.dataset.pg) { S.table.page = +t.dataset.pg; drawRawTable(); }
-    else if (t.dataset.cb) {
-      S.carBasis = t.dataset.cb; applyCarBasis(S.all, S.carBasis); applyFilter(); save(); render();
-      toast(`ใช้ยอดรถยนต์ ${S.carBasis === '1022' ? 'ช่วง 10.00–22.00 น. (ช่วงเดียวกับยอดลูกค้า)' : 'ทั้งหมด 24 ชม.'} ในการคำนวณ`, 'info', 3000);
-    }
     else if (t.dataset.hm) { S.holMode = t.dataset.hm === '1'; save(); render(); }
     else if (t.dataset.dow) { S.dc.dow = +t.dataset.dow; render(); }
     else if (t.dataset.dcq) {
@@ -3566,7 +3692,10 @@ function handleEvents() {
   $('#dFrom').addEventListener('change', e => { S.from = e.target.value; S.to = $('#dTo').value; applyFilter(); render(); });
   $('#dTo').addEventListener('change', e => { S.to = e.target.value; S.from = $('#dFrom').value; applyFilter(); render(); });
   $('#btnTheme').addEventListener('click', () => { S.theme = S.theme === 'dark' ? 'light' : 'dark'; applyTheme(); save(); render(); });
-  $('#btnCollapse').addEventListener('click', () => { document.body.classList.toggle('collapsed'); setTimeout(() => Object.values(S.charts).forEach(c => c.resize()), 280); });
+  // v11: จอกลาง (แท็บเล็ตแนวนอน/โน้ตบุ๊กเล็ก 1024–1279px) ย่อเมนูเป็นไอคอนอัตโนมัติ ให้พื้นที่แดชบอร์ดกว้างพอ — ผู้ใช้กดย่อ/ขยายเองได้ (จำค่าที่กดไว้)
+  const autoCollapse = () => { if (S.userCollapse) return; const mid = innerWidth >= 1024 && innerWidth < 1280; if (document.body.classList.contains('collapsed') !== mid) { document.body.classList.toggle('collapsed', mid); setTimeout(() => Object.values(S.charts).forEach(c => { try { c.resize(); } catch (e) { } }), 280); } };
+  autoCollapse(); window.addEventListener('resize', () => { clearTimeout(S._acT); S._acT = setTimeout(autoCollapse, 150); });
+  $('#btnCollapse').addEventListener('click', () => { S.userCollapse = true; document.body.classList.toggle('collapsed'); setTimeout(() => Object.values(S.charts).forEach(c => c.resize()), 280); });
   $('#btnMenu').addEventListener('click', () => { document.body.classList.add('side-open'); $('#overlay').classList.remove('hidden'); });
   $('#overlay').addEventListener('click', () => { document.body.classList.remove('side-open'); $('#overlay').classList.add('hidden'); });
   $('#btnFull').addEventListener('click', () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (e) { toast('เบราว์เซอร์ไม่รองรับโหมดเต็มจอ', 'warn'); } });
@@ -3636,7 +3765,7 @@ async function init() {
   const saved = load();
   if (saved) {
     S.theme = saved.theme || 'light'; S.order = saved.order || 'dmy'; S.org = saved.org || S.org;
-    S.customHolText = saved.holText || ''; S.customHol = parseHolidayText(S.customHolText, S.order); S.holMode = !!saved.holMode; S.carBasis = saved.carBasis === '1022' ? '1022' : '24';
+    S.customHolText = saved.holText || ''; S.customHol = parseHolidayText(S.customHolText, S.order); S.holMode = !!saved.holMode; S.carBasis = '24'; // v11: ใช้ยอดรถยนต์ 24 ชม. เสมอ (เลิกให้เลือก 10–22 น.)
     if (saved.sh) { SH.url = saved.sh.url || DEFAULT_GAS_URL; SH.key = saved.sh.key || ''; SH.interval = [0, 15, 30, 60, 300].includes(saved.sh.interval) ? saved.sh.interval : 60; SH.by = saved.sh.by || ''; }
   }
   else if (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) S.theme = 'dark';
