@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <!--
-  Customer & Car Compare Analytics — v14
+  Customer & Car Compare Analytics — v15
+  v15: + ศูนย์ออกรายงาน: เลือก ① ประเภท (รายวัน/สัปดาห์/เดือน/ปี/กำหนดเอง) ② งวด ③ รูปแบบไฟล์ (PDF/JPEG/Excel/LINE) · เทียบงวดมาตรฐานอัตโนมัติ
+       + รายงานประจำสัปดาห์ (1 หน้า) และประจำเดือน (2 หน้า) แบบมาตรฐาน · แก้นิยามยอดลูกค้าในรายงานให้ตรงข้อมูลจริง
   v14: + ปฏิทินเหตุการณ์พิเศษ (แสดงบนกราฟ วิเคราะห์ผลกระทบ ตัดวันผิดปกติออกจากค่าปกติ) · วันหยุดยาว · วิเคราะห์รายชั่วโมง (ต้องใช้ Code_CCA_v6.gs)
   v13: + ฝ่ายบริการทั่วไป · คาดการณ์ยอดสิ้นเดือน/สิ้นปี พร้อมช่วง 95% และทดสอบความแม่นยำย้อนหลัง
   v12: + หน้าเปรียบเทียบอิสระ: แผงควบคุมกระชับในการ์ดเดียว · แก้ช่องว่างด้านบนหน้าที่ไม่มีแถบกรอง
@@ -261,6 +263,39 @@
   .spin-ic svg{ animation:spin .9s linear infinite; }
   #modal{ position:fixed; inset:0; z-index:95; background:rgba(15,10,35,.5); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; padding:16px; }
   #modal.show{ display:flex; }
+  /* v15: ศูนย์ออกรายงาน */
+  #rcModal{ position:fixed; inset:0; z-index:94; background:rgba(15,10,35,.5); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; padding:16px; }
+  #rcModal.show{ display:flex; }
+  #rcModal .rc-card{ width:100%; max-width:860px; max-height:calc(100vh - 32px); display:flex; flex-direction:column; padding:0; animation:fade .2s ease; overflow:hidden; }
+  .rc-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; border-bottom:1px solid var(--border); }
+  .rc-bodyin{ padding:14px 20px 16px; overflow-y:auto; }
+  .rc-foot{ display:flex; justify-content:flex-end; gap:8px; padding:12px 20px; border-top:1px solid var(--border); background:var(--card2); }
+  .rc-sec{ margin-bottom:14px; }
+  .rc-h{ display:flex; align-items:center; gap:8px; font-weight:600; font-size:14px; margin-bottom:8px; }
+  .rc-n{ width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px; color:#fff; background:linear-gradient(135deg,var(--p1),var(--p2)); }
+  .rc-types{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
+  .rc-type{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; text-align:left; padding:10px 11px; border-radius:14px; border:1.5px solid var(--border); background:var(--card); color:var(--text); cursor:pointer; font-family:inherit; transition:all .15s; }
+  .rc-type:hover{ border-color:var(--p1); }
+  .rc-type.on{ border-color:var(--p1); background:var(--soft); box-shadow:0 8px 18px -12px rgba(124,58,237,.8); }
+  .rc-ic{ width:30px; height:30px; border-radius:9px; display:inline-flex; align-items:center; justify-content:center; background:var(--soft); color:var(--p1); margin-bottom:3px; }
+  .rc-type.on .rc-ic{ background:linear-gradient(135deg,var(--p1),var(--p2)); color:#fff; }
+  .rc-tt{ font-weight:600; font-size:14px; } .rc-td{ font-size:11px; color:var(--muted); line-height:1.45; }
+  .rc-fmts{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+  .rc-fmt{ display:flex; align-items:center; gap:9px; padding:9px 11px; border-radius:12px; border:1.5px solid var(--border); background:var(--card); color:var(--text); cursor:pointer; font-family:inherit; text-align:left; }
+  .rc-fmt span{ display:flex; flex-direction:column; line-height:1.3; } .rc-fmt small{ font-size:11px; color:var(--muted); }
+  .rc-fmt.on{ border-color:var(--p1); background:var(--soft); color:var(--p1); }
+  .rc-fmt.on b{ color:var(--text); }
+  .btn.rc-on{ border-color:var(--p1); color:var(--p1); background:var(--soft); }
+  .rc-sum{ border-radius:14px; padding:12px 14px; background:linear-gradient(135deg,var(--soft),var(--soft2)); border:1px solid var(--border); }
+  .rc-sum-t{ display:flex; align-items:center; gap:6px; font-weight:600; font-size:13.5px; color:#059669; margin-bottom:6px; }
+  .rc-sum-g{ display:grid; grid-template-columns:auto 1fr; gap:3px 14px; font-size:13px; line-height:1.55; }
+  .rc-warn{ display:flex; gap:6px; align-items:flex-start; font-size:12px; color:#b45309; margin-top:6px; line-height:1.5; } .rc-warn svg{ flex-shrink:0; margin-top:2px; }
+  .rc-err{ color:#b91c1c; display:flex; gap:8px; align-items:center; font-size:13.5px; }
+  .rc-link{ color:var(--p1); text-decoration:underline; }
+  @media (max-width:760px){ .rc-types{ grid-template-columns:repeat(2,minmax(0,1fr)); } .rc-types .rc-type:last-child{ grid-column:span 2; } .rc-fmts{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media (max-width:520px){ #rcModal{ padding:0; align-items:stretch; } #rcModal .rc-card{ max-height:100vh; border-radius:0; } .rc-bodyin{ padding:12px 14px; } .rc-top{ padding:12px 14px; } .rc-sum-g{ grid-template-columns:1fr; gap:0; } .rc-sum-g .muted{ margin-top:4px; font-size:11.5px; } }
+  #rpW1 .rp-tbl td, #rpW2 .rp-tbl td{ padding:1.6px 6px; } #rpW1 .rp-list{ line-height:1.5; } #rpW1 .rp-box, #rpW2 .rp-box{ padding:7px 12px; } #rpW1 .rp-kpi{ padding:7px 12px; } #rpW1 .rp-kpi .v{ font-size:18px; line-height:1.3; }
+  .rc-cmp td, .rc-cmp th{ font-size:10px; white-space:nowrap; } .rc-cmp td{ padding:2.6px 5px !important; } .rc-day td{ font-size:10.5px; padding:5.2px 5px !important; } .rc-day th{ font-size:9.8px; padding:2px 5px !important; }
   #modal .card{ width:100%; max-width:460px; padding:24px; animation:fade .2s ease; }
   .btn-danger{ background:linear-gradient(135deg,#ef4444,#db2777); color:#fff; border:0; }
   .btn-danger:hover{ color:#fff; filter:brightness(1.08); }
@@ -448,24 +483,7 @@
           </div>
           <button id="btnFull" class="icon-btn hidden sm:inline-flex" title="เต็มจอ" data-i="maximize"></button>
           <button id="btnTheme" class="icon-btn" title="สลับธีม"></button>
-          <div class="relative">
-            <button id="btnExport" class="btn btn-primary"><span data-i="download"></span><span class="hidden xl:inline">Export รายงาน</span></button>
-            <div id="exportMenu" class="menu">
-              <button data-export="pdf"><span data-i="fileText"></span>รายงาน PDF (A4 แนวนอน)</button>
-              <button data-export="jpg"><span data-i="image"></span>รายงาน JPEG (A4 แนวนอน)</button>
-              <button data-export="csv"><span data-i="sheet"></span>ข้อมูลรายวัน CSV (Excel)</button>
-              <div class="menu-sep"></div>
-              <button data-export="dailypdf"><span data-i="calendar"></span>รายงานประจำวัน PDF (วันล่าสุด/ที่เลือก)</button>
-              <button data-export="dailyjpg"><span data-i="image"></span>รายงานประจำวัน JPEG</button>
-              <button data-export="dailycsv"><span data-i="sheet"></span>สรุปประจำวัน CSV (Excel)</button>
-              <button data-export="dailyline"><span data-i="clipboard"></span>คัดลอกสรุปประจำวัน (LINE)</button>
-              <div class="menu-sep"></div>
-              <button data-export="yearpdf"><span data-i="calYear"></span>รายงานรายปี PDF (ปีล่าสุด เทียบปีก่อน)</button>
-              <div class="menu-sep"></div>
-              <button data-export="cmppdf"><span data-i="fileText"></span>รายงานเปรียบเทียบงวด PDF (1 หน้า)</button>
-              <button data-export="cmpjpg"><span data-i="image"></span>รายงานเปรียบเทียบงวด JPEG</button>
-            </div>
-          </div>
+          <button id="btnExport" class="btn btn-primary" title="ออกรายงาน รายวัน / รายสัปดาห์ / รายเดือน / รายปี"><span data-i="download"></span><span class="hidden xl:inline">ออกรายงาน</span></button>
           <div class="hidden 2xl:flex items-center gap-2 pl-1">
             <img data-logo alt="SBK Compare" style="width:40px;height:40px;border-radius:12px">
           </div>
@@ -594,11 +612,16 @@
 
     <footer class="px-4 md:px-6 lg:px-8 py-4 text-xs muted flex flex-wrap justify-between gap-2" style="border-top:1px solid var(--border)">
       <span>SBK Customer & Car Compare Analytics · Single File Web App</span>
-      <span>v14.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
+      <span>v15.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
     </footer>
   </div>
 </div>
 
+<div id="rcModal" role="dialog" aria-modal="true" aria-labelledby="rcTitle"><div class="card rc-card">
+  <div class="rc-top"><div class="flex items-center gap-3 min-w-0"><div class="ico ico-v"><span data-i="fileText"></span></div><div class="min-w-0"><div class="card-h" id="rcTitle">ศูนย์ออกรายงาน</div><div class="text-xs muted">เลือกประเภท งวด และรูปแบบไฟล์ — ระบบเทียบกับงวดมาตรฐานให้อัตโนมัติ</div></div></div><button id="rcClose" class="icon-btn" title="ปิด" data-i="x"></button></div>
+  <div id="rcBody" class="rc-bodyin"></div>
+  <div class="rc-foot"><button id="rcCancel" class="btn">ยกเลิก</button><button id="rcGo" class="btn btn-primary"></button></div>
+</div></div>
 <div id="modal"><div class="card"><div id="mBody"></div><div class="flex justify-end gap-2 mt-6"><button id="mCancel" class="btn">ยกเลิก</button><button id="mOk" class="btn btn-primary">ยืนยัน</button></div></div></div>
 <!-- โค้ด Apps Script ฝังไว้ให้คัดลอก/ดาวน์โหลดจากแอปได้ทันที (type=text/plain = เบราว์เซอร์ไม่รัน) -->
 <script type="text/plain" id="gasCode">
@@ -3622,7 +3645,7 @@ function buildReport() {
   const tm = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
   const docNo = `CCA-${String(now.getFullYear() + 543).slice(2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
   const pc = prev.length ? growth(c.mean, mean(prev.map(x => x.cust))) : null, pv = prev.length ? growth(v.mean, mean(prev.map(x => x.car))) : null, pr = prev.length ? growth(ratio, groupRatio(prev)) : null;
-  const chip = x => ok(x) ? `<b style="color:${x >= 0 ? '#047857' : '#b91c1c'}">${x >= 0 ? '▲' : '▼'} ${P(Math.abs(x), 1, false)}</b> <span style="color:#6e6a86">เทียบช่วงก่อน</span>` : '<span style="color:#94a3b8">— ไม่มีช่วงเทียบ</span>';
+  const chip = x => ok(x) ? `<b style="color:${x >= 0 ? '#047857' : '#b91c1c'}">${x >= 0 ? '▲' : '▼'} ${P(Math.abs(x), 1, false)}</b> <span style="color:#6e6a86">เฉลี่ย/วัน เทียบช่วงก่อน</span>` : '<span style="color:#94a3b8">— ไม่มีช่วงเทียบ</span>';
   // html2canvas ไม่รองรับ color-mix() → ผสมสีกับขาวเองเป็น rgb
   const mixW = (hex, pct) => { const n = parseInt(hex.slice(1), 16), f = pct / 100; return `rgb(${[16, 8, 0].map(sh => Math.round(((n >> sh) & 255) * f + 255 * (1 - f))).join(',')})`; };
   const tint = (col, pct = 25) => `background:linear-gradient(135deg, ${mixW(col, pct)}, ${mixW(col, Math.max(4, pct / 3.5))});border:1px solid ${mixW(col, 32)}`;
@@ -3694,7 +3717,7 @@ function buildReport() {
       </div>
       <div class="rp-fill" style="display:grid;grid-template-columns:1.55fr 1fr;gap:12px;margin-top:12px">
         <div class="rp-box"><div class="rp-t">นิยามและวิธีคำนวณ</div>
-<div class="rp-list" style="display:grid;grid-template-columns:1fr 1fr;column-gap:18px"><div class="rp-li"><span class="n">•</span><span>ยอดลูกค้า = "ยอดลูกค้าเข้าใช้บริการ" (10.00–22.00 น.) จากชีตรายวัน</span></div><div class="rp-li"><span class="n">•</span><span>ยอดรถยนต์ = ${basis}</span></div><div class="rp-li"><span class="n">•</span><span>Ratio = ยอดรวมลูกค้า ÷ ยอดรวมรถยนต์ (ถ่วงน้ำหนักตามปริมาณ)</span></div><div class="rp-li"><span class="n">•</span><span>SD = ส่วนเบี่ยงเบนมาตรฐานแบบตัวอย่าง (n−1) · CV = SD ÷ ค่าเฉลี่ย</span></div><div class="rp-li"><span class="n">•</span><span>* MoM คำนวณจากค่าเฉลี่ยต่อวัน เพื่อเทียบเดือนที่จำนวนวันต่างกันได้ยุติธรรม</span></div><div class="rp-li"><span class="n">•</span><span>ค่าเฉลี่ยนับเฉพาะวันที่มีข้อมูล (วันที่ขาดหายไม่ถูกนับเป็น 0)</span></div><div class="rp-li"><span class="n">•</span><span>วันหยุดนักขัตฤกษ์ตามประกาศ ครม. 2567–2569 (★ ในตาราง) + รายการเพิ่มเติมของศูนย์</span></div><div class="rp-li"><span class="n">•</span><span>ค่าผิดปกติ = |robust z| &gt; 3.5 เทียบวันเดียวกันในสัปดาห์</span></div></div></div>
+<div class="rp-list" style="display:grid;grid-template-columns:1fr 1fr;column-gap:18px"><div class="rp-li"><span class="n">•</span><span>ยอดลูกค้า = "ยอดลูกค้าเข้าใช้บริการ" จากชีตรายวัน (รวมทุกประตู ตลอดเวลาเปิดให้บริการ)</span></div><div class="rp-li"><span class="n">•</span><span>ยอดรถยนต์ = ${basis}</span></div><div class="rp-li"><span class="n">•</span><span>Ratio = ยอดรวมลูกค้า ÷ ยอดรวมรถยนต์ (ถ่วงน้ำหนักตามปริมาณ)</span></div><div class="rp-li"><span class="n">•</span><span>SD = ส่วนเบี่ยงเบนมาตรฐานแบบตัวอย่าง (n−1) · CV = SD ÷ ค่าเฉลี่ย</span></div><div class="rp-li"><span class="n">•</span><span>* MoM คำนวณจากค่าเฉลี่ยต่อวัน เพื่อเทียบเดือนที่จำนวนวันต่างกันได้ยุติธรรม</span></div><div class="rp-li"><span class="n">•</span><span>ค่าเฉลี่ยนับเฉพาะวันที่มีข้อมูล (วันที่ขาดหายไม่ถูกนับเป็น 0)</span></div><div class="rp-li"><span class="n">•</span><span>วันหยุดนักขัตฤกษ์ตามประกาศ ครม. 2567–2569 (★ ในตาราง) + รายการเพิ่มเติมของศูนย์</span></div><div class="rp-li"><span class="n">•</span><span>ค่าผิดปกติ = |robust z| &gt; 3.5 เทียบวันเดียวกันในสัปดาห์</span></div></div></div>
         <div class="rp-box"><div class="rp-t">สรุปรายปี (ค่าเฉลี่ยต่อวัน)</div>
           <table class="rp-tbl"><thead><tr><th>ปี</th><th class="num">วัน</th><th class="num">ลูกค้า</th><th class="num">YoY</th><th class="num">รถยนต์</th><th class="num">YoY</th><th class="num">Ratio</th></tr></thead><tbody>
           ${ys.map(y => `<tr><td>พ.ศ. ${y.y + 543}</td><td class="num">${y.days}/${y.diy}</td><td class="num"><b>${N(y.custAvg)}</b></td><td class="num">${P(y.yoyCustAvg)}</td><td class="num"><b>${N(y.carAvg)}</b></td><td class="num">${P(y.yoyCarAvg)}</td><td class="num">${N(y.ratio, 2)}</td></tr>`).join('')}
@@ -4092,16 +4115,461 @@ function buildCmpReport() {
   } finally { Chart.defaults.color = prevColor; Chart.defaults.borderColor = prevBorder; }
   return `รายงานเปรียบเทียบ_${NM.a}_vs_${NM.b}`.replace(/[\\/:*?"<>|\s]+/g, '_');
 }
+/* =====================================================================
+   v15: ศูนย์ออกรายงาน (Report Center)
+   แทนเมนู Export แบบเดิมที่มีตัวเลือกปนกันหลายแบบ → เลือกเป็นขั้นตอน: ① ประเภทรายงาน ② งวด ③ รูปแบบไฟล์
+   ทุกรายงานเทียบกับ "งวดมาตรฐาน" ให้อัตโนมัติ และตัดช่วงให้เท่ากันเมื่องวดปัจจุบันยังไม่ครบ (เทียบแบบยุติธรรม)
+     รายวัน    = วันก่อน · วันเดียวกันสัปดาห์ก่อน · เฉลี่ย 4 สัปดาห์ · ปีก่อน (รายงานประจำวันเดิม)
+     รายสัปดาห์ = จันทร์–อาทิตย์ · เทียบสัปดาห์ก่อน (−7 วัน) และสัปดาห์เดียวกันปีก่อน (−364 วัน = ตรงวันในสัปดาห์)
+     รายเดือน   = เทียบเดือนก่อน และเดือนเดียวกันปีก่อน (ตัดที่วันที่เดียวกันถ้าเดือนยังไม่ครบ)
+     รายปี      = เทียบปีก่อน (ช่วงเดียวกัน YTD หรือทั้งปี)
+     กำหนดเอง  = ช่วงวันที่อิสระ · เทียบช่วงก่อนหน้าเท่ากัน / ช่วงเดียวกันปีก่อน / ไม่เทียบ
+   ===================================================================== */
+const RC_TYPES = [
+  { k: 'day', t: 'รายวัน', icon: 'calendar', d: 'เทียบวันก่อน · สัปดาห์ก่อน · ปีก่อน' },
+  { k: 'week', t: 'รายสัปดาห์', icon: 'bars', d: 'จันทร์–อาทิตย์ · เทียบสัปดาห์ก่อน · ปีก่อน' },
+  { k: 'month', t: 'รายเดือน', icon: 'table', d: 'เทียบเดือนก่อน · เดือนเดียวกันปีก่อน' },
+  { k: 'year', t: 'รายปี', icon: 'calYear', d: 'เทียบปีก่อน (ช่วงเดียวกัน / ทั้งปี)' },
+  { k: 'custom', t: 'กำหนดช่วงเอง', icon: 'cols', d: 'เลือกวันเริ่ม–สิ้นสุดได้อิสระ' }
+];
+const RC_FMT = [['pdf', 'PDF', 'fileText', 'A4 แนวนอน'], ['jpg', 'JPEG', 'image', 'ภาพ A4'], ['csv', 'Excel', 'sheet', 'ไฟล์ CSV'], ['line', 'LINE', 'clipboard', 'คัดลอกข้อความ']];
+const RC_STORE = 'sbk_cca_rc_v1';
+const minKey = (a, b) => a < b ? a : b;
+const trendWord = g => !ok(g) ? 'ไม่มีข้อมูลเทียบ' : Math.abs(g) < 0.02 ? 'ทรงตัว' : g > 0 ? (g >= 0.05 ? 'เพิ่มขึ้นชัดเจน' : 'เพิ่มขึ้นเล็กน้อย') : (g <= -0.05 ? 'ลดลงชัดเจน' : 'ลดลงเล็กน้อย');
+
+function rcState() {
+  if (S.rc) return S.rc;
+  let saved = {}; try { saved = JSON.parse(localStorage.getItem(RC_STORE) || '{}') || {}; } catch (e) { saved = {}; }
+  // จำเฉพาะ "รูปแบบ" ที่ผู้ใช้ชอบ — ไม่จำวันที่ เพราะเปิดครั้งหน้าควรเริ่มที่งวดล่าสุดเสมอ (กันออกรายงานงวดเก่าโดยไม่ตั้งใจ)
+  S.rc = { type: RC_TYPES.some(t => t.k === saved.type) ? saved.type : 'month', fmt: RC_FMT.some(f => f[0] === saved.fmt) ? saved.fmt : 'pdf', basis: saved.basis === 'full' ? 'full' : 'ytd', cmp: ['prev', 'yoy', 'none'].includes(saved.cmp) ? saved.cmp : 'prev' };
+  return S.rc;
+}
+function rcSave() { const s = S.rc; try { localStorage.setItem(RC_STORE, JSON.stringify({ type: s.type, fmt: s.fmt, basis: s.basis, cmp: s.cmp })); } catch (e) { /* โหมดส่วนตัว/บล็อกพื้นที่ → ข้าม */ } }
+function rcWeeks() {
+  const m = new Map(); S.all.forEach(r => { const w = weekStartKey(r); m.set(w, (m.get(w) || 0) + 1); });
+  return [...m.entries()].sort((a, b) => a[0] < b[0] ? 1 : -1).map(([s, n]) => ({ s, e: addDaysKey(s, 6), n }));
+}
+function rcMonths() {
+  const m = new Map(); S.all.forEach(r => m.set(r.ym, (m.get(r.ym) || 0) + 1));
+  return [...m.entries()].sort((a, b) => a[0] < b[0] ? 1 : -1).map(([ym, n]) => { const [y, mo] = ym.split('-').map(Number); return { ym, n, dim: daysInMonth(y, mo) }; });
+}
+const rcYears = () => [...new Set(S.all.map(r => r.y))].sort((a, b) => b - a);
+const wkLabel = (s, e) => { const a = dateFromKey(s), b = dateFromKey(e); return a.m === b.m ? `${a.d}–${b.d} ${TH_MONTHS[b.m - 1]} ${b.y + 543}` : `${a.d} ${TH_MONTHS[a.m - 1]}${a.y !== b.y ? ' ' + (a.y + 543) : ''} – ${b.d} ${TH_MONTHS[b.m - 1]} ${b.y + 543}`; };
+const rngLabel = (s, e) => s === e ? dTH(s) : wkLabel(s, e);
+const rngShort = (s, e) => { const a = dateFromKey(s), b = dateFromKey(e); return s === e ? dShort(s) : a.m === b.m && a.y === b.y ? `${a.d}–${b.d} ${TH_MONTHS[b.m - 1]} ${String(b.y + 543).slice(2)}` : `${dShort(s)}–${dShort(e)}`; };
+
+// สถิติของช่วงวันที่ — ค่าเฉลี่ยนับเฉพาะวันที่มีข้อมูล (วันขาดหายไม่ถูกนับเป็น 0)
+function rngStat(s, e, label) {
+  const rows = s && e ? S.all.filter(r => r.key >= s && r.key <= e) : [], G = summarizeGroup(rows), cal = s && e ? daysBetween(s, e) + 1 : 0;
+  return { s, e, label, rows, n: rows.length, cal, full: rows.length === cal && cal > 0, custT: G.cust.total, carT: G.car.total, custA: G.cust.mean, carA: G.car.mean, ratio: G.ratio, cust: G.cust, car: G.car, dg: dayGroups(rows) };
+}
+// ยอดรวมเทียบกันได้เมื่อ "ทั้งสองช่วงมีข้อมูลครบทุกวันเท่ากัน" — ไม่งั้นใช้ค่าเฉลี่ย/วัน (กันตัวเลขหลอกจากวันที่ขาดหาย)
+const totComparable = (A, B) => A.n > 0 && B.n > 0 && A.full && B.full && A.cal === B.cal;
+
+/* ---------- แปลงการเลือก → สเปกรายงาน (ชื่อ งวด ฐานเทียบ คำเตือน) ---------- */
+function rcResolve(sp) {
+  const last = S.all[S.all.length - 1].key, first = S.all[0].key, warn = [], info = [];
+  if (sp.type === 'day') {
+    const k = sp.day && S.all.some(r => r.key === sp.day) ? sp.day : null;
+    if (!k) return { err: 'ไม่มีข้อมูลของวันที่เลือก — กรุณาเลือกวันที่มีข้อมูล' };
+    return { kind: 'day', key: k, title: 'รายงานสรุปประจำวัน', period: `วัน${TH_DAYS[dateFromKey(k).dow]}ที่ ${dTH(k, true)}`, pages: 1, cmpTxt: 'วันก่อนหน้า · วันเดียวกันสัปดาห์ก่อน · เฉลี่ย 4 สัปดาห์ · วันทำงาน 30 วัน · ปีก่อน', warn, info };
+  }
+  if (sp.type === 'year') {
+    const Q = yearCompare(sp.year, sp.basis); if (!Q) return { err: 'ไม่มีข้อมูลรายปี' };
+    const y = Q.Y + 543;
+    if (!Q.hasPrev) warn.push(`ไม่มีข้อมูลปี ${y - 1} สำหรับเทียบ — รายงานจะแสดงเฉพาะปี ${y}`);
+    if (sp.basis === 'full' && !Q.fullYear) warn.push(`ปี ${y} ยังไม่ครบปี (มีข้อมูล ${Q.C.days} วัน) — การเทียบ "ทั้งปี" จะไม่ยุติธรรม แนะนำ "ช่วงเดียวกัน"`);
+    return { kind: 'year', year: Q.Y, basis: sp.basis, title: `รายงานรายปี ${y}`, period: `ปี ${y} (${Q.rangeTxt}) · ข้อมูล ${N(Q.C.days)} วัน`, pages: 1, cmpTxt: `ปี ${y - 1}${Q.basis === 'ytd' && Q.rangeTxt !== 'ทั้งปี' ? ' ช่วงเดียวกัน ' + Q.rangeTxt : ' ทั้งปี'} (${N(Q.P.days)} วัน)`, warn, info };
+  }
+  let s, pe, kind, title, bases = [];
+  if (sp.type === 'week') {
+    s = sp.week; if (!s) return { err: 'กรุณาเลือกสัปดาห์' }; pe = addDaysKey(s, 6); kind = 'week'; title = 'รายงานสรุปประจำสัปดาห์';
+  } else if (sp.type === 'month') {
+    if (!sp.ym) return { err: 'กรุณาเลือกเดือน' };
+    const [y, m] = sp.ym.split('-').map(Number); s = sp.ym + '-01'; pe = sp.ym + '-' + String(daysInMonth(y, m)).padStart(2, '0'); kind = 'month'; title = 'รายงานสรุปประจำเดือน';
+  } else {
+    s = sp.from; pe = sp.to; if (!s || !pe) return { err: 'กรุณาเลือกวันเริ่มต้นและวันสิ้นสุด' };
+    if (s > pe) [s, pe] = [pe, s]; kind = 'custom'; title = 'รายงานวิเคราะห์ช่วงที่กำหนด';
+    if (daysBetween(s, pe) > 3660) return { err: 'ช่วงวันที่ยาวเกิน 10 ปี' };
+  }
+  if (s > last) return { err: 'งวดที่เลือกยังไม่มีข้อมูล' };
+  const e = minKey(pe, last), span = daysBetween(s, e); // span = จำนวนวันที่ผ่านไปแล้วของงวด (นับจาก 0)
+  if (e < pe && kind !== 'custom') warn.push(`งวดนี้ยังไม่ครบ — มีข้อมูลถึง ${dTH(e)} (${span + 1} จาก ${daysBetween(s, pe) + 1} วัน) · ฐานเทียบจะถูกตัดให้มีจำนวนวันเท่ากัน`);
+  if (kind === 'custom' && pe > last) warn.push(`ข้อมูลมีถึง ${dTH(last)} — ช่วงที่เลือกหลังจากนั้นไม่มีข้อมูล`);
+  if (s < first) warn.push(`ข้อมูลเริ่มที่ ${dTH(first)} — ช่วงก่อนหน้านั้นไม่มีข้อมูล`);
+  if (kind === 'week') {
+    bases = [{ id: 'b1', label: 'สัปดาห์ก่อน', short: 'สัปดาห์ก่อน', s: addDaysKey(s, -7), e: addDaysKey(e, -7), off: -7 }, { id: 'b2', label: 'สัปดาห์เดียวกันปีก่อน', short: 'ปีก่อน', s: addDaysKey(s, -364), e: addDaysKey(e, -364), off: -364 }];
+  } else if (kind === 'month') {
+    const [y, m] = sp.ym.split('-').map(Number), dEnd = +e.slice(8), done = e === pe;
+    const pm = prevMonthKey(sp.ym), [py, pmo] = pm.split('-').map(Number), ly = (y - 1) + '-' + sp.ym.slice(5);
+    const cut = (ym2, dim2) => ym2 + '-' + String(done ? dim2 : Math.min(dEnd, dim2)).padStart(2, '0');
+    bases = [{ id: 'b1', label: `เดือนก่อน (${ymTH(pm, true)})`, short: 'เดือนก่อน', s: pm + '-01', e: cut(pm, daysInMonth(py, pmo)) },
+      { id: 'b2', label: `ปีก่อน (${ymTH(ly, true)})`, short: 'ปีก่อน', s: ly + '-01', e: cut(ly, daysInMonth(y - 1, m)) }];
+  } else if (sp.cmp === 'prev') {
+    const L = span + 1; bases = [{ id: 'b1', label: `${N(L)} วันก่อนหน้า`, s: addDaysKey(s, -L), e: addDaysKey(s, -1) }];
+  } else if (sp.cmp === 'yoy') {
+    bases = [{ id: 'b1', label: 'ช่วงเดียวกันปีก่อน', s: shiftYearKey(s, -1), e: shiftYearKey(e, -1) }];
+  }
+  const C = rngStat(s, e, 'งวดนี้');
+  if (!C.n) return { err: 'ช่วงที่เลือกไม่มีข้อมูล' };
+  bases = bases.map(b => Object.assign(rngStat(b.s, b.e, b.label), { id: b.id, short: b.short || b.label, off: b.off }));
+  if (C.n < C.cal) info.push(`งวดนี้ขาดข้อมูล ${C.cal - C.n} วัน — ค่าเฉลี่ยคิดจากวันที่มีข้อมูล`);
+  bases.forEach(b => { if (!b.n) warn.push(`${b.label}: ไม่มีข้อมูลสำหรับเทียบ`); else if (b.n < b.cal) info.push(`${b.label} ขาดข้อมูล ${b.cal - b.n} วัน — เทียบด้วยค่าเฉลี่ย/วัน`); });
+  const name = kind === 'week' ? `สัปดาห์ ${wkLabel(s, pe)}` : kind === 'month' ? `เดือน${ymTH(sp.ym, true)}` : rngLabel(s, e);
+  const pages = kind === 'month' ? 2 : kind === 'week' ? 1 : 2;
+  return { kind, title, name, s, pe, e, span, C, bases, ym: sp.ym, cmp: sp.cmp, pages, warn, info,
+    period: kind === 'week' ? `สัปดาห์ ${wkLabel(s, pe)} (จันทร์–อาทิตย์)` : kind === 'month' ? `${ymTH(sp.ym, true)}${e < pe ? ` (1–${+e.slice(8)} ${TH_MONTHS[+e.slice(5, 7) - 1]})` : ''}` : `${dTH(s)} – ${dTH(e)} (${N(span + 1)} วัน)`,
+    cmpTxt: bases.length ? bases.map(b => `${b.label} ${rngLabel(b.s, b.e)}`).join(' · ') : 'ไม่เทียบ' };
+}
+
+/* ---------- ข้อค้นพบอัตโนมัติของรายงานสัปดาห์/เดือน/ช่วงกำหนดเอง ---------- */
+function rcInsights(R, html = true) {
+  const C = R.C, [B1, B2] = R.bases, B = s => html ? `<b>${s}</b>` : s, out = [];
+  const gA = (b, f) => b && b.n ? growth(C[f], b[f]) : null, pct = g => ok(g) ? P(g) : '—';
+  const nm = R.kind === 'week' ? `สัปดาห์ ${rngShort(R.s, R.pe)} ` : R.kind === 'month' ? `${ymTH(R.ym, true)} ` : 'ช่วงที่เลือก';
+  const cmpPart = f => R.bases.filter(b => b.n).map(b => `${trendWord(gA(b, f))}เมื่อเทียบ${b.short} (${pct(gA(b, f))})`).join(' และ') || 'ไม่มีงวดสำหรับเทียบ';
+  out.push(`${nm}ลูกค้ารวม ${B(N(C.custT))} คน (${C.n} วัน) เฉลี่ย ${B(N(C.custA))} คน/วัน — ${cmpPart('custA')}`);
+  out.push(`รถยนต์รวม ${B(N(C.carT))} คัน เฉลี่ย ${B(N(C.carA))} คัน/วัน — ${cmpPart('carA')}`);
+  if (B1 && B1.n && ok(C.ratio) && ok(B1.ratio)) { const d = C.ratio - B1.ratio; out.push(`Ratio ลูกค้าต่อรถยนต์ ${B(N(C.ratio, 2))} คน/คัน (${B1.short} ${N(B1.ratio, 2)})${Math.abs(d) >= 0.05 ? d > 0 ? ' — สัดส่วนลูกค้าที่ไม่ได้มาด้วยรถยนต์ส่วนตัวเพิ่มขึ้น' : ' — ลูกค้าพึ่งพารถยนต์ส่วนตัวมากขึ้น (ควรติดตามความพร้อมของลานจอด)' : ' — ใกล้เคียงเดิม'}`); }
+  if (C.cust.maxRow) out.push(`ลูกค้าสูงสุด ${B(dTH(C.cust.maxRow.key))} (${TH_DAYS[C.cust.maxRow.dow]}) ${B(N(C.cust.max))} คน · ต่ำสุด ${dTH(C.cust.minRow.key)} (${TH_DAYS[C.cust.minRow.dow]}) ${N(C.cust.min)} คน`);
+  const W = C.dg.wd, E = C.dg.we; if (W.days && E.days) out.push(`เสาร์–อาทิตย์เฉลี่ย ${B(N(E.cust.mean))} คน/วัน ${E.cust.mean >= W.cust.mean ? 'สูงกว่า' : 'ต่ำกว่า'}วันทำงาน ${B(P(Math.abs(growth(E.cust.mean, W.cust.mean)), 1, false))}`);
+  if (R.kind === 'week' && B1 && B1.n) { // วันไหนเปลี่ยนมากที่สุดเมื่อเทียบวันเดียวกันของสัปดาห์ก่อน
+    const by = new Map(S.all.map(x => [x.key, x])); const d = C.rows.map(r => { const p = by.get(addDaysKey(r.key, -7)); return p ? { r, g: growth(r.cust, p.cust) } : null; }).filter(x => x && ok(x.g));
+    if (d.length) { const up = d.reduce((a, x) => x.g > a.g ? x : a), dn = d.reduce((a, x) => x.g < a.g ? x : a); out.push(`เทียบวันเดียวกันของสัปดาห์ก่อน: ${TH_DAYS[up.r.dow]} ${up.g >= 0 ? 'เพิ่ม' : 'ลด'}มากสุด ${B(P(up.g))}${dn !== up ? ` · ${TH_DAYS[dn.r.dow]} ${dn.g < 0 ? 'ลด' : 'เพิ่ม'}${dn.g < 0 ? 'มากสุด' : 'น้อยสุด'} ${B(P(dn.g))}` : ''}`); }
+  }
+  if (B1 && B1.n >= 3 && C.n >= 3 && R.kind !== 'week') { const w = welchT(C.rows.map(r => r.cust), B1.rows.map(r => r.cust)); out.push(`ลูกค้าเฉลี่ย/วันเทียบ${B1.short}: ` + (html ? sigText(w) : sigText(w).replace(/<[^>]+>/g, ''))); }
+  const evs = (S.events || []).filter(ev => ev.to >= R.s && ev.from <= R.e);
+  evs.slice(0, 3).forEach(ev => { const im = eventImpact(ev); out.push(`เหตุการณ์ ★ ${html ? esc(ev.title) : ev.title} (${rngLabel(ev.from, ev.to)})${im && ok(im.g) ? ` ลูกค้าเฉลี่ย ${N(im.act)} คน/วัน ${P(im.g)} จากค่าคาดหมาย` : ''}${ev.exclude ? ' · ตัดออกจากค่าปกติ' : ''}`); });
+  const lw = []; C.rows.forEach(r => { if (r.lw && !lw.some(x => x.s === r.lwRun.s)) lw.push(r.lwRun); });
+  if (lw.length > 2) { const l = C.rows.filter(r => r.lw); out.push(`มีวันหยุดยาว ${lw.length} ช่วง (${l.length} วัน) ลูกค้าเฉลี่ย ${B(N(mean(l.map(r => r.cust))))} คน/วัน`); }
+  else lw.forEach(x => { const l = C.rows.filter(r => r.key >= x.s && r.key <= x.e); out.push(`วันหยุดยาว ${rngLabel(x.s, x.e)} (${x.len} วัน) ลูกค้าเฉลี่ย ${B(N(mean(l.map(r => r.cust))))} คน/วัน`); });
+  const hol = C.rows.filter(r => r.hol); if (hol.length && !lw.length) out.push(`มีวันหยุดนักขัตฤกษ์ ${hol.length} วัน: ${hol.slice(0, 3).map(r => (html ? esc(r.hol) : r.hol) + ' ' + dShort(r.key)).join(', ')}`);
+  if (R.kind === 'month' && R.e < R.pe) { const f = rcForecast(R.pe, R.e, R.s); if (f) out.push(`คาดการณ์ยอดลูกค้าทั้งเดือน ${B(N(f.totC))} คน (ช่วง 95%: ${N(f.loC)}–${N(f.hiC)}) · รถยนต์ ${N(f.totV)} คัน`); }
+  return out;
+}
+// คาดการณ์ + ช่วง 95% ที่ปรับเทียบจากผลทดสอบย้อนหลัง (วิธีเดียวกับการ์ดคาดการณ์ในหน้ารายเดือน)
+function rcForecast(end, asOf, start) {
+  const f = forecastTo(end, asOf, S.all.filter(r => r.key <= asOf), start); if (!f) return null;
+  const bt = fcBacktest(); if (bt.relRms) { const wid = (fc, lo, hi) => Math.sqrt(((hi - lo) / 2) ** 2 + (1.96 * bt.relRms * fc) ** 2); const wc = wid(f.fcC, f.loC, f.hiC); f.loC = f.totC - wc; f.hiC = f.totC + wc; }
+  return f;
+}
+const RC_FOOT = ['% เปลี่ยนแปลงคิดจากค่าเฉลี่ยต่อวัน · ยอดรวมเทียบเมื่อทั้งสองงวดมีข้อมูลครบทุกวันเท่านั้น (* = เทียบด้วยค่าเฉลี่ย/วัน)', '† = วันที่ใช้เทียบเป็นคนละประเภทวัน (นักขัตฤกษ์ vs วันปกติ) — % ของวันนั้นไม่สะท้อนแนวโน้มจริง'];
+function rcNotes(R) {
+  const C = R.C, out = [];
+  out.push(`ข้อมูลงวดนี้ ${C.n}/${C.cal} วัน${C.full ? ' (ครบ)' : ''}${R.bases.map(b => ` · ${b.short} ${b.n}/${b.cal} วัน`).join('')}`);
+  R.warn.concat(R.info).forEach(t => { if (!/^งวดนี้ขาดข้อมูล/.test(t)) out.push(t); });
+  const ex = C.rows.filter(r => r.evx); if (ex.length) out.push(`มี ${ex.length} วันที่ติดป้าย "ตัดออกจากค่าปกติ" — ยังนับในยอดรวม แต่ไม่ถูกใช้เป็นฐานคาดการณ์`);
+  try { const o = dataQuality(S.all, holMap()).outliers.filter(x => x.key >= R.s && x.key <= R.e); if (o.length) out.push(`พบค่าผิดปกติ ${o.length} วัน (เช่น ${o.slice(0, 2).map(x => dShort(x.key)).join(', ')}) — ควรตรวจสอบกับเหตุการณ์ในวันนั้น`); } catch (e) { /* ข้าม */ }
+  return out;
+}
+
+/* ---------- รายงาน PDF/JPEG มาตรฐาน: สัปดาห์ (1 หน้า) · เดือน (2 หน้า) ---------- */
+function buildPeriodReport(R) {
+  const C = R.C, [B1, B2] = R.bases, by = new Map(S.all.map(x => [x.key, x]));
+  const mixW = (hex, pct) => { const n = parseInt(hex.slice(1), 16), f = pct / 100; return `rgb(${[16, 8, 0].map(sh => Math.round(((n >> sh) & 255) * f + 255 * (1 - f))).join(',')})`; };
+  const gTxt = x => ok(x) ? `<b style="color:${x >= 0 ? '#047857' : '#b91c1c'}">${x >= 0 ? '▲' : '▼'} ${P(Math.abs(x), 1, false)}</b>` : '<span style="color:#94a3b8">—</span>';
+  const kp = (l, v, u, col, extra) => `<div class="rp-kpi" style="background:linear-gradient(135deg, ${mixW(col, 22)}, ${mixW(col, 6)});border:1px solid ${mixW(col, 32)}"><div class="l">${l}</div><div class="v">${v} <small>${u}</small></div><div class="x" style="font-size:9.5px;line-height:1.45">${extra || ''}</div></div>`;
+  const gb = (b, f) => b && b.n ? growth(C[f], b[f]) : null;
+  // เทียบรายวันกับวันฐานที่ "ประเภทวันต่างกัน" (เช่น วันธรรมดา vs วันนักขัตฤกษ์) → แสดงสีเทา + † เพราะ % ไม่สะท้อนแนวโน้มจริง
+  const gDay = (r, p, f) => { if (!p) return gTxt(null); const x = growth(r[f], p[f]); return !!r.hol !== !!p.hol ? `<span style="color:#94a3b8">${ok(x) ? (x >= 0 ? '▲' : '▼') + ' ' + P(Math.abs(x), 1, false) : '—'}†</span>` : gTxt(x); };
+  const vsLine = f => R.bases.length ? R.bases.map(b => `<span style="white-space:nowrap">${b.short} ${gTxt(gb(b, f))}</span>`).join('<br>') : '';
+  const totLine = (fT, fA) => R.bases.length ? R.bases.map(b => `<span style="white-space:nowrap">${b.short} ${gTxt(totComparable(C, b) ? growth(C[fT], b[fT]) : gb(b, fA))}${totComparable(C, b) ? '' : '<sup>*</sup>'}</span>`).join('<br>') : '';
+  const pages = R.kind === 'month' ? 2 : 1, doc = R.kind === 'week' ? 'WK' : 'MO';
+  const head = pg => rpHeader({ title: R.title, sub: `${R.period}${R.bases.length ? ' · เทียบ' + R.bases.map(b => b.short).join(' และ') : ''}`, period: R.name, doc, page: pg + '/' + pages });
+  const ins = rcInsights(R, true), notes = rcNotes(R);
+  // ตารางเทียบงวดมาตรฐาน
+  const cell = (b, f, d = 0) => b.n ? N(b[f], d) : '-';
+  const gCell = (b, f) => `<td class="num">${gTxt(gb(b, f))}</td>`;
+  const typ = (G, k) => G[k].days ? N(G[k].cust.mean) : '-';
+  const cmpRows = [
+    ['ช่วงวันที่', b => rngShort(b.s, b.e), null],
+    ['วันที่มีข้อมูล', b => `${b.n}/${b.cal}`, null],
+    ['ลูกค้ารวม (คน)', b => b.n ? N(b.custT) : '-', b => totComparable(C, b) ? growth(C.custT, b.custT) : null],
+    ['ลูกค้าเฉลี่ย/วัน', b => `<b>${cell(b, 'custA')}</b>`, b => gb(b, 'custA')],
+    ['รถยนต์รวม (คัน)', b => b.n ? N(b.carT) : '-', b => totComparable(C, b) ? growth(C.carT, b.carT) : null],
+    ['รถยนต์เฉลี่ย/วัน', b => `<b>${cell(b, 'carA')}</b>`, b => gb(b, 'carA')],
+    ['Ratio (คน/คัน)', b => cell(b, 'ratio', 2), b => gb(b, 'ratio')],
+    ['ลูกค้า วันทำงาน', b => typ(b.dg, 'wd'), b => b.dg.wd.days && C.dg.wd.days ? growth(C.dg.wd.cust.mean, b.dg.wd.cust.mean) : null],
+    ['ลูกค้า ส.–อา.', b => typ(b.dg, 'we'), b => b.dg.we.days && C.dg.we.days ? growth(C.dg.we.cust.mean, b.dg.we.cust.mean) : null],
+    ['ลูกค้า นักขัตฤกษ์', b => typ(b.dg, 'hol'), b => b.dg.hol.days && C.dg.hol.days ? growth(C.dg.hol.cust.mean, b.dg.hol.cust.mean) : null]
+  ];
+  const cmpTbl = `<table class="rp-tbl rc-cmp"><thead><tr><th>ตัวชี้วัด</th><th class="num">งวดนี้</th>${R.bases.map(b => `<th class="num">${b.short}</th><th class="num">%</th>`).join('')}</tr></thead><tbody>
+    ${cmpRows.map(([l, f, g]) => `<tr><td>${l}</td><td class="num" style="background:#f7f5ff">${f(C)}</td>${R.bases.map(b => `<td class="num">${f(b)}</td><td class="num">${g ? gTxt(g(b)) : ''}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  // ตารางรายละเอียด: สัปดาห์ = รายวัน 7 วัน · เดือน = ตามวันในสัปดาห์
+  const typeTxt = r => r.hol ? `<span style="color:#b45309">${esc(r.hol.length > 16 ? r.hol.slice(0, 15) + '…' : r.hol)}</span>` : r.we ? 'เสาร์–อาทิตย์' : 'วันทำงาน';
+  const evMark = r => (r.ev ? ` <span style="color:#7c3aed">★ ${esc(r.ev[0].title.length > 14 ? r.ev[0].title.slice(0, 13) + '…' : r.ev[0].title)}</span>` : '') + (r.lw ? ' <span style="color:#db2777">หยุดยาว</span>' : '');
+  let detail;
+  if (R.kind === 'week') {
+    const days = Array.from({ length: 7 }, (_, i) => addDaysKey(R.s, i));
+    detail = `<div class="rp-t">ยอดรายวัน เทียบวันเดียวกันของสัปดาห์ก่อน${B2 ? ' และปีก่อน' : ''}</div><table class="rp-tbl"><thead><tr><th>วัน</th><th>ประเภท/เหตุการณ์</th><th class="num">ลูกค้า</th><th class="num">vs สัปดาห์ก่อน</th><th class="num">vs ปีก่อน</th><th class="num">รถยนต์</th><th class="num">vs สัปดาห์ก่อน</th><th class="num">Ratio</th></tr></thead><tbody>
+      ${days.map(k => { const r = by.get(k), o = dateFromKey(k); if (!r) return `<tr><td>${TH_DAYS_S[o.dow]} ${dShort(k)}</td><td colspan="7" style="color:#94a3b8">${k > R.e ? 'ยังไม่ถึงวัน/ยังไม่มีข้อมูล' : 'ไม่มีข้อมูล'}</td></tr>`;
+        const p = by.get(addDaysKey(k, -7)), l = by.get(addDaysKey(k, -364));
+        return `<tr><td style="white-space:nowrap">${TH_DAYS_S[o.dow]} ${dShort(k)}</td><td>${typeTxt(r)}${evMark(r)}</td><td class="num"><b>${N(r.cust)}</b></td><td class="num">${gDay(r, p, 'cust')}</td><td class="num">${gDay(r, l, 'cust')}</td><td class="num">${N(r.car)}</td><td class="num">${gDay(r, p, 'car')}</td><td class="num">${N(r.ratio, 2)}</td></tr>`; }).join('')}
+      <tr style="background:#f7f5ff"><td colspan="2"><b>รวม ${C.n} วัน</b></td><td class="num"><b>${N(C.custT)}</b></td><td class="num">${B1 ? gTxt(totComparable(C, B1) ? growth(C.custT, B1.custT) : gb(B1, 'custA')) : ''}</td><td class="num">${B2 ? gTxt(totComparable(C, B2) ? growth(C.custT, B2.custT) : gb(B2, 'custA')) : ''}</td><td class="num"><b>${N(C.carT)}</b></td><td class="num">${B1 ? gTxt(totComparable(C, B1) ? growth(C.carT, B1.carT) : gb(B1, 'carA')) : ''}</td><td class="num">${N(C.ratio, 2)}</td></tr></tbody></table>`;
+  } else {
+    const dowRows = [1, 2, 3, 4, 5, 6, 0].map(d => { const a = C.rows.filter(r => r.dow === d), b = B1 ? B1.rows.filter(r => r.dow === d) : [], c = B2 ? B2.rows.filter(r => r.dow === d) : [];
+      const m = l => l.length ? mean(l.map(r => r.cust)) : null; return { d, n: a.length, c: m(a), v: a.length ? mean(a.map(r => r.car)) : null, g1: growth(m(a), m(b)), g2: growth(m(a), m(c)) }; });
+    detail = `<div class="rp-t">ค่าเฉลี่ยตามวันในสัปดาห์ (ลูกค้า คน/วัน)</div><table class="rp-tbl"><thead><tr><th>วัน</th><th class="num">จำนวนวัน</th><th class="num">ลูกค้าเฉลี่ย</th>${B1 ? `<th class="num">vs ${B1.short}</th>` : ''}${B2 ? `<th class="num">vs ${B2.short}</th>` : ''}<th class="num">รถยนต์เฉลี่ย</th></tr></thead><tbody>
+      ${dowRows.map(x => `<tr><td><span class="rp-dot" style="color:${x.d === 0 || x.d === 6 ? '#ec4899' : '#8b5cf6'}">●</span>${TH_DAYS[x.d]}</td><td class="num">${x.n}</td><td class="num"><b>${N(x.c)}</b></td>${B1 ? `<td class="num">${gTxt(x.g1)}</td>` : ''}${B2 ? `<td class="num">${gTxt(x.g2)}</td>` : ''}<td class="num">${N(x.v)}</td></tr>`).join('')}</tbody></table>`;
+  }
+  const chartH = R.kind === 'week' ? 196 : 196;
+  let html = `<div class="rp-page" id="rpW1">
+    ${head(1)}
+    <div class="rp-body">
+      <div class="rp-grid6">
+        ${kp('ลูกค้ารวม', N(C.custT), 'คน', '#8b5cf6', totLine('custT', 'custA'))}
+        ${kp('รถยนต์รวม (24 ชม.)', N(C.carT), 'คัน', '#f59e0b', totLine('carT', 'carA'))}
+        ${kp('ลูกค้าเฉลี่ย / วัน', N(C.custA), 'คน', '#6366f1', vsLine('custA'))}
+        ${kp('รถยนต์เฉลี่ย / วัน', N(C.carA), 'คัน', '#3b82f6', vsLine('carA'))}
+        ${kp('Ratio ลูกค้า : รถยนต์', N(C.ratio, 2), 'คน/คัน', '#ec4899', vsLine('ratio'))}
+        ${kp('ลูกค้าสูงสุด / วัน', N(C.cust.max), 'คน', '#10b981', C.cust.maxRow ? `${TH_DAYS[C.cust.maxRow.dow]} ${dTH(C.cust.maxRow.key)}` : '')}
+      </div>
+      <div style="display:grid;grid-template-columns:1.18fr 1fr;gap:12px;margin-top:10px">
+        <div class="rp-box"><div class="rp-t">ยอดลูกค้ารายวัน${R.bases.length ? ' — แท่ง = งวดนี้ · เส้น = ' + R.bases.map(b => b.short).join(' / ') + (R.kind === 'week' ? ' (วันเดียวกันในสัปดาห์)' : ' (วันที่เดียวกัน)') : ''}</div><canvas id="rpWChart" width="560" height="${chartH}" style="width:560px;height:${chartH}px"></canvas></div>
+        <div class="rp-box"><div class="rp-t">ตารางเปรียบเทียบงวดมาตรฐาน</div>${cmpTbl}</div>
+      </div>
+      <div class="rp-fill" style="display:grid;grid-template-columns:1.18fr 1fr;gap:12px;margin-top:10px">
+        <div class="rp-box">${detail}<div style="font-size:9px;color:#6e6a86;margin-top:6px;line-height:1.5">${RC_FOOT.join('<br>')}</div></div>
+        <div class="rp-box" style="background:linear-gradient(135deg, ${mixW('#8b5cf6', 9)}, #fff);border-color:${mixW('#8b5cf6', 25)}"><div class="rp-t" style="color:#6d28d9">สรุปผลการวิเคราะห์</div>
+          <div class="rp-list">${ins.slice(0, R.kind === 'week' ? 6 : 7).map((t, i) => `<div class="rp-li"><span class="n">${i + 1}.</span><span>${t}</span></div>`).join('')}</div>
+          ${R.kind === 'week' ? `<div class="rp-t" style="color:#b45309;margin-top:6px">ข้อสังเกตด้านข้อมูล</div><div class="rp-list">${notes.slice(0, 3).map(t => `<div class="rp-li"><span class="n">•</span><span>${t}</span></div>`).join('')}</div>` : ''}</div>
+      </div>
+    </div>
+    ${rpFooter('1/' + pages)}
+  </div>`;
+  if (R.kind === 'month') {
+    const [y, m] = R.ym.split('-').map(Number), dim = daysInMonth(y, m), keys = Array.from({ length: dim }, (_, i) => R.ym + '-' + String(i + 1).padStart(2, '0'));
+    const half = Math.ceil(dim / 2);
+    const dayTbl = list => `<table class="rp-tbl rc-day"><thead><tr><th>วันที่</th><th>ประเภท/เหตุการณ์</th><th class="num">ลูกค้า</th><th class="num">vs 4 สป.ก่อน</th><th class="num">รถยนต์</th><th class="num">Ratio</th></tr></thead><tbody>
+      ${list.map(k => { const r = by.get(k), o = dateFromKey(k); if (!r) return `<tr><td style="white-space:nowrap">${TH_DAYS_S[o.dow]} ${o.d}</td><td colspan="5" style="color:#94a3b8">${k > R.e ? '—' : 'ไม่มีข้อมูล'}</td></tr>`;
+        // เทียบ "วันเดียวกันในสัปดาห์" ของเดือนก่อน (−28 วัน = 4 สัปดาห์พอดี) — ยุติธรรมกว่าวันที่เดียวกันซึ่งอาจตรงกับคนละวันในสัปดาห์
+        const p = by.get(addDaysKey(k, -28));
+        return `<tr><td style="white-space:nowrap">${TH_DAYS_S[o.dow]} ${o.d}</td><td>${typeTxt(r)}${evMark(r)}</td><td class="num"><b>${N(r.cust)}</b></td><td class="num">${gDay(r, p, 'cust')}</td><td class="num">${N(r.car)}</td><td class="num">${N(r.ratio, 2)}</td></tr>`; }).join('')}</tbody></table>`;
+    // สรุปรายสัปดาห์ในเดือน (จันทร์–อาทิตย์ ตัดที่ขอบเดือน)
+    const wk = []; keys.forEach(k => { const r = by.get(k); const o = dateFromKey(k), ws = addDaysKey(k, -((o.dow + 6) % 7)); let w = wk.find(x => x.ws === ws); if (!w) { w = { ws, s: k, e: k, rows: [] }; wk.push(w); } w.e = k; if (r) w.rows.push(r); });
+    const evs = (S.events || []).filter(ev => ev.to >= R.s && ev.from <= R.pe);
+    html += `<div class="rp-page" id="rpW2">
+      ${head(2)}
+      <div class="rp-body">
+        <div class="rp-fill" style="display:grid;grid-template-columns:1.62fr 1fr;gap:12px">
+          <div class="rp-box"><div class="rp-t">ตารางยอดรายวัน ${ymTH(R.ym, true)} <span style="font-weight:400;color:#6e6a86">(vs 4 สป.ก่อน = เทียบวันเดียวกันในสัปดาห์ เมื่อ 28 วันก่อน)</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${dayTbl(keys.slice(0, half))}${dayTbl(keys.slice(half))}</div></div>
+          <div style="display:flex;flex-direction:column;gap:10px;min-height:0">
+            <div class="rp-box"><div class="rp-t">ยอดรถยนต์รายวัน (24 ชม.)</div><canvas id="rpWChart2" width="360" height="150" style="width:360px;height:150px"></canvas></div>
+            <div class="rp-box"><div class="rp-t">สรุปรายสัปดาห์ในเดือน</div><table class="rp-tbl"><thead><tr><th>สัปดาห์</th><th class="num">วัน</th><th class="num">ลูกค้ารวม</th><th class="num">เฉลี่ย/วัน</th><th class="num">รถยนต์/วัน</th></tr></thead><tbody>
+              ${wk.map(w => `<tr><td style="white-space:nowrap">${+w.s.slice(8)}–${+w.e.slice(8)}</td><td class="num">${w.rows.length}</td><td class="num">${w.rows.length ? N(sum(w.rows.map(r => r.cust))) : '-'}</td><td class="num"><b>${w.rows.length ? N(mean(w.rows.map(r => r.cust))) : '-'}</b></td><td class="num">${w.rows.length ? N(mean(w.rows.map(r => r.car))) : '-'}</td></tr>`).join('')}</tbody></table></div>
+            <div class="rp-box" style="flex:1;background:${mixW('#f59e0b', 7)};border-color:${mixW('#f59e0b', 28)}"><div class="rp-t" style="color:#b45309">เหตุการณ์ & ข้อสังเกตด้านข้อมูล</div><div class="rp-list">
+              ${evs.slice(0, 3).map(ev => `<div class="rp-li"><span class="n">★</span><span>${esc(ev.title)} (${rngLabel(ev.from, ev.to)}) · ${esc(ev.type)}</span></div>`).join('')}
+              ${notes.concat(RC_FOOT).map(t => `<div class="rp-li"><span class="n">•</span><span>${t}</span></div>`).join('')}</div></div>
+          </div>
+        </div>
+      </div>
+      ${rpFooter('2/2')}
+    </div>`;
+  }
+  $('#report').innerHTML = html;
+  // กราฟ: แท่ง = งวดนี้ · เส้น = ฐานเทียบที่จัดวันให้ตรงกัน (สัปดาห์ = วันเดียวกันในสัปดาห์, เดือน = วันที่เดียวกัน)
+  const nDays = daysBetween(R.s, R.pe) + 1, idx = Array.from({ length: nDays }, (_, i) => i);
+  const curKey = i => addDaysKey(R.s, i);
+  const baseKey = (b, i) => R.kind === 'week' ? addDaysKey(curKey(i), b.off) : R.kind === 'month' ? (() => { const k = b.s.slice(0, 8) + String(i + 1).padStart(2, '0'); return dateFromKey(k) && k.slice(0, 7) === b.s.slice(0, 7) ? k : null; })() : null;
+  const labels = idx.map(i => { const o = dateFromKey(curKey(i)); return R.kind === 'week' ? `${TH_DAYS_S[o.dow]} ${o.d}` : String(o.d); });
+  const val = (k, f) => { const r = k && by.get(k); return r ? r[f] : null; };
+  const lineCol = ['#f59e0b', '#94a3b8'];
+  const prevColor = Chart.defaults.color, prevBorder = Chart.defaults.borderColor;
+  Chart.defaults.color = '#6e6a86'; Chart.defaults.borderColor = 'rgba(110,106,134,.13)';
+  try {
+    const mk = (id, f, col, w, h) => { if (S.charts[id]) { S.charts[id].destroy(); delete S.charts[id]; }
+      const ds = [{ type: 'bar', label: 'งวดนี้', data: idx.map(i => curKey(i) <= R.e ? val(curKey(i), f) : null), backgroundColor: idx.map(i => { const r = by.get(curKey(i)); return r && (r.we || r.hol) ? mixW(col, 70) : col; }), borderRadius: 3, order: 2 }]
+        .concat(R.kind === 'custom' ? [] : R.bases.map((b, j) => ({ type: 'line', label: b.short, data: idx.map(i => val(baseKey(b, i), f)), borderColor: lineCol[j], backgroundColor: lineCol[j], borderWidth: j ? 1.6 : 2, borderDash: j ? [2, 3] : [5, 4], pointRadius: R.kind === 'week' ? 2.5 : 1.2, tension: .3, spanGaps: true, order: 1 })));
+      S.charts[id] = new Chart($('#' + id), { type: 'bar', data: { labels, datasets: ds }, options: { responsive: false, animation: false, devicePixelRatio: 2, plugins: { legend: { display: true, position: 'top', align: 'end', labels: { font: { size: 9 }, boxWidth: 8, boxHeight: 8 } } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 8.5 }, maxRotation: 0, autoSkip: true } }, y: { beginAtZero: true, grace: '6%', ticks: { font: { size: 8.5 }, callback: tickK } } } } }); };
+    mk('rpWChart', 'cust', '#8b5cf6');
+    if (R.kind === 'month') mk('rpWChart2', 'car', '#f97316');
+  } finally { Chart.defaults.color = prevColor; Chart.defaults.borderColor = prevBorder; }
+  return `${R.kind === 'week' ? 'รายงานประจำสัปดาห์' : 'รายงานประจำเดือน'}_${R.s}${R.kind === 'week' ? '_' + R.pe : ''}`;
+}
+
+/* ---------- CSV / LINE ของรายงานสัปดาห์ เดือน ช่วงกำหนดเอง ---------- */
+function rcPeriodCSV(R) {
+  const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`, C = R.C, by = new Map(S.all.map(x => [x.key, x]));
+  const L = [[R.title, R.period].map(q).join(','), [`เทียบกับ: ${R.cmpTxt}`].map(q).join(','), ''];
+  L.push(['ตัวชี้วัด', 'งวดนี้'].concat(R.bases.flatMap(b => [b.label, '% เปลี่ยนแปลง'])).map(q).join(','));
+  const row = (lab, f, d, gf) => L.push([lab, ok(C[f]) ? +C[f].toFixed(d) : ''].concat(R.bases.flatMap(b => [b.n && ok(b[f]) ? +b[f].toFixed(d) : '', gf(b) === null || gf(b) === undefined ? '' : (gf(b) * 100).toFixed(2) + '%'])).map(q).join(','));
+  L.push(['ช่วงวันที่', `${C.s} ถึง ${C.e}`].concat(R.bases.flatMap(b => [`${b.s} ถึง ${b.e}`, ''])).map(q).join(','));
+  L.push(['วันที่มีข้อมูล', `${C.n}/${C.cal}`].concat(R.bases.flatMap(b => [`${b.n}/${b.cal}`, ''])).map(q).join(','));
+  row('ลูกค้ารวม (คน)', 'custT', 0, b => totComparable(C, b) ? growth(C.custT, b.custT) : null);
+  row('ลูกค้าเฉลี่ย/วัน', 'custA', 2, b => b.n ? growth(C.custA, b.custA) : null);
+  row('รถยนต์รวม (คัน)', 'carT', 0, b => totComparable(C, b) ? growth(C.carT, b.carT) : null);
+  row('รถยนต์เฉลี่ย/วัน', 'carA', 2, b => b.n ? growth(C.carA, b.carA) : null);
+  row('Ratio (คน/คัน)', 'ratio', 4, b => b.n ? growth(C.ratio, b.ratio) : null);
+  L.push('', ['วันที่ (พ.ศ.)', 'วันที่ (ค.ศ.)', 'วัน', 'ประเภท', 'วันหยุด', 'เหตุการณ์', 'หยุดยาว', 'ลูกค้า', 'รถยนต์ 24 ชม.', 'Ratio', R.kind === 'month' ? 'ลูกค้า 4 สัปดาห์ก่อน (วันเดียวกันในสัปดาห์)' : R.kind === 'week' ? 'ลูกค้า 7 วันก่อน' : R.cmp === 'yoy' ? 'ลูกค้าวันเดียวกันปีก่อน' : `ลูกค้า ${R.span + 1} วันก่อน`, '% เทียบ'].map(q).join(','));
+  const pk = k => R.kind === 'month' ? addDaysKey(k, -28) : R.kind === 'week' ? addDaysKey(k, -7) : R.cmp === 'yoy' ? shiftYearKey(k, -1) : addDaysKey(k, -(R.span + 1));
+  C.rows.forEach(r => { const p = R.kind === 'custom' && R.cmp === 'none' ? null : by.get(pk(r.key)); L.push([dTH(r.key), r.key, TH_DAYS[r.dow], DAYTYPE_TH[dayTypeOf(r)], r.hol || '', r.ev ? r.ev.map(e => e.title).join(' / ') : '', r.lw ? 'ใช่' : '', r.cust, r.car, ok(r.ratio) ? r.ratio.toFixed(4) : '', p ? p.cust : '', p ? ((growth(r.cust, p.cust) || 0) * 100).toFixed(2) + '%' : ''].map(q).join(',')); });
+  L.push('', [`ข้อค้นพบ`].map(q).join(','));
+  rcInsights(R, false).forEach((t, i) => L.push(q(`${i + 1}. ${t}`)));
+  download(new Blob(['﻿' + L.join('\r\n')], { type: 'text/csv;charset=utf-8' }), `${R.title.replace(/\s/g, '')}_${R.s}_${R.e}.csv`);
+}
+function rcPeriodLine(R) {
+  const C = R.C, g = (b, f) => { const x = b.n ? growth(C[f], b[f]) : null; return ok(x) ? P(x) : '-'; };
+  const bs = R.bases.filter(b => b.n);
+  const L = [`📊 ${R.title} — ${S.org}`, R.period, '', `👥 ลูกค้ารวม ${N(C.custT)} คน (เฉลี่ย ${N(C.custA)} คน/วัน)`];
+  bs.forEach(b => L.push(`   เทียบ${b.short} ${g(b, 'custA')}`));
+  L.push(`🚗 รถยนต์รวม ${N(C.carT)} คัน (เฉลี่ย ${N(C.carA)} คัน/วัน)`); bs.forEach(b => L.push(`   เทียบ${b.short} ${g(b, 'carA')}`));
+  L.push(`⚖️ Ratio ${N(C.ratio, 2)} คน/คัน`);
+  if (C.cust.maxRow) L.push(`🔝 สูงสุด ${TH_DAYS_S[C.cust.maxRow.dow]} ${dShort(C.cust.maxRow.key)} ${N(C.cust.max)} คน`);
+  const ins = rcInsights(R, false).slice(4).filter(t => !/Welch/.test(t)).slice(0, 3); if (ins.length) L.push('', ...ins.map(t => '• ' + t));
+  L.push('', `% เทียบจากค่าเฉลี่ยต่อวัน · ข้อมูล ${C.n}/${C.cal} วัน · ที่มา: SBK Customer & Car Compare Analytics · ${dTH(todayKey())}`);
+  return L.join('\n');
+}
+function yearCSV(Q) {
+  const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`, y = Q.Y + 543, py = y - 1;
+  const L = [[`รายงานรายปี ${y} เทียบ ${py}`, Q.basis === 'ytd' ? `ช่วงเดียวกัน ${Q.rangeTxt}` : 'ทั้งปี'].map(q).join(','), '',
+    ['ตัวชี้วัด', `ปี ${y}`, `ปี ${py}`, '% เปลี่ยนแปลง'].map(q).join(',')];
+  const r = (l, a, b, d = 0, useG = true) => L.push([l, ok(a) ? +a.toFixed(d) : '', ok(b) ? +b.toFixed(d) : '', useG && ok(growth(a, b)) ? (growth(a, b) * 100).toFixed(2) + '%' : ''].map(q).join(','));
+  r('วันที่มีข้อมูล', Q.C.days, Q.P.days, 0, false); r('ลูกค้ารวม (คน)', Q.C.cust, Q.P.cust, 0, Q.totOk); r('รถยนต์รวม (คัน)', Q.C.car, Q.P.car, 0, Q.totOk);
+  r('ลูกค้าเฉลี่ย/วัน', Q.C.custAvg, Q.P.custAvg, 2); r('รถยนต์เฉลี่ย/วัน', Q.C.carAvg, Q.P.carAvg, 2); r('Ratio', Q.C.ratio, Q.P.ratio, 4);
+  L.push('', ['เดือน', `วัน ${y}`, `ลูกค้าเฉลี่ย/วัน ${y}`, `วัน ${py}`, `ลูกค้าเฉลี่ย/วัน ${py}`, '% ลูกค้า', `รถยนต์เฉลี่ย/วัน ${y}`, `รถยนต์เฉลี่ย/วัน ${py}`, '% รถยนต์'].map(q).join(','));
+  Q.months.forEach(m => L.push([TH_MONTHS_LONG[m.m - 1], m.c ? m.c.days : '', m.c ? m.c.cust.toFixed(2) : '', m.p ? m.p.days : '', m.p ? m.p.cust.toFixed(2) : '', m.c && m.p ? (growth(m.c.cust, m.p.cust) * 100).toFixed(2) + '%' : '', m.c ? m.c.car.toFixed(2) : '', m.p ? m.p.car.toFixed(2) : '', m.c && m.p ? (growth(m.c.car, m.p.car) * 100).toFixed(2) + '%' : ''].map(q).join(',')));
+  download(new Blob(['﻿' + L.join('\r\n')], { type: 'text/csv;charset=utf-8' }), `รายงานรายปี_${Q.Y}.csv`);
+}
+function yearLine(Q) {
+  const y = Q.Y + 543, g = (a, b) => ok(growth(a, b)) ? P(growth(a, b)) : '-';
+  return [`📊 รายงานรายปี ${y} — ${S.org}`, `${Q.rangeTxt} · ข้อมูล ${N(Q.C.days)} วัน · เทียบปี ${y - 1}${Q.basis === 'ytd' && Q.rangeTxt !== 'ทั้งปี' ? ' ช่วงเดียวกัน' : ''}`, '',
+    `👥 ลูกค้ารวม ${N(Q.C.cust)} คน · เฉลี่ย ${N(Q.C.custAvg)} คน/วัน (${g(Q.C.custAvg, Q.P.custAvg)})`, `🚗 รถยนต์รวม ${N(Q.C.car)} คัน · เฉลี่ย ${N(Q.C.carAvg)} คัน/วัน (${g(Q.C.carAvg, Q.P.carAvg)})`,
+    `⚖️ Ratio ${N(Q.C.ratio, 2)} คน/คัน`, Q.C.max ? `🔝 สูงสุด ${dTH(Q.C.max.key)} ${N(Q.C.max.cust)} คน` : '', '', `ที่มา: SBK Customer & Car Compare Analytics · ${dTH(todayKey())}`].filter((x, i, a) => x !== '' || a[i - 1] !== '').join('\n');
+}
+async function copyText(txt, msg) {
+  try { await navigator.clipboard.writeText(txt); }
+  catch (e) { const t = document.createElement('textarea'); t.value = txt; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } finally { t.remove(); } }
+  toast(msg || 'คัดลอกข้อความแล้ว — วางใน LINE ได้ทันที', 'success');
+}
+
+/* ---------- หน้าต่างศูนย์ออกรายงาน ---------- */
+function openReportCenter(pref) {
+  if (!S.all.length) { toast('ยังไม่มีข้อมูล — กรุณารอการเชื่อมต่อ Google Drive', 'warn'); return; }
+  const s = rcState(), last = S.all[S.all.length - 1].key;
+  // ค่าเริ่มต้นของงวด = ล่าสุดเสมอ (หรือตามหน้าที่เปิดอยู่)
+  s.day = S.page === 'dashboard' && S.range === 'day' ? dailyKey() : last;
+  const wks = rcWeeks(); s.week = wks.length ? wks[0].s : null;
+  s.ym = last.slice(0, 7); s.year = S.page === 'yearly' && S.yearSel ? S.yearSel : +last.slice(0, 4);
+  if (S.page === 'yearly' && S.yearBasis) s.basis = S.yearBasis;
+  s.from = S.rangeStart || S.all[0].key; s.to = S.rangeEnd || last;
+  if (pref) s.type = pref;
+  else if (S.page === 'dashboard' && S.range === 'day') s.type = 'day';
+  else if (S.page === 'yearly') s.type = 'year';
+  else if (S.page === 'monthly') s.type = 'month';
+  else if (S.page === 'dashboard' && ['7', '30', '90', 'custom'].includes(S.range)) { s.type = 'custom'; s.cmp = 'prev'; }
+  rcRender(); $('#rcModal').classList.add('show');
+  setTimeout(() => { const b = $('#rcModal .rc-type.on'); if (b) b.focus(); }, 60);
+}
+function closeReportCenter() { $('#rcModal').classList.remove('show'); }
+function rcSpec() { const s = S.rc; return { type: s.type, day: s.day, week: s.week, ym: s.ym, year: s.year, basis: s.basis, from: s.from, to: s.to, cmp: s.cmp }; }
+function rcRender() {
+  const s = S.rc, last = S.all[S.all.length - 1].key, first = S.all[0].key;
+  let pick = '';
+  if (s.type === 'day') {
+    const prev = S.all.length > 1 ? S.all[S.all.length - 2].key : last;
+    pick = `<div class="flex flex-wrap items-center gap-2"><input type="date" id="rcDay" class="field" style="width:auto" value="${s.day}" min="${first}" max="${last}">
+      <button class="btn btn-sm ${s.day === last ? 'rc-on' : ''}" data-rcq="day:${last}">วันล่าสุด (${dShort(last)})</button><button class="btn btn-sm ${s.day === prev ? 'rc-on' : ''}" data-rcq="day:${prev}">วันก่อนหน้า</button></div>`;
+  } else if (s.type === 'week') {
+    const wks = rcWeeks(), full = wks.find(w => w.e <= last && w.n === 7);
+    pick = `<div class="flex flex-wrap items-center gap-2"><select id="rcWeek" class="field" style="width:auto;max-width:100%">${wks.map(w => `<option value="${w.s}" ${w.s === s.week ? 'selected' : ''}>${wkLabel(w.s, w.e)} (${w.n}/7 วัน${w.e > last ? ' · ยังไม่ครบ' : ''})</option>`).join('')}</select>
+      <button class="btn btn-sm ${s.week === wks[0].s ? 'rc-on' : ''}" data-rcq="week:${wks[0].s}">สัปดาห์ล่าสุด</button>${full && full.s !== wks[0].s ? `<button class="btn btn-sm ${s.week === full.s ? 'rc-on' : ''}" data-rcq="week:${full.s}">สัปดาห์ที่ครบล่าสุด</button>` : ''}</div>`;
+  } else if (s.type === 'month') {
+    const ms = rcMonths(), full = ms.find(m => m.n === m.dim);
+    pick = `<div class="flex flex-wrap items-center gap-2"><select id="rcMonth" class="field" style="width:auto">${ms.map(m => `<option value="${m.ym}" ${m.ym === s.ym ? 'selected' : ''}>${ymTH(m.ym, true)} (${m.n}/${m.dim} วัน)</option>`).join('')}</select>
+      <button class="btn btn-sm ${s.ym === ms[0].ym ? 'rc-on' : ''}" data-rcq="ym:${ms[0].ym}">เดือนล่าสุด</button>${full && full.ym !== ms[0].ym ? `<button class="btn btn-sm ${s.ym === full.ym ? 'rc-on' : ''}" data-rcq="ym:${full.ym}">เดือนที่ครบล่าสุด (${ymTH(full.ym)})</button>` : ''}</div>`;
+  } else if (s.type === 'year') {
+    pick = `<div class="flex flex-wrap items-center gap-2"><select id="rcYear" class="field" style="width:auto">${rcYears().map(y => `<option value="${y}" ${y === s.year ? 'selected' : ''}>ปี ${y + 543}</option>`).join('')}</select>
+      <div class="seg seg-sm">${[['ytd', 'ช่วงเดียวกัน (YTD)'], ['full', 'ทั้งปี']].map(([k, l]) => `<button data-rcb="${k}" class="${s.basis === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>`;
+  } else {
+    pick = `<div class="flex flex-wrap items-center gap-2"><input type="date" id="rcFrom" class="field" style="width:auto" value="${s.from}" min="${first}" max="${last}"><span class="muted">ถึง</span><input type="date" id="rcTo" class="field" style="width:auto" value="${s.to}" min="${first}" max="${last}"></div>
+      <div class="flex flex-wrap items-center gap-2 mt-2"><span class="text-xs muted">เทียบกับ</span><div class="seg seg-sm">${[['prev', 'ช่วงก่อนหน้า (จำนวนวันเท่ากัน)'], ['yoy', 'ช่วงเดียวกันปีก่อน'], ['none', 'ไม่เทียบ']].map(([k, l]) => `<button data-rcc="${k}" class="${s.cmp === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>`;
+  }
+  const R = rcResolve(rcSpec()); S._rcR = R;
+  const pagesTxt = R.err ? '' : s.fmt === 'pdf' || s.fmt === 'jpg' ? `${s.type === 'custom' ? 2 : R.pages} หน้า A4 แนวนอน` : s.fmt === 'csv' ? 'ไฟล์ CSV เปิดด้วย Excel ได้ (ภาษาไทยไม่เพี้ยน)' : 'ข้อความสรุปสำหรับวางใน LINE';
+  const sum_ = R.err ? `<div class="rc-sum rc-err">${I('alert', 16)} ${R.err}</div>` : `<div class="rc-sum">
+      <div class="rc-sum-t">${I('check', 15)} สิ่งที่จะได้รับ</div>
+      <div class="rc-sum-g"><span class="muted">รายงาน</span><b>${R.title}</b><span class="muted">งวด</span><span>${R.period}</span><span class="muted">เทียบกับ</span><span>${R.cmpTxt}</span><span class="muted">ไฟล์</span><span>${RC_FMT.find(f => f[0] === s.fmt)[1]} · ${pagesTxt}</span></div>
+      ${R.warn.concat(R.info).map(w => `<div class="rc-warn">${I('info', 13)} ${w}</div>`).join('')}</div>`;
+  $('#rcBody').innerHTML = `
+    <div class="rc-sec"><div class="rc-h"><span class="rc-n">1</span>ประเภทรายงาน</div>
+      <div class="rc-types">${RC_TYPES.map(t => `<button class="rc-type ${s.type === t.k ? 'on' : ''}" data-rct="${t.k}"><span class="rc-ic">${I(t.icon, 18)}</span><span class="rc-tt">${t.t}</span><span class="rc-td">${t.d}</span></button>`).join('')}</div></div>
+    <div class="rc-sec"><div class="rc-h"><span class="rc-n">2</span>เลือกงวด</div>${pick}</div>
+    <div class="rc-sec"><div class="rc-h"><span class="rc-n">3</span>รูปแบบไฟล์</div>
+      <div class="rc-fmts">${RC_FMT.map(([k, l, ic, d]) => `<button class="rc-fmt ${s.fmt === k ? 'on' : ''}" data-rcf="${k}">${I(ic, 16)}<span><b>${l}</b><small>${d}</small></span></button>`).join('')}</div></div>
+    ${sum_}
+    <div class="text-xs muted mt-3">รายงานเฉพาะทาง: <a href="#" data-rcgo="studio" class="rc-link">เปรียบเทียบอิสระ (ทุกมิติ)</a> · <a href="#" data-rcgo="hourly" class="rc-link">วิเคราะห์รายชั่วโมง</a> — ตั้งค่าในหน้านั้นแล้วกดปุ่ม PDF ของหน้า</div>`;
+  const b = $('#rcGo'); b.disabled = !!R.err;
+  b.innerHTML = `${I(s.fmt === 'line' ? 'clipboard' : 'download', 16)}${s.fmt === 'line' ? 'คัดลอกข้อความ' : 'สร้างรายงาน'}`;
+}
+// รันงานโดยตั้งสถานะชั่วคราว (วัน/ปี/ช่วง) แล้วคืนค่าเดิมเสมอ — กันหน้าจอหลักเปลี่ยนตามการออกรายงาน
+async function rcWithState(patch, fn, reFilter) {
+  const keys = Object.keys(patch), saved = {}; keys.forEach(k => saved[k] = S[k]);
+  try { Object.assign(S, patch); if (reFilter) reFilter(); return await fn(); }
+  finally { Object.assign(S, saved); if (reFilter) applyFilter(); }
+}
+async function runReportCenter() {
+  const s = S.rc, R = rcResolve(rcSpec()); if (R.err) { toast(R.err, 'warn'); return; }
+  rcSave(); closeReportCenter();
+  const f = s.fmt;
+  try {
+    if (R.kind === 'day') {
+      await rcWithState({ dayKey: R.key, dayAuto: false }, async () => {
+        if (f === 'csv') exportDailyCSV(); else if (f === 'line') await copyDailyLine(); else await exportReport(f === 'pdf' ? 'dailypdf' : 'dailyjpg');
+      });
+    } else if (R.kind === 'year') {
+      await rcWithState({ yearSel: R.year, yearBasis: R.basis }, async () => {
+        const Q = yearCompare(R.year, R.basis);
+        if (f === 'csv') { yearCSV(Q); toast('ส่งออก CSV รายงานรายปีสำเร็จ', 'success'); } else if (f === 'line') await copyText(yearLine(Q)); else await exportReport(f === 'pdf' ? 'yearpdf' : 'yearjpg');
+      });
+    } else if (R.kind === 'custom') {
+      if (f === 'csv') { rcPeriodCSV(R); toast('ส่งออก CSV สำเร็จ', 'success'); return; }
+      if (f === 'line') { await copyText(rcPeriodLine(R)); return; }
+      // PDF/JPEG ช่วงกำหนดเอง = รายงานวิเคราะห์ 2 หน้า (บทสรุปผู้บริหาร + รายละเอียด) โดยกำหนดฐานเทียบตามที่เลือก
+      await rcWithState({ range: 'custom', from: R.s, to: R.e }, () => exportReport(f), () => {
+        applyFilter(); const b = R.bases[0];
+        S.prev = b ? b.rows : []; S.prevLabel = b ? b.label : '';
+      });
+    } else {
+      if (f === 'csv') { rcPeriodCSV(R); toast('ส่งออก CSV สำเร็จ', 'success'); }
+      else if (f === 'line') await copyText(rcPeriodLine(R));
+      else { S._rcP = R; await exportReport('per' + f); }
+    }
+  } catch (e) { console.error(e); toast('ออกรายงานไม่สำเร็จ: ' + esc(e.message), 'error', 6000); }
+}
+function rcHandle(e) {
+  const t = e.target.closest('[data-rct],[data-rcf],[data-rcq],[data-rcb],[data-rcc],[data-rcgo],#rcGo,#rcClose,#rcCancel');
+  if (!t) { if (e.target.id === 'rcModal') closeReportCenter(); return; }
+  const s = S.rc;
+  if (t.dataset.rct) { s.type = t.dataset.rct; rcRender(); }
+  else if (t.dataset.rcf) { s.fmt = t.dataset.rcf; rcRender(); }
+  else if (t.dataset.rcq) { const [k, v] = t.dataset.rcq.split(':'); s[k === 'ym' ? 'ym' : k] = v; rcRender(); }
+  else if (t.dataset.rcb) { s.basis = t.dataset.rcb; rcRender(); }
+  else if (t.dataset.rcc) { s.cmp = t.dataset.rcc; rcRender(); }
+  else if (t.dataset.rcgo) { e.preventDefault(); closeReportCenter(); goto(t.dataset.rcgo); }
+  else if (t.id === 'rcGo') runReportCenter();
+  else closeReportCenter();
+}
+function rcChange(e) {
+  const s = S.rc, id = e.target.id, v = e.target.value; if (!s) return;
+  if (id === 'rcDay' && v) {
+    if (!S.all.some(r => r.key === v)) { toast(`ไม่มีข้อมูลวันที่ ${dTH(v)} — เลือกวันที่ใกล้ที่สุดที่มีข้อมูลแทน`, 'warn'); const p = S.all.filter(r => r.key <= v); s.day = (p.length ? p[p.length - 1] : S.all[0]).key; } else s.day = v;
+  } else if (id === 'rcWeek') s.week = v; else if (id === 'rcMonth') s.ym = v; else if (id === 'rcYear') s.year = +v;
+  else if (id === 'rcFrom' && v) s.from = v; else if (id === 'rcTo' && v) s.to = v; else return;
+  rcRender();
+}
+
 async function exportReport(type) {
-  const cmp = type === 'cmppdf' || type === 'cmpjpg', daily = type === 'dailypdf' || type === 'dailyjpg', year = type === 'yearpdf' || type === 'yearjpg', hr = type === 'hrpdf';
-  if (cmp) type = type.slice(3); if (daily) type = type.slice(5); if (year) type = type.slice(4); if (hr) type = 'pdf';
-  if (!(cmp || daily || year || hr ? S.all.length : S.rows.length)) { toast('ยังไม่มีข้อมูลสำหรับสร้างรายงาน', 'warn'); return; }
-  if (!window.html2canvas || (type === 'pdf' && !window.jspdf)) { toast('โหลดไลบรารีสร้างรายงานไม่สำเร็จ — กรุณาตรวจสอบอินเทอร์เน็ตแล้วรีเฟรชหน้า', 'error', 6000); return; }
-  if (!window.Chart) { toast('ไม่พบไลบรารีกราฟ — ไม่สามารถสร้างรายงานได้', 'error'); return; }
-  const pages = cmp ? ['rpC'] : daily ? ['rpD'] : year ? ['rpY'] : hr ? ['rpH'] : ['rpP1', 'rpP2'], kind = cmp ? 'รายงานเปรียบเทียบ' : daily ? 'รายงานประจำวัน' : year ? 'รายงานรายปี' : hr ? 'รายงานรายชั่วโมง' : 'รายงาน';
+  const cmp = type === 'cmppdf' || type === 'cmpjpg', daily = type === 'dailypdf' || type === 'dailyjpg', year = type === 'yearpdf' || type === 'yearjpg', hr = type === 'hrpdf', per = type === 'perpdf' || type === 'perjpg';
+  if (per) type = type.slice(3); if (cmp) type = type.slice(3); if (daily) type = type.slice(5); if (year) type = type.slice(4); if (hr) type = 'pdf';
+  if (!(cmp || daily || year || hr || per ? S.all.length : S.rows.length)) { toast('ยังไม่มีข้อมูลสำหรับสร้างรายงาน', 'warn'); return false; }
+  if (per && !S._rcP) { toast('ไม่พบการตั้งค่ารายงาน', 'warn'); return false; }
+  if (!window.html2canvas || (type === 'pdf' && !window.jspdf)) { toast('โหลดไลบรารีสร้างรายงานไม่สำเร็จ — กรุณาตรวจสอบอินเทอร์เน็ตแล้วรีเฟรชหน้า', 'error', 6000); return false; }
+  if (!window.Chart) { toast('ไม่พบไลบรารีกราฟ — ไม่สามารถสร้างรายงานได้', 'error'); return false; }
+  const pages = per ? (S._rcP.kind === 'month' ? ['rpW1', 'rpW2'] : ['rpW1']) : cmp ? ['rpC'] : daily ? ['rpD'] : year ? ['rpY'] : hr ? ['rpH'] : ['rpP1', 'rpP2'], kind = per ? (S._rcP.kind === 'month' ? 'รายงานประจำเดือน' : 'รายงานประจำสัปดาห์') : cmp ? 'รายงานเปรียบเทียบ' : daily ? 'รายงานประจำวัน' : year ? 'รายงานรายปี' : hr ? 'รายงานรายชั่วโมง' : 'รายงาน';
   showLoading(`กำลังสร้าง${kind} ${type.toUpperCase()} (${pages.length} หน้า)...`);
   try {
-    const cmpName = cmp ? buildCmpReport() : daily ? buildDailyReport() : year ? buildYearReport() : hr ? buildHourlyReport() : (buildReport(), null);
+    const cmpName = per ? buildPeriodReport(S._rcP) : cmp ? buildCmpReport() : daily ? buildDailyReport() : year ? buildYearReport() : hr ? buildHourlyReport() : (buildReport(), null);
     await document.fonts.ready; await nextFrame(); // รอฟอนต์ไทยโหลดครบ ไม่งั้นสระ/วรรณยุกต์จะเพี้ยนในภาพ
     const shots = [];
     for (const id of pages) shots.push(await html2canvas(document.getElementById(id), { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false, windowWidth: 1123, windowHeight: 794 }));
@@ -4111,9 +4579,9 @@ async function exportReport(type) {
       shots.forEach((cv, i) => { if (i) pdf.addPage('a4', 'landscape'); pdf.addImage(cv.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, 297, 210); });
       pdf.save(name + '.pdf');
     } else shots.forEach((cv, i) => setTimeout(() => download(cv.toDataURL('image/jpeg', 0.95), `${name}_หน้า${i + 1}.jpg`), i * 400));
-    toast(`ส่งออก${kind} ${type.toUpperCase()} สำเร็จ (${pages.length} หน้า)`, 'success');
-  } catch (e) { console.error(e); toast('สร้างรายงานไม่สำเร็จ: ' + esc(e.message), 'error', 6000); }
-  finally { ['rpChart', 'rpCChart', 'rpDChart', 'rpDChart2', 'rpYChart', 'rpHC', 'rpHV'].forEach(k => { if (S.charts[k]) { S.charts[k].destroy(); delete S.charts[k]; } }); $('#report').innerHTML = ''; hideLoading(); }
+    toast(`ส่งออก${kind} ${type.toUpperCase()} สำเร็จ (${pages.length} หน้า)`, 'success'); return true;
+  } catch (e) { console.error(e); toast('สร้างรายงานไม่สำเร็จ: ' + esc(e.message), 'error', 6000); return false; }
+  finally { ['rpWChart', 'rpWChart2', 'rpChart', 'rpCChart', 'rpDChart', 'rpDChart2', 'rpYChart', 'rpHC', 'rpHV'].forEach(k => { if (S.charts[k]) { S.charts[k].destroy(); delete S.charts[k]; } }); $('#report').innerHTML = ''; hideLoading(); }
 }
 
 /* =====================================================================
@@ -4131,7 +4599,7 @@ function handleEvents() {
   });
   document.addEventListener('click', e => {
     const t = e.target.closest('[data-page],[data-goto],[data-action],[data-export],[data-range],[data-gran],[data-mm],[data-ym],[data-t],[data-sort],[data-pg],[data-hm],[data-cb],[data-dow],[data-dcq],[data-edit],[data-del],[data-stm],[data-stp],[data-std],[data-dnav],[data-ysel],[data-ybasis],[data-evedit],[data-evdel],[data-evact],[data-hrc],[data-hrt]');
-    if (!t) { if (!e.target.closest('#btnExport')) $('#exportMenu').classList.remove('open'); return; }
+    if (!t) return;
     if (t.dataset.page) goto(t.dataset.page);
     else if (t.dataset.goto) goto(t.dataset.goto);
     else if (t.dataset.action === 'refresh') { SH.connected ? poll(true) : sheetsConnect(false); }
@@ -4146,7 +4614,7 @@ function handleEvents() {
       render();
     }
     else if (t.dataset.export) {
-      $('#exportMenu').classList.remove('open'); const x = t.dataset.export, dayMode = S.page === 'dashboard' && S.range === 'day';
+      const x = t.dataset.export, dayMode = S.page === 'dashboard' && S.range === 'day';
       if (x === 'dailycsv' || (x === 'csv' && dayMode)) exportDailyCSV();
       else if (x === 'dailyline') copyDailyLine();
       else if (x === 'hrcsv') exportHourlyCSV();
@@ -4222,7 +4690,9 @@ function handleEvents() {
   // กลับมาที่แท็บ → ดึงข้อมูลทันที (ระหว่างซ่อนแท็บระบบหยุดดึงเพื่อประหยัดโควตา)
   window.addEventListener('scroll', () => $('#topbar').classList.toggle('scrolled', window.scrollY > 8), { passive: true });
   document.addEventListener('visibilitychange', () => { if (!document.hidden && SH.connected && SH.interval > 0) poll(false); });
-  $('#btnExport').addEventListener('click', e => { e.stopPropagation(); if (!S.all.length) { toast('ยังไม่มีข้อมูล — กรุณารอการเชื่อมต่อ Google Drive', 'warn'); return; } $('#exportMenu').classList.toggle('open'); });
+  $('#btnExport').addEventListener('click', e => { e.stopPropagation(); openReportCenter(); });
+  $('#rcModal').addEventListener('click', rcHandle); $('#rcModal').addEventListener('change', rcChange);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#rcModal').classList.contains('show')) closeReportCenter(); });
   $('#orgName').addEventListener('input', e => { S.org = e.target.value.trim() || 'ศูนย์การค้าซีคอน บางแค'; save(); });
   $('#dFrom').addEventListener('change', e => { S.from = e.target.value; S.to = $('#dTo').value; applyFilter(); render(); });
   $('#dTo').addEventListener('change', e => { S.to = e.target.value; S.from = $('#dFrom').value; applyFilter(); render(); });
