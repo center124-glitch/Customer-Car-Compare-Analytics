@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <!--
-  Customer & Car Compare Analytics — v15
+  Customer & Car Compare Analytics — v17
+  v17: + หน้าภาพรวม: การ์ด KPI ช่องทางอื่น (จยย. · เดลิเวอรี่ · MRT เข้า · สัดส่วน MRT) เทียบช่วงก่อน/ฐานรายวันเหมือนยอดหลัก
+       + หน้า จยย./เดลิเวอรี่/MRT เลือกมุมมอง รายวัน / รายสัปดาห์ / รายเดือน / รายปี พร้อมฐานเทียบมาตรฐานของแต่ละงวด
+  v16: + หน้า "จยย. · เดลิเวอรี่ · MRT" — ยอด จยย. / เดลิเวอรี่ / แท็กซี่ / ลูกค้าเข้า-ออกทางสะพาน MRT (ต้องใช้ Code_CCA_v7.gs สำหรับ MRT)
+       + เดือนที่ยอดใดเป็น 0/ว่างทั้งเดือน = "ไม่ได้บันทึก" (ไม่นับเป็น 0) · แก้นิยามยอดลูกค้าให้ตรงกับข้อความในชีตจริง
   v15: + ศูนย์ออกรายงาน: เลือก ① ประเภท (รายวัน/สัปดาห์/เดือน/ปี/กำหนดเอง) ② งวด ③ รูปแบบไฟล์ (PDF/JPEG/Excel/LINE) · เทียบงวดมาตรฐานอัตโนมัติ
        + รายงานประจำสัปดาห์ (1 หน้า) และประจำเดือน (2 หน้า) แบบมาตรฐาน · แก้นิยามยอดลูกค้าในรายงานให้ตรงข้อมูลจริง
-  v14: + ปฏิทินเหตุการณ์พิเศษ (แสดงบนกราฟ วิเคราะห์ผลกระทบ ตัดวันผิดปกติออกจากค่าปกติ) · วันหยุดยาว · วิเคราะห์รายชั่วโมง (ต้องใช้ Code_CCA_v6.gs)
+  v14: + ปฏิทินเหตุการณ์พิเศษ (แสดงบนกราฟ วิเคราะห์ผลกระทบ ตัดวันผิดปกติออกจากค่าปกติ) · วันหยุดยาว · วิเคราะห์รายชั่วโมง (ต้องใช้ Code_CCA_v7.gs)
   v13: + ฝ่ายบริการทั่วไป · คาดการณ์ยอดสิ้นเดือน/สิ้นปี พร้อมช่วง 95% และทดสอบความแม่นยำย้อนหลัง
   v12: + หน้าเปรียบเทียบอิสระ: แผงควบคุมกระชับในการ์ดเดียว · แก้ช่องว่างด้านบนหน้าที่ไม่มีแถบกรอง
   v11: + ยกเลิกปุ่มเลือกนิยามยอดรถยนต์ — วิเคราะห์ด้วยยอดรถยนต์เข้า 24 ชม. ทั้งแอป · ปรับ UI ทุกหน้าทุกขนาดจอ
@@ -23,14 +27,14 @@
   v4: + เปรียบเทียบอิสระทุกมิติ (วัน/สัปดาห์/เดือน/ปี/ช่วงกำหนดเอง × ทุกตัวชี้วัด × ประเภทวัน/วันในสัปดาห์) + ตัดวันให้เท่ากันอัตโนมัติ
       + หน้า "ตรวจคุณภาพข้อมูล" (วันขาดหาย, Outlier, ค่า 0, ข้อสังเกตจากไฟล์, ปีที่ไม่มีปฏิทินวันหยุด)
       + ยกเลิกหน้านำเข้าข้อมูล (ใช้ Google Drive เป็นแหล่งเดียว) + แคชออฟไลน์ + Error handling ทั้งระบบ + ปฏิทินวันหยุด 2567
-  v3: + ดึงข้อมูลจริงจากโฟลเดอร์ Drive "ข้อมูลเปรียบเทียบ ยอดลูกค้าและยอดรถยนต์" ผ่าน Apps Script (Code_CCA_v6.gs)
+  v3: + ดึงข้อมูลจริงจากโฟลเดอร์ Drive "ข้อมูลเปรียบเทียบ ยอดลูกค้าและยอดรถยนต์" ผ่าน Apps Script (Code_CCA_v7.gs)
         อ่านไฟล์รายเดือน "สรุป ยอดลูกค้าเข้า และ รถเข้า เดือน xx" ทุกไฟล์ (1 ชีต = 1 วัน) → ยอดลูกค้าเข้า / รถยนต์ 24 ชม. / 10–22 น. / จยย. / เดลิเวอรี่
       + ตั้งค่า GAS URL ไว้ในตัว เปิดแอปแล้วเชื่อมต่ออัตโนมัติ · เลือกนิยามยอดรถยนต์ (24 ชม. / 10–22 น.)
       + ข้อมูลที่บันทึกจากแอปเก็บในไฟล์ "CCA_บันทึกเพิ่มเติม" (ไม่แตะไฟล์ต้นฉบับ) ใช้เติมวันที่ไฟล์รายเดือนยังไม่มี
   v2: + แท็บ "เปรียบเทียบรายวัน" (จันทร์เทียบจันทร์ / วันทำงาน-เสาร์อาทิตย์-วันหยุดนักขัตฤกษ์ / วันต่อวัน / Heatmap)
       + ปฏิทินวันหยุดราชการ 2568–2569 (แก้ไขเพิ่มได้) + เชื่อมต่อ Google Sheets (บันทึก/แก้ไข/ลบ/อัปโหลดชุดใหญ่)
       + Real-time Update: ตรวจเวอร์ชันข้อมูลใน Sheets อัตโนมัติ แล้วรีเฟรช Dashboard ทันทีเมื่อมีข้อมูลใหม่
-  ต้องใช้คู่กับไฟล์ Code_CCA_v6.gs (Google Apps Script) — ดูวิธีติดตั้งในหน้า "Google Sheets" ของแอป
+  ต้องใช้คู่กับไฟล์ Code_CCA_v7.gs (Google Apps Script) — ดูวิธีติดตั้งในหน้า "Google Sheets" ของแอป
   ระบบวิเคราะห์และเปรียบเทียบ "ยอดลูกค้า" × "ยอดรถยนต์" (Single File Web App)
   - นำเข้าข้อมูล: วางจาก Excel / นำเข้าไฟล์ .xlsx .xls .csv
   - สถิติ: Total / Average / Median / Max / Min / SD / CV / Ratio / Pearson r / Regression
@@ -263,6 +267,13 @@
   .spin-ic svg{ animation:spin .9s linear infinite; }
   #modal{ position:fixed; inset:0; z-index:95; background:rgba(15,10,35,.5); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; padding:16px; }
   #modal.show{ display:flex; }
+  /* v17: แถบ KPI ช่องทางอื่น + แผงควบคุมหน้า จยย./MRT */
+  .md-strip{ display:flex; flex-direction:column; gap:10px; }
+  .md-strip-h{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px; padding:0 2px; }
+  .md-strip-h svg{ display:inline-block; vertical-align:-2px; }
+  .md-ctrl{ display:flex; flex-wrap:wrap; align-items:center; gap:10px 16px; }
+  .md-ctrl-g{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; min-width:0; }
+  .md-chart{ height:300px; } @media (max-width:640px){ .md-chart{ height:240px; } .md-ctrl-g.ml-auto{ margin-left:0; } }
   /* v15: ศูนย์ออกรายงาน */
   #rcModal{ position:fixed; inset:0; z-index:94; background:rgba(15,10,35,.5); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; padding:16px; }
   #rcModal.show{ display:flex; }
@@ -295,7 +306,7 @@
   @media (max-width:760px){ .rc-types{ grid-template-columns:repeat(2,minmax(0,1fr)); } .rc-types .rc-type:last-child{ grid-column:span 2; } .rc-fmts{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
   @media (max-width:520px){ #rcModal{ padding:0; align-items:stretch; } #rcModal .rc-card{ max-height:100vh; border-radius:0; } .rc-bodyin{ padding:12px 14px; } .rc-top{ padding:12px 14px; } .rc-sum-g{ grid-template-columns:1fr; gap:0; } .rc-sum-g .muted{ margin-top:4px; font-size:11.5px; } }
   #rpW1 .rp-tbl td, #rpW2 .rp-tbl td{ padding:1.6px 6px; } #rpW1 .rp-list{ line-height:1.5; } #rpW1 .rp-box, #rpW2 .rp-box{ padding:7px 12px; } #rpW1 .rp-kpi{ padding:7px 12px; } #rpW1 .rp-kpi .v{ font-size:18px; line-height:1.3; }
-  .rc-cmp td, .rc-cmp th{ font-size:10px; white-space:nowrap; } .rc-cmp td{ padding:2.6px 5px !important; } .rc-day td{ font-size:10.5px; padding:5.2px 5px !important; } .rc-day th{ font-size:9.8px; padding:2px 5px !important; }
+  .rc-cmp td, .rc-cmp th{ font-size:10px; white-space:nowrap; } .rc-cmp td{ padding:2.6px 5px !important; } .rc-day td{ font-size:10.5px; padding:3.3px 5px !important; white-space:nowrap; } .rc-day th{ font-size:9.8px; padding:2px 5px !important; }
   #modal .card{ width:100%; max-width:460px; padding:24px; animation:fade .2s ease; }
   .btn-danger{ background:linear-gradient(135deg,#ef4444,#db2777); color:#fff; border:0; }
   .btn-danger:hover{ color:#fff; filter:brightness(1.08); }
@@ -412,7 +423,9 @@
     main{ padding-top:14px !important; }
     #filterBar{ padding:10px; gap:10px; }
     #filterBar .seg{ width:100%; display:grid; gap:4px; }
-    #rangeSeg{ grid-template-columns:repeat(3,1fr); }
+    #rangeSeg{ grid-template-columns:repeat(4,1fr); } /* v17: 2 แถวพอดีจอ (เดิม 3 แถว กินพื้นที่) */
+    #rangeSeg [data-range=day]{ grid-column:span 2; }
+    #filterBar .seg button{ font-size:13px; }
     #filterBar .seg button{ padding:8px 4px; text-align:center; white-space:nowrap; }
     #filterBar .seg.hidden{ display:none; }
     #customRange{ width:100%; }
@@ -421,7 +434,7 @@
     #filterBar .range-info .chip{ white-space:nowrap; }
   }
 </style>
-<style id="tw">*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:Prompt,sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width:640px){.container{max-width:640px}}@media (min-width:768px){.container{max-width:768px}}@media (min-width:1024px){.container{max-width:1024px}}@media (min-width:1280px){.container{max-width:1280px}}@media (min-width:1536px){.container{max-width:1536px}}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0}.top-0{top:0}.z-30{z-index:30}.z-40{z-index:40}.m-3{margin:.75rem}.mb-1{margin-bottom:.25rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.ml-1{margin-left:.25rem}.ml-2{margin-left:.5rem}.ml-auto{margin-left:auto}.mr-0{margin-right:0}.mr-0\.5{margin-right:.125rem}.mr-2{margin-right:.5rem}.mt-0{margin-top:0}.mt-0\.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.mt-1\.5{margin-top:.375rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.mt-6{margin-top:1.5rem}.inline-block{display:inline-block}.inline{display:inline}.flex{display:flex}.inline-flex{display:inline-flex}.table{display:table}.grid{display:grid}.contents{display:contents}.hidden{display:none}.h-screen{height:100vh}.min-h-screen{min-height:100vh}.w-full{width:100%}.min-w-0{min-width:0}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.resize{resize:both}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-2\.5{gap:.625rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.gap-6{gap:1.5rem}.gap-x-5{-moz-column-gap:1.25rem;column-gap:1.25rem}.gap-x-6{-moz-column-gap:1.5rem;column-gap:1.5rem}.gap-y-3{row-gap:.75rem}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-3>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.75rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.75rem*var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.self-start{align-self:flex-start}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis}.truncate,.whitespace-nowrap{white-space:nowrap}.rounded-2xl{border-radius:1rem}.rounded-xl{border-radius:.75rem}.p-10{padding:2.5rem}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-3\.5{padding:.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pb-3{padding-bottom:.75rem}.pb-4{padding-bottom:1rem}.pl-1{padding-left:.25rem}.pt-3{padding-top:.75rem}.pt-5{padding-top:1.25rem}.text-center{text-align:center}.text-right{text-align:right}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[11px\]{font-size:11px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.leading-tight{line-height:1.25}.opacity-80{opacity:.8}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.ease-in-out{transition-timing-function:cubic-bezier(.4,0,.2,1)}.ease-out{transition-timing-function:cubic-bezier(0,0,.2,1)}@media (min-width:640px){.sm\:col-span-2{grid-column:span 2/span 2}.sm\:flex{display:flex}.sm\:inline-flex{display:inline-flex}.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width:768px){.md\:inline{display:inline}.md\:flex{display:flex}.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.md\:p-6{padding:1.5rem}.md\:px-6{padding-left:1.5rem;padding-right:1.5rem}}@media (min-width:1024px){.lg\:sticky{position:sticky}.lg\:top-0{top:0}.lg\:col-span-4{grid-column:span 4/span 4}.lg\:block{display:block}.lg\:inline-flex{display:inline-flex}.lg\:hidden{display:none}.lg\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.lg\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.lg\:px-8{padding-left:2rem;padding-right:2rem}}@media (min-width:1280px){.xl\:col-span-1{grid-column:span 1/span 1}.xl\:col-span-2{grid-column:span 2/span 2}.xl\:col-span-3{grid-column:span 3/span 3}.xl\:inline{display:inline}.xl\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.xl\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.xl\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.xl\:grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}.xl\:grid-cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}.xl\:flex-row{flex-direction:row}.xl\:items-center{align-items:center}.xl\:gap-4{gap:1rem}.xl\:gap-5{gap:1.25rem}.xl\:self-center{align-self:center}.xl\:whitespace-nowrap{white-space:nowrap}.xl\:pr-5{padding-right:1.25rem}.xl\:text-right{text-align:right}}@media (min-width:1536px){.\32xl\:flex{display:flex}}</style>
+<style id="tw">*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:Prompt,sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width:640px){.container{max-width:640px}}@media (min-width:768px){.container{max-width:768px}}@media (min-width:1024px){.container{max-width:1024px}}@media (min-width:1280px){.container{max-width:1280px}}@media (min-width:1536px){.container{max-width:1536px}}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0}.top-0{top:0}.z-30{z-index:30}.z-40{z-index:40}.m-3{margin:.75rem}.mb-1{margin-bottom:.25rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.ml-1{margin-left:.25rem}.ml-2{margin-left:.5rem}.ml-auto{margin-left:auto}.mr-0{margin-right:0}.mr-0\.5{margin-right:.125rem}.mr-2{margin-right:.5rem}.mt-0{margin-top:0}.mt-0\.5{margin-top:.125rem}.mt-1{margin-top:.25rem}.mt-1\.5{margin-top:.375rem}.mt-2{margin-top:.5rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.mt-6{margin-top:1.5rem}.inline-block{display:inline-block}.inline{display:inline}.flex{display:flex}.inline-flex{display:inline-flex}.table{display:table}.grid{display:grid}.contents{display:contents}.hidden{display:none}.h-screen{height:100vh}.min-h-screen{min-height:100vh}.w-full{width:100%}.min-w-0{min-width:0}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.resize{resize:both}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-2\.5{gap:.625rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.gap-5{gap:1.25rem}.gap-6{gap:1.5rem}.gap-x-5{-moz-column-gap:1.25rem;column-gap:1.25rem}.gap-x-6{-moz-column-gap:1.5rem;column-gap:1.5rem}.gap-y-3{row-gap:.75rem}.space-y-1>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.25rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.25rem*var(--tw-space-y-reverse))}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-3>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.75rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.75rem*var(--tw-space-y-reverse))}.space-y-4>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem*var(--tw-space-y-reverse))}.space-y-6>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem*var(--tw-space-y-reverse))}.self-start{align-self:flex-start}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis}.truncate,.whitespace-nowrap{white-space:nowrap}.rounded-2xl{border-radius:1rem}.rounded-xl{border-radius:.75rem}.p-10{padding:2.5rem}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-3\.5{padding:.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-10{padding-top:2.5rem;padding-bottom:2.5rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pb-3{padding-bottom:.75rem}.pb-4{padding-bottom:1rem}.pl-1{padding-left:.25rem}.pt-3{padding-top:.75rem}.pt-5{padding-top:1.25rem}.text-center{text-align:center}.text-right{text-align:right}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[11px\]{font-size:11px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-normal{font-weight:400}.font-semibold{font-weight:600}.leading-tight{line-height:1.25}.opacity-80{opacity:.8}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.ease-in-out{transition-timing-function:cubic-bezier(.4,0,.2,1)}.ease-out{transition-timing-function:cubic-bezier(0,0,.2,1)}@media (min-width:640px){.sm\:col-span-2{grid-column:span 2/span 2}.sm\:flex{display:flex}.sm\:inline-flex{display:inline-flex}.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width:768px){.md\:inline{display:inline}.md\:flex{display:flex}.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.md\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.md\:p-6{padding:1.5rem}.md\:px-6{padding-left:1.5rem;padding-right:1.5rem}}@media (min-width:1024px){.lg\:sticky{position:sticky}.lg\:top-0{top:0}.lg\:col-span-4{grid-column:span 4/span 4}.lg\:block{display:block}.lg\:inline-flex{display:inline-flex}.lg\:hidden{display:none}.lg\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.lg\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.lg\:px-8{padding-left:2rem;padding-right:2rem}}@media (min-width:1280px){.xl\:col-span-1{grid-column:span 1/span 1}.xl\:col-span-2{grid-column:span 2/span 2}.xl\:col-span-3{grid-column:span 3/span 3}.xl\:inline{display:inline}.xl\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.xl\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.xl\:grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}.xl\:grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}.xl\:grid-cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}.xl\:flex-row{flex-direction:row}.xl\:items-center{align-items:center}.xl\:gap-4{gap:1rem}.xl\:gap-5{gap:1.25rem}.xl\:self-center{align-self:center}.xl\:whitespace-nowrap{white-space:nowrap}.xl\:pr-5{padding-right:1.25rem}.xl\:text-right{text-align:right}}@media (min-width:1536px){.\32xl\:flex{display:flex}}</style>
 </head>
 <body>
 <div id="toasts"></div>
@@ -520,6 +533,7 @@
       <!-- ===================== PAGE: QUALITY (v4) ===================== -->
       <section id="page-quality" class="page"><div class="space-y-6" data-body></div></section>
       <section id="page-hourly" class="page"><div class="space-y-6" data-body></div></section>
+      <section id="page-modes" class="page"><div class="space-y-6" data-body></div></section>
       <section id="page-events" class="page"><div class="space-y-6" data-body></div></section>
       <!-- ===================== PAGE: DASHBOARD ===================== -->
       <section id="page-dashboard" class="page"><div class="space-y-6" data-body></div></section>
@@ -591,9 +605,9 @@
               <div id="holInfo" class="text-xs muted mt-2"></div>
             </div>
             <div class="card p-5 md:p-6">
-              <div class="flex items-center gap-3 mb-4"><div class="ico ico-i"><span data-i="info"></span></div><div><div class="card-h">วิธีติดตั้ง / อัปเดตสคริปต์</div><div class="card-sub">ใช้ไฟล์ Code_CCA_v6.gs (อ่านโฟลเดอร์ Drive โดยตรง)</div></div></div>
+              <div class="flex items-center gap-3 mb-4"><div class="ico ico-i"><span data-i="info"></span></div><div><div class="card-h">วิธีติดตั้ง / อัปเดตสคริปต์</div><div class="card-sub">ใช้ไฟล์ Code_CCA_v7.gs (อ่านโฟลเดอร์ Drive โดยตรง)</div></div></div>
               <div class="space-y-3 text-sm">
-                <div class="step"><div class="step-n">1</div><div>เปิดโปรเจกต์ Apps Script เดิม (URL /exec ที่ใช้อยู่) → ลบโค้ดเดิม วาง <code class="k">Code_CCA_v6.gs</code> แล้วบันทึก</div></div>
+                <div class="step"><div class="step-n">1</div><div>เปิดโปรเจกต์ Apps Script เดิม (URL /exec ที่ใช้อยู่) → ลบโค้ดเดิม วาง <code class="k">Code_CCA_v7.gs</code> แล้วบันทึก</div></div>
                 <div class="step"><div class="step-n">2</div><div>เลือกฟังก์ชัน <code class="k">setup</code> กด <b>Run</b> และอนุญาตสิทธิ์ Drive/Sheets (จะสร้างไฟล์ "CCA_บันทึกเพิ่มเติม" ในโฟลเดอร์)</div></div>
                 <div class="step"><div class="step-n">3</div><div>เลือก <code class="k">warmup</code> กด <b>Run</b> เพื่ออ่านไฟล์ทั้งโฟลเดอร์ครั้งแรก (ถ้า Log ขึ้น complete:false ให้ Run ซ้ำ) แล้ว Run <code class="k">installTrigger</code> 1 ครั้ง</div></div>
                 <div class="step"><div class="step-n">4</div><div><b>Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy</b><br>Execute as: <b>Me</b> · Who has access: <b>Anyone</b></div></div>
@@ -612,7 +626,7 @@
 
     <footer class="px-4 md:px-6 lg:px-8 py-4 text-xs muted flex flex-wrap justify-between gap-2" style="border-top:1px solid var(--border)">
       <span>SBK Customer & Car Compare Analytics · Single File Web App</span>
-      <span>v15.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
+      <span>v17.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
     </footer>
   </div>
 </div>
@@ -627,8 +641,10 @@
 <script type="text/plain" id="gasCode">
 /**
  * =====================================================================
- *  SBK Customer & Car Compare Analytics — Google Apps Script Backend v6
- *  ใช้คู่กับไฟล์ Customer_Car_Compare_Analytics_v14.html (แอปรุ่นก่อนใช้ได้ตามเดิม)
+ *  SBK Customer & Car Compare Analytics — Google Apps Script Backend v7
+ *  ใช้คู่กับไฟล์ Customer_Car_Compare_Analytics_v16.html (แอปรุ่นก่อนใช้ได้ตามเดิม)
+ *  v7: + ยอดลูกค้าเข้า/ออก ทางประตู "สะพาน MRT" (mrt / mrtOut) = ผลรวมรายชั่วโมงของแถวประตู MRT ในตารางลูกค้าเข้า/ออก
+ *      + แคชเก็บรายชื่อฟิลด์ + รุ่นตัวอ่าน → หลังอัปเดตจะอ่านไฟล์ใหม่ทีละชุดอัตโนมัติ (ระหว่างนั้นใช้แคชเดิมได้ ไม่เพี้ยนคอลัมน์)
  *  v6: + ข้อมูลรายชั่วโมง (action=hourly&ym=YYYY-MM) — รวมยอดทุกประตู/ทุกช่องทางต่อชั่วโมง และตรวจกับยอดรวมรายวัน
  *      + เหตุการณ์พิเศษ (ชีต Events ในไฟล์ "บันทึกเพิ่มเติม") — action=eventSave / eventDelete · read ส่ง events กลับไปด้วย
  *      + อ่านคอลัมน์ได้ถึง AD (เดิม J) เพื่อให้เห็นตารางรายชั่วโมงครบ 24 ชม.
@@ -648,6 +664,8 @@
  *    ยอดรถยนต์เข้า 10.00 น. - 22.00 น.   → car1022 (B45/D45)
  *    ยอด จยย. / ยอด แท็กซี่ / ยอด เดลิเวอรี่ → moto / taxi / deli
  *    ยอดลูกค้าออกจากใช้บริการ / ยอดรถยนต์ออก ทั้งหมด → custOut / carOut
+ *    แถว "ประตู สะพาน MRT" ในตารางลูกค้าเข้า / ออก (รวมทุกชั่วโมง)  → mrt / mrtOut (v7)
+ *    ป้ายไหนไม่มีในชีต (เช่น ปีที่เลิกนับ) → ส่งค่า null = "ไม่มีข้อมูล" ไม่ใช่ 0
  *  วันที่: เดือน/ปี จาก "ชื่อไฟล์" (เชื่อถือได้ที่สุด) + วัน จากหัวชีต B1 (สำรอง = ตัวเลขนำหน้าชื่อชีต)
  *
  *  วิธีติดตั้ง / อัปเดต
@@ -688,7 +706,10 @@ const LABELS = [
   ['carOut', /^ยอดรถยนต์ออก\s*ทั้งหมด/], ['custOut', /^ยอดลูกค้าออก/],
   ['moto', /^ยอด\s*จยย/], ['taxi', /^ยอด\s*แท็กซี่/], ['deli', /^ยอด\s*เดลิเวอรี่/]
 ];
-const FIELDS = ['cust', 'car24', 'car1022', 'custOut', 'carOut', 'moto', 'taxi', 'deli'];
+const FIELDS = ['cust', 'car24', 'car1022', 'custOut', 'carOut', 'moto', 'taxi', 'deli', 'mrt', 'mrtOut'];
+const OLD_FIELDS = ['cust', 'car24', 'car1022', 'custOut', 'carOut', 'moto', 'taxi', 'deli']; // รูปแบบแคชของ v6 ลงมา
+const PARSE_VER = 7; // เปลี่ยนเมื่อวิธีอ่านชีตเปลี่ยน → แคชเก่าจะถูกอ่านใหม่
+const GATE_MRT = /MRT|รถไฟฟ้า/i;
 
 // วันหยุดราชการ 2567–2569 (ประกาศ ครม.) — แก้/เพิ่มได้ในชีต Holidays ของไฟล์ "บันทึกเพิ่มเติม"
 const DEFAULT_HOLIDAYS = [
@@ -745,7 +766,7 @@ function handle_(p) {
     const a = p.action || 'read';
     if (a === 'save' || a === 'bulk' || a === 'delete' || a === 'eventSave' || a === 'eventDelete') checkKey_(p.key);
     if (a === 'read' && p.force === '1') checkKey_(p.key); // v5: การอ่านใหม่ทั้งหมด (หนัก) ต้องมีรหัส — กันผู้ไม่หวังดีสั่ง rebuild ซ้ำ ๆ
-    if (a === 'ping') out = { ok: true, app: 'SBK-CCA', api: 6, serverTime: new Date().toISOString() };
+    if (a === 'ping') out = { ok: true, app: 'SBK-CCA', api: 7, serverTime: new Date().toISOString() };
     else if (a === 'meta') out = meta_();
     else if (a === 'read') out = read_(p.force === '1');
     else if (a === 'save') out = withLock_(function () { return save_(parseJson_(p.data)); });
@@ -864,7 +885,7 @@ function dayFromTitle_(vals) {
   return null;
 }
 function parseMonthFile_(f) {
-  const res = { u: f.u, d: [], w: [] };
+  const res = { u: f.u, d: [], w: [], v: PARSE_VER, f: FIELDS };
   if (!f.ym) { res.w.push('อ่านเดือน/ปีจากชื่อไฟล์ไม่ได้: ' + f.name); return res; }
   const ss = SpreadsheetApp.openById(f.id);
   const seen = {};
@@ -873,6 +894,7 @@ function parseMonthFile_(f) {
     if (nr < 1 || nc < 1) return;
     const vals = sh.getRange(1, 1, nr, nc).getValues();
     const v = parseDaySheet_(vals);
+    const g = parseGate_(vals, GATE_MRT); if (g.in !== null) v.mrt = g.in; if (g.out !== null) v.mrtOut = g.out;
     if (v.__bad) res.w.push(f.name + ' › ชีต "' + sh.getName() + '": ค่าไม่ใช่ตัวเลข ' + v.__bad.join(', '));
     if (v.cust === undefined && v.car24 === undefined) return;          // ชีตวันที่ยังไม่ได้กรอก (วันในอนาคต)
     if (v.cust === undefined || v.car24 === undefined) { res.w.push(f.name + ' › ชีต "' + sh.getName() + '": ไม่พบ' + (v.cust === undefined ? 'ยอดลูกค้า' : 'ยอดรถยนต์ 24 ชม.') + ' — วันนี้จะไม่ถูกนำมาคำนวณ'); return; }
@@ -901,7 +923,7 @@ function cachePut_(id, obj) {
     if (utf8Len_(s) > 8800 && obj.w && obj.w.length) {
       const w = obj.w.slice(0, 3).map(function (x) { return String(x).slice(0, 160); });
       if (obj.w.length > 3) w.push('… และคำเตือนอื่นอีก ' + (obj.w.length - 3) + ' รายการ');
-      s = JSON.stringify({ u: obj.u, ym: obj.ym, d: obj.d, w: w });
+      s = JSON.stringify({ u: obj.u, ym: obj.ym, d: obj.d, w: w, v: obj.v, f: obj.f });
     }
     if (utf8Len_(s) > 8800) return false;
     props_().setProperty('F_' + id, s); return true;
@@ -931,7 +953,7 @@ function buildAllInner_(force, cacheOnly) {
     let c = force ? null : cacheGet_(f.id);
     const ymKey = f.ym ? f.ym.y + '-' + f.ym.m : '';
     // v5: แคชใช้ได้เมื่อ "เวลาแก้ไขไฟล์" และ "เดือน/ปีตามชื่อไฟล์" ตรงกัน (เปลี่ยนชื่อไฟล์แก้ปีผิด → อ่านใหม่)
-    const fresh = c && c.u === f.u && (c.ym === undefined || c.ym === ymKey);
+    const fresh = c && c.u === f.u && (c.ym === undefined || c.ym === ymKey) && c.v === PARSE_VER;
     if (!fresh) {
       if (cacheOnly || Date.now() - t0 > CONFIG.TIME_BUDGET_MS) {
         complete = false;
@@ -945,9 +967,10 @@ function buildAllInner_(force, cacheOnly) {
       }
     } else fileInfo.push({ id: f.id, name: f.name, days: c.d.length, ym: f.ym });
     (c.w || []).forEach(function (w) { warnings.push(w); });
+    const cf = c.f || OLD_FIELDS; // แคชรุ่นเก่า (ยังไม่ได้อ่านใหม่) → อ่านตามรายชื่อฟิลด์ของรุ่นนั้น กันค่าเลื่อนคอลัมน์
     c.d.forEach(function (a) {
-      const rec = { date: a[0], src: 'file', fid: f.id, sheet: a[FIELDS.length + 1] };
-      FIELDS.forEach(function (x, i) { rec[x] = a[i + 1]; });
+      const rec = { date: a[0], src: 'file', fid: f.id, sheet: a[cf.length + 1] };
+      FIELDS.forEach(function (x) { const i = cf.indexOf(x); rec[x] = i >= 0 ? a[i + 1] : null; });
       rec.car = rec.car24;
       if (byKey[rec.date]) { warnings.push('วันที่ ' + rec.date + ' พบในหลายไฟล์ (' + byKey[rec.date].sheet + ' / ' + f.name + ') — ใช้ไฟล์แรก'); return; }
       byKey[rec.date] = rec; rows.push(rec);
@@ -1082,11 +1105,33 @@ function parseHourly_(vals) {
   }
   return out;
 }
+// v7: ยอดของประตูที่ระบุ (เช่น สะพาน MRT) จากตารางลูกค้า — บล็อกแรก = เข้า, บล็อกที่สอง = ออก · รวมทุกชั่วโมงของแถวนั้น
+// ไม่พบแถวประตูในบล็อก = null (เช่น ปีที่ไม่มีประตูนี้) — ไม่ใช่ 0
+function parseGate_(vals, re) {
+  const out = { in: null, out: null }; let blk = 0;
+  for (let r = 0; r < vals.length && blk < 2; r++) {
+    const row = vals[r], hc = [];
+    for (let c = 0; c < row.length; c++) { const m = clean_(row[c]).match(HOUR_RE); if (m) hc.push(c); }
+    if (hc.length < 8) continue;
+    const first = +clean_(row[hc[0]]).match(HOUR_RE)[1]; if (first <= 2) continue; // ตารางรถยนต์ (01.00 น.) ไม่ใช่ตารางลูกค้า
+    let val = null;
+    for (let rr = r + 1; rr < vals.length; rr++) {
+      const a0 = clean_(vals[rr][0]), lab = clean_(vals[rr][1]);
+      if (lab === 'รวม' || a0 === 'ลำดับ') break;
+      if (!re.test(lab)) continue;
+      val = 0; hc.forEach(function (c) { const n = num_(vals[rr][c]); if (n !== null && n > 0) val += n; });
+      break;
+    }
+    if (blk === 0) out.in = val; else out.out = val;
+    blk++;
+  }
+  return out;
+}
 function hourly_(ym) {
   const m = ym.match(/^(\d{4})-(\d{2})$/); if (!m) throw new Error('ระบุเดือนไม่ถูกต้อง (ต้องเป็น YYYY-MM)');
   const y = +m[1], mo = +m[2];
   const f = listMonthFiles_().filter(function (x) { return x.ym && x.ym.y === y && x.ym.m === mo; })[0];
-  if (!f) return { ok: true, api: 6, ym: ym, days: [], note: 'ไม่พบไฟล์ของเดือนนี้ในโฟลเดอร์' };
+  if (!f) return { ok: true, api: 7, ym: ym, days: [], note: 'ไม่พบไฟล์ของเดือนนี้ในโฟลเดอร์' };
   let cache = null; try { cache = CacheService.getScriptCache(); } catch (e) { cache = null; }
   const ck = 'H6_' + f.id + '_' + f.u;
   if (cache) { const c = cache.get(ck); if (c) { try { const o = JSON.parse(c); o.cached = true; return o; } catch (e) { /* อ่านใหม่ */ } } }
@@ -1104,7 +1149,7 @@ function hourly_(ym) {
     days.push({ date: k, ch: H.c ? H.c.h : null, c: H.c ? H.c.v : null, vh: H.v ? H.v.h : null, v: H.v ? H.v.v : null, dc: v.cust === undefined ? null : v.cust, dv: v.car24 === undefined ? null : v.car24 });
   });
   days.sort(function (a, b) { return a.date < b.date ? -1 : 1; });
-  const res = { ok: true, api: 6, ym: ym, file: f.name, days: days };
+  const res = { ok: true, api: 7, ym: ym, file: f.name, days: days };
   if (cache) { try { cache.put(ck, JSON.stringify(res), 21600); } catch (e) { /* ใหญ่เกิน/แคชไม่ได้ ก็ส่งผลสด */ } }
   return res;
 }
@@ -1126,7 +1171,7 @@ function read_(force) {
   man.rows.forEach(function (r) { if (all.byKey[r.date]) { overlap++; all.byKey[r.date].manualNote = r.note || ''; } else rows.push(r); });
   rows.sort(function (a, b) { return a.date < b.date ? -1 : 1; });
   return {
-    ok: true, api: 6, complete: all.complete, version: getVersion_(), sig: all.sig,
+    ok: true, api: 7, complete: all.complete, version: getVersion_(), sig: all.sig,
     count: rows.length, rows: rows, holidays: man.holidays, events: man.events || [], files: all.files, warnings: all.warnings.slice(0, 200),
     manual: { url: man.url, count: man.count, overlap: overlap }, folderId: CONFIG.FOLDER_ID, serverTime: new Date().toISOString()
   };
@@ -1162,6 +1207,7 @@ function delete_(date) {
   sh.deleteRow(idx[k]);
   return { ok: true, deleted: k, version: bumpVersion_() };
 }
+
 </script>
 <!-- พื้นที่สร้างรายงาน A4 (อยู่นอกจอ) -->
 <div id="report"></div>
@@ -1331,7 +1377,7 @@ function recordsToRows(records, order) {
       const o = Object.assign({}, dt, { cust: cu, car: ca, note: rec.note ? String(rec.note) : '', at: rec.at || '', by: rec.by || '', src: rec.src || 'manual', fid: rec.fid || '', sheet: rec.sheet || '', manualNote: rec.manualNote || '' });
       // ค่าเพิ่มเติมจากไฟล์รายเดือน (มีเฉพาะแหล่ง file)
       // ค่าติดลบ/ไม่ใช่ตัวเลข = ไม่มีข้อมูล (null) — ไม่ให้ไปทำให้ยอดรวม/Ratio ผิด
-      ['car24', 'car1022', 'custOut', 'carOut', 'moto', 'taxi', 'deli'].forEach(f => { const v = rec[f] === undefined ? null : parseNumber(rec[f]); o[f] = v === null || v < 0 ? null : v; });
+      ['car24', 'car1022', 'custOut', 'carOut', 'moto', 'taxi', 'deli', 'mrt', 'mrtOut'].forEach(f => { const v = rec[f] === undefined ? null : parseNumber(rec[f]); o[f] = v === null || v < 0 ? null : v; });
       map.set(dt.key, o);
     }
   });
@@ -1560,7 +1606,9 @@ const METRICS = [
   { k: 'carOut', label: 'รถยนต์ออก 24 ชม.', unit: 'คัน', color: '#f97316' },
   { k: 'moto', label: 'รถจักรยานยนต์ (จยย.)', unit: 'คัน', color: '#10b981' },
   { k: 'taxi', label: 'แท็กซี่', unit: 'คัน', color: '#06b6d4' },
-  { k: 'deli', label: 'เดลิเวอรี่', unit: 'คัน', color: '#3b82f6' }
+  { k: 'deli', label: 'เดลิเวอรี่', unit: 'คัน', color: '#3b82f6' },
+  { k: 'mrt', label: 'ลูกค้าเข้าทางสะพาน MRT', unit: 'คน', color: '#ec4899' },
+  { k: 'mrtOut', label: 'ลูกค้าออกทางสะพาน MRT', unit: 'คน', color: '#a855f7' }
 ];
 const isNum = v => typeof v === 'number' && isFinite(v);
 // สถิติของ 1 ตัวชี้วัด — นับเฉพาะวันที่มีค่าจริง (null = ไม่มีข้อมูล ไม่ใช่ 0) เพื่อไม่ให้ค่าเฉลี่ยเพี้ยน
@@ -1779,7 +1827,8 @@ const NAV = [
   { id: 'daycmp', label: 'เปรียบเทียบรายวัน', icon: 'cols' },
   { id: 'monthly', label: 'เปรียบเทียบรายเดือน', icon: 'bars', badge: 'MoM' },
   { id: 'yearly', label: 'เปรียบเทียบรายปี', icon: 'calYear', badge: 'YoY' },
-  { id: 'hourly', label: 'วิเคราะห์รายชั่วโมง', icon: 'activity', badge: 'ใหม่' },
+  { id: 'hourly', label: 'วิเคราะห์รายชั่วโมง', icon: 'activity' },
+  { id: 'modes', label: 'จยย. · เดลิเวอรี่ · MRT', icon: 'car', badge: 'ใหม่' },
   { sec: 'ตารางข้อมูล' },
   { id: 'raw', label: 'ตารางข้อมูลรายวัน', icon: 'table' },
   { id: 'events', label: 'ปฏิทินเหตุการณ์', icon: 'sparkles' },
@@ -1788,6 +1837,7 @@ const NAV = [
   { id: 'quality', label: 'ตรวจคุณภาพข้อมูล', icon: 'check' }
 ];
 const PAGES = {
+  modes: { m: '<span class="g-text">จยย. · MRT</span>', bc: 'จยย. · เดลิเวอรี่ · MRT', title: 'ช่องทาง <span class="g-text">จยย. · เดลิเวอรี่ · แท็กซี่ · MRT</span>', sub: 'ยอดรถจักรยานยนต์ เดลิเวอรี่ แท็กซี่ และลูกค้าที่เข้า–ออกทางสะพาน MRT · เทียบเดือนก่อน/ปีก่อน · เดือนที่ไม่ได้บันทึกจะไม่นับเป็น 0' },
   hourly: { m: '<span class="g-text">รายชั่วโมง</span>', bc: 'วิเคราะห์รายชั่วโมง', title: 'วิเคราะห์ <span class="g-text">รายชั่วโมง</span>', sub: 'ลูกค้าและรถยนต์เข้าแต่ละชั่วโมง จากตารางรายประตูในไฟล์รายเดือน · Heatmap วัน × ชั่วโมง · เทียบเดือน/ปีก่อน' },
   events: { m: '<span class="g-text">เหตุการณ์</span>', bc: 'ปฏิทินเหตุการณ์', title: 'ปฏิทิน <span class="g-text">เหตุการณ์พิเศษ</span>', sub: 'บันทึกโปรโมชัน อีเวนต์ สภาพอากาศ การปิดพื้นที่ · วิเคราะห์ผลกระทบ · วันหยุดยาว' },
   studio: { m: 'เทียบ <span class="g-text">ทุกมิติ</span>', bc: 'เปรียบเทียบอิสระ', title: 'เปรียบเทียบ <span class="g-text">ทุกมิติ</span>', sub: 'เลือกงวดหลักเทียบกับงวดใดก็ได้ (วัน/สัปดาห์/เดือน/ปี/ช่วงกำหนดเอง) × ทุกตัวชี้วัด × ประเภทวัน/วันในสัปดาห์' },
@@ -1878,7 +1928,7 @@ function renderNav() {
   $('#nav').innerHTML = NAV.map(n => n.sec ? `<div class="side-label hide-collapsed">${n.sec}</div>` :
     `<button class="nav-item ${S.page === n.id ? 'active' : ''}" data-page="${n.id}" title="${n.label}">${I(n.icon)}<span class="hide-collapsed">${n.label}</span>${n.id === 'sheets' && SH.connected ? '<span class="nav-badge live hide-collapsed">Live</span>' : n.id === 'quality' ? (S.qCount ? `<span class="nav-badge hide-collapsed" style="background:linear-gradient(90deg,#f59e0b,#ef4444)">${S.qCount > 99 ? '99+' : S.qCount}</span>` : '') : n.badge ? `<span class="nav-badge hide-collapsed">${n.badge}</span>` : ''}</button>`).join('');
 }
-const NO_FILTER = ['sheets', 'studio', 'quality', 'hourly', 'events']; // หน้าที่มีตัวเลือกช่วงเวลาของตัวเอง
+const NO_FILTER = ['sheets', 'studio', 'quality', 'hourly', 'events', 'modes']; // หน้าที่มีตัวเลือกช่วงเวลาของตัวเอง
 function goto(page) {
   S.page = page;
   // v8: "รายวัน (ล่าสุด)" มีเฉพาะหน้าภาพรวม — หน้าอื่นกลับไปใช้ช่วง "ทั้งหมด" (การวิเคราะห์รายเดือน/ปี ต้องใช้หลายวัน)
@@ -1929,7 +1979,7 @@ function applyFilter() {
   $('#dFrom').min = $('#dTo').min = first; $('#dFrom').max = $('#dTo').max = last;
   $('#dFrom').value = start; $('#dTo').value = end;
   $('#rangeBadge').textContent = `${dTH(start)} – ${dTH(end)}`;
-  $('#rangeInfo').textContent = `${N(S.rows.length)} วันที่มีข้อมูล` + (S.prev.length ? ` · เทียบกับ${S.prevLabel}` : '');
+  $('#rangeInfo').textContent = `${N(S.rows.length)} วันที่มีข้อมูล` + (S.prev.length ? ` · เทียบกับ ${S.prevLabel}` : '');
 }
 function updateStatus() {
   const has = S.all.length > 0;
@@ -1961,7 +2011,7 @@ function render() {
     if (!body) return;
     if (!S.all.length) { body.innerHTML = emptyHTML(); return; }
     if (!NO_FILTER.includes(S.page) && S.page !== 'yearly' && !S.rows.length) { body.innerHTML = emptyHTML('ไม่มีข้อมูลในช่วงเวลาที่เลือก', 'กรุณาเลือกช่วงเวลาอื่นจากแถบด้านบน', false); return; }
-    ({ dashboard: renderDashboard, weekday: renderWeekday, monthly: renderMonthly, yearly: renderYearly, raw: renderRaw, daycmp: renderDayCmp, studio: renderStudio, quality: renderQuality, hourly: renderHourly, events: renderEvents })[S.page](body);
+    ({ dashboard: renderDashboard, weekday: renderWeekday, monthly: renderMonthly, yearly: renderYearly, raw: renderRaw, daycmp: renderDayCmp, studio: renderStudio, quality: renderQuality, hourly: renderHourly, modes: renderModes, events: renderEvents })[S.page](body);
   } catch (e) {
     console.error('[render]', S.page, e);
     if (body) body.innerHTML = `<div class="card empty"><div class="empty-ic" style="color:var(--down)">${I('alert')}</div><div class="text-lg font-semibold">แสดงผลหน้านี้ไม่สำเร็จ</div>
@@ -1975,11 +2025,12 @@ function emptyHTML(title, sub, btns = true) {
     <div class="muted text-sm mt-1">${sub || 'ระบบดึงข้อมูลจากไฟล์รายเดือนในโฟลเดอร์ Google Drive อัตโนมัติ — ตรวจสอบการเชื่อมต่อที่หน้า "Google Drive / Sheets"'}</div>${btns ? st : ''}
     ${btns ? `<div class="flex flex-wrap justify-center gap-2 mt-5"><button class="btn btn-primary" data-action="reconnect">${I('refresh')}เชื่อมต่อ / ลองใหม่</button><button class="btn" data-page="sheets">${I('sheet')}ตั้งค่าการเชื่อมต่อ</button></div>` : ''}</div>`;
 }
-function insightHTML(items, title = 'AI INSIGHT') {
+// v17: nDays = จำนวนวันที่ใช้วิเคราะห์จริงของหน้านั้น (เดิมแสดงจำนวนวันของตัวกรองหน้าภาพรวมเสมอ ทำให้หน้ารายปี/รายชั่วโมง/ช่องทางอื่นแสดงเลขไม่ตรง)
+function insightHTML(items, title = 'AI INSIGHT', nDays) {
   return `<div class="insight flex flex-col xl:flex-row xl:items-center gap-4">
     <div class="insight-head flex items-center gap-4 xl:pr-5"><div class="insight-ic">${I('bulb')}</div><div class="font-bold text-lg g-text whitespace-nowrap">${title}</div></div>
     <ul class="ins-list flex-1">${items.map(t => `<li>${t}</li>`).join('')}</ul>
-    <div class="text-xs muted xl:text-right xl:whitespace-nowrap self-start xl:self-center">Rule-based · อ้างอิง ${N(S.rows.length)} วัน</div></div>`;
+    <div class="text-xs muted xl:text-right xl:whitespace-nowrap self-start xl:self-center">Rule-based · อ้างอิง ${N(nDays === undefined ? S.rows.length : nDays)} วัน</div></div>`;
 }
 const ICO_COLOR = { 'ico-v': '#8b5cf6', 'ico-o': '#f59e0b', 'ico-i': '#6366f1', 'ico-b': '#3b82f6', 'ico-p': '#ec4899', 'ico-g': '#10b981' };
 function kpiCard(o) {
@@ -2052,6 +2103,7 @@ function renderDashboard(body) {
     ${kpiCard({ ico: 'ico-p', icon: 'percent', label: 'อัตราส่วน ลูกค้า:รถยนต์', value: N(ratio, 2), unit: 'คน/คัน', chip: chipHTML(prev.length ? growth(ratio, pr) : null), note: 'ยอดรวมลูกค้า ÷ ยอดรวมรถยนต์', spark: 'spR' })}
     ${kpiCard({ ico: 'ico-g', icon: 'link', label: 'สหสัมพันธ์ (Pearson r)', value: N(r, 3), unit: '', chip: `<span class="chip ${Math.abs(r) >= .7 ? 'chip-up' : 'chip-flat'}">${corrLabel(r)}</span>`, note: `R² = ${N(r === null ? null : r * r, 3)}` })}
   </div>
+  ${modeKpiRow(rows, prev.length ? [{ short: S.prevLabel, rows: prev }] : [], { note: prev.length ? 'ตัวเลขใหญ่ = ยอดรวม · % = เฉลี่ย/วัน เทียบ ' + S.prevLabel : 'ยอดรวมทั้งช่วงข้อมูล' })}
 
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
     <div class="card p-5 xl:col-span-2">
@@ -2560,7 +2612,7 @@ function renderYearly(body) {
   ${yearControlsHTML(Q)}
   ${yearKpiHTML(Q)}
   ${Q.Y === Q.years[0] ? forecastCardHTML('year') : ''}
-  ${insightHTML(yearInsights(Q), `ปี ${Q.Y + 543} เทียบ ${Q.Y - 1 + 543}`)}
+  ${insightHTML(yearInsights(Q), `ปี ${Q.Y + 543} เทียบ ${Q.Y - 1 + 543}`, Q.C.days + Q.P.days)}
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
     <div class="card p-5 ${ytd ? 'xl:col-span-2' : 'xl:col-span-3'}">
       ${cardHead('เปรียบเทียบรายเดือนข้ามปี', `ค่าเฉลี่ยต่อวันของแต่ละเดือน · ${metric === 'cust' ? 'ยอดลูกค้า (คน/วัน)' : metric === 'car' ? 'ยอดรถยนต์ (คัน/วัน)' : 'Ratio (คน/คัน)'}`,
@@ -2600,6 +2652,7 @@ const EVT_TYPES = ['โปรโมชัน', 'อีเวนต์/กิจ�
 const EVT_COLOR = { 'โปรโมชัน': '#8b5cf6', 'อีเวนต์/กิจกรรม': '#ec4899', 'สภาพอากาศ': '#0ea5e9', 'ปิดพื้นที่/ซ่อมบำรุง': '#f59e0b', 'เหตุขัดข้อง': '#ef4444', 'อื่น ๆ': '#64748b' };
 // ---------- ติดป้ายเหตุการณ์ + วันหยุดยาว ให้ทุกแถว (เรียกหลัง annotate ทุกครั้ง) ----------
 function annotateExtra(rows) {
+  markRecorded(rows); // v16: เดือนที่ไม่ได้บันทึกยอด จยย./แท็กซี่/เดลิเวอรี่/MRT → null
   const evs = (S.events || []).filter(e => e && e.from && e.to);
   const hm = holMap();
   const off = k => { const o = dateFromKey(k); return !!o && (o.dow === 0 || o.dow === 6 || !!hm[k]); };
@@ -2648,7 +2701,7 @@ function renderEvents(body) {
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
     <div class="card p-5">
       ${cardHead(E.id ? 'แก้ไขเหตุการณ์' : 'เพิ่มเหตุการณ์พิเศษ', 'โปรโมชัน อีเวนต์ ฝนตกหนัก ปิดลานจอด ฯลฯ — ใช้อธิบายค่าผิดปกติและแสดงบนกราฟ')}
-      ${!canWrite ? `<div class="info-box mb-3">${I('info')}<div>${SH.connected ? 'ต้องอัปเดต Apps Script เป็น <b>Code_CCA_v6.gs</b> ก่อนจึงจะบันทึกเหตุการณ์ได้ (หน้า Google Drive / Sheets → ดาวน์โหลดโค้ด)' : 'ยังไม่ได้เชื่อมต่อ Google Sheets'}</div></div>` : ''}
+      ${!canWrite ? `<div class="info-box mb-3">${I('info')}<div>${SH.connected ? 'ต้องอัปเดต Apps Script เป็น <b>Code_CCA_v7.gs</b> ก่อนจึงจะบันทึกเหตุการณ์ได้ (หน้า Google Drive / Sheets → ดาวน์โหลดโค้ด)' : 'ยังไม่ได้เชื่อมต่อ Google Sheets'}</div></div>` : ''}
       <div class="grid grid-cols-2 gap-3">
         <div><label class="text-xs muted">วันเริ่ม</label><input type="date" id="evFrom" class="field mt-1" value="${E.from || ''}"></div>
         <div><label class="text-xs muted">วันสิ้นสุด</label><input type="date" id="evTo" class="field mt-1" value="${E.to || ''}"></div>
@@ -2724,7 +2777,7 @@ async function loadHourly(ym) {
   if (S.hourly[ym]) return S.hourly[ym];
   const r = await jsonp({ action: 'hourly', ym }, 120000);
   if (!r || !r.ok) throw new Error((r && r.error) || 'อ่านข้อมูลรายชั่วโมงไม่สำเร็จ');
-  if (r.api === undefined || !Array.isArray(r.days)) throw new Error('สคริปต์ยังไม่รองรับรายชั่วโมง — กรุณาอัปเดตเป็น Code_CCA_v6.gs');
+  if (r.api === undefined || !Array.isArray(r.days)) throw new Error('สคริปต์ยังไม่รองรับรายชั่วโมง — กรุณาอัปเดตเป็น Code_CCA_v7.gs');
   // ตรวจความถูกต้อง: ผลรวมรายชั่วโมงต้องเท่ากับยอดรวมรายวัน (ลูกค้า และรถยนต์ 24 ชม.) — วันที่ไม่ตรงจะไม่ถูกนำมาเฉลี่ย
   const byKey = new Map(S.all.map(x => [x.key, x]));
   r.days.forEach(d => {
@@ -2771,7 +2824,7 @@ function renderHourly(body) {
     <span class="text-xs muted ml-2">ประเภทวัน</span><div class="seg seg-sm">${Object.entries(tLab).map(([k, l]) => `<button data-hrt="${k}" class="${hs.t === k ? 'on' : ''}">${l}</button>`).join('')}</div>
     <div class="flex gap-1.5 ml-auto"><button class="btn btn-sm" data-export="hrcsv">${I('sheet')}CSV</button><button class="btn btn-primary btn-sm" data-export="hrpdf">${I('download')}PDF</button></div>
   </div></div>`;
-  if (!(SH.connected && SH.api >= 6)) { body.innerHTML = controls + emptyHTML('ต้องอัปเดต Apps Script', 'ข้อมูลรายชั่วโมงต้องใช้ Code_CCA_v6.gs — ไปที่หน้า Google Drive / Sheets → ดาวน์โหลดโค้ด แล้ว Deploy เป็น New version', false); return; }
+  if (!(SH.connected && SH.api >= 6)) { body.innerHTML = controls + emptyHTML('ต้องอัปเดต Apps Script', 'ข้อมูลรายชั่วโมงต้องใช้ Code_CCA_v7.gs — ไปที่หน้า Google Drive / Sheets → ดาวน์โหลดโค้ด แล้ว Deploy เป็น New version', false); return; }
   const key = hs.ym + '|' + cmpYm;
   const H = S.hourly && S.hourly[hs.ym], Hc = cmpYm ? (S.hourly && S.hourly[cmpYm]) : null;
   if (!H || (cmpYm && S.hourly[cmpYm] === undefined)) {
@@ -2815,13 +2868,13 @@ function renderHourly(body) {
   body.innerHTML = controls + `
   <div class="flex flex-wrap items-center gap-2 text-xs"><span class="chip ${okC === nD ? 'chip-up' : 'chip-o'}">ลูกค้า: ผลรวมรายชั่วโมงตรงยอดรวม ${okC}/${nD} วัน</span><span class="chip ${okV === nD ? 'chip-up' : 'chip-o'}">รถยนต์: ตรง ${okV}/${nD} วัน</span>${Hc === null && cmpYm ? `<span class="chip chip-flat">ไม่มีไฟล์ ${nB} สำหรับเทียบ</span>` : ''}${bBad ? `<span class="chip chip-o" style="white-space:normal">${nB}: ไม่มีวันที่ผลรวมรายชั่วโมงตรงยอดรวม — ไม่นำมาเทียบ</span>` : ''}${bad.length ? `<span class="muted">วันที่ไม่ตรง: ${bad.slice(0, 6).map(d => dShort(d.date)).join(', ')}${bad.length > 6 ? ' …' : ''}</span>` : ''}</div>
   ${kpi}
-  ${insightHTML(ins, 'สรุปรายชั่วโมง')}
+  ${insightHTML(ins, 'สรุปรายชั่วโมง', A.cd.length + (B ? B.cd.length : 0))}
   <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
     <div class="card p-5">${cardHead(`ลูกค้าเฉลี่ยรายชั่วโมง · ${tLab[hs.t]}`, `ป้าย 11 = ช่วง 10.00–11.00 น. · ${nA}${B ? ' (แท่ง) เทียบ ' + nB + ' (เส้น)' : ''}`)}<div style="height:320px"><canvas id="chHrC"></canvas></div></div>
     <div class="card p-5">${cardHead('รถยนต์เข้าเฉลี่ยรายชั่วโมง (24 ชม.)', `${nA}${B ? ' (แท่ง) เทียบ ' + nB + ' (เส้น)' : ''}`)}<div style="height:320px"><canvas id="chHrV"></canvas></div></div>
   </div>
   <div class="card p-5">${cardHead('Heatmap ลูกค้าเฉลี่ย: วันในสัปดาห์ × ชั่วโมง', `${nA} · ${tLab[hs.t]} · สีเข้ม = หนาแน่นมาก`)}${heat}</div>
-  <div class="card p-5">${cardHead('ตารางรายชั่วโมง', 'ค่าเฉลี่ยต่อวัน · ลูกค้านับ 10.00–24.00 น. (บางประตูเปิด 09.00–24.00 น.) · รถยนต์นับ 24 ชม.')}${tbl}</div>`;
+  <div class="card p-5">${cardHead('ตารางรายชั่วโมง', 'ค่าเฉลี่ยต่อวัน · ลูกค้าตัดยอด 10.00–22.00 น. (ประตู Donki / Uniqlo 09.00–24.00 น.) ตามชีต · รถยนต์นับ 24 ชม.')}${tbl}</div>`;
   const ds = (lab, a, b, col) => [{ type: 'bar', label: nA, data: a, backgroundColor: col + 'cc', borderRadius: 5, maxBarThickness: 26, order: 2 }].concat(b ? [{ type: 'line', label: nB, data: b, borderColor: '#f59e0b', backgroundColor: '#f59e0b', borderWidth: 2.2, borderDash: [5, 4], tension: .35, pointRadius: 2.5, order: 1 }] : []);
   const opt = u => ({ responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'top', align: 'end' }, tooltip: { callbacks: { title: it => hrLab(+it[0].label), label: it => ` ${it.dataset.label}: ${N(it.raw)} ${u}` } } }, scales: { x: { grid: { display: false }, ticks: { maxRotation: 0 } }, y: { beginAtZero: true, ticks: { callback: tickK } } } });
   mkChart('chHrC', { type: 'bar', data: { labels: HR_C.map(String), datasets: ds('ลูกค้า', A.c, B && B.c, '#8b5cf6') }, options: opt('คน/ชม.') });
@@ -2868,6 +2921,215 @@ function buildHourlyReport() {
     mk('rpHC', HR_C.map(String), A.c, B && B.c, '#8b5cf6'); mk('rpHV', HR_V.map(String), A.v, B && B.v, '#f97316');
   } finally { Chart.defaults.color = prevColor; Chart.defaults.borderColor = prevBorder; }
   return `รายชั่วโมง_${S.hr.ym}`;
+}
+
+/* =====================================================================
+   v16: ช่องทางอื่น — ยอด จยย. · เดลิเวอรี่ · แท็กซี่ · ลูกค้าทางสะพาน MRT
+   แหล่งข้อมูล: ป้าย "ยอด จยย./ยอด แท็กซี่/ยอด เดลิเวอรี่" ในชีตรายวัน + แถว "ประตู สะพาน MRT" ในตารางลูกค้าเข้า/ออก (Code_CCA_v7.gs)
+   บางปี/บางเดือนอาจเลิกนับบางยอด → ถ้า "ทั้งเดือนเป็น 0 หรือว่าง" ถือว่า "ไม่ได้บันทึก" (ไม่ใช่ยอด 0 จริง)
+   เพื่อไม่ให้ค่าเฉลี่ยและการเทียบ % ถูกดึงลงด้วยศูนย์ปลอม
+   ===================================================================== */
+const MODE_M = [
+  { k: 'moto', label: 'รถจักรยานยนต์ (จยย.)', short: 'จยย.', unit: 'คัน', color: '#10b981', ico: 'ico-g', icon: 'car' },
+  { k: 'deli', label: 'เดลิเวอรี่', short: 'เดลิเวอรี่', unit: 'คัน', color: '#3b82f6', ico: 'ico-b', icon: 'car' },
+  { k: 'taxi', label: 'แท็กซี่', short: 'แท็กซี่', unit: 'คัน', color: '#06b6d4', ico: 'ico-i', icon: 'car' },
+  { k: 'mrt', label: 'ลูกค้าเข้าทางสะพาน MRT', short: 'MRT เข้า', unit: 'คน', color: '#ec4899', ico: 'ico-p', icon: 'users' },
+  { k: 'mrtOut', label: 'ลูกค้าออกทางสะพาน MRT', short: 'MRT ออก', unit: 'คน', color: '#a855f7', ico: 'ico-v', icon: 'users' }
+];
+const MODE_KEYS = MODE_M.map(m => m.k);
+// ตรวจว่าเดือนไหน "มีการบันทึก" แต่ละยอด — เดือนที่เป็น 0/ว่างทั้งเดือน → ตั้งเป็น null (เก็บค่าดิบไว้ที่ r._k)
+function markRecorded(rows) {
+  const rec = {}, zero = {}; MODE_KEYS.forEach(k => { rec[k] = new Set(); zero[k] = new Set(); });
+  const raw = (r, k) => r['_' + k] !== undefined ? r['_' + k] : r[k];
+  for (const [ym, l] of groupBy(rows, r => r.ym)) MODE_KEYS.forEach(k => {
+    const v = l.map(r => raw(r, k)).filter(isNum);
+    if (v.some(x => x > 0)) { rec[k].add(ym); l.forEach(r => { if (r['_' + k] !== undefined) { r[k] = r['_' + k]; delete r['_' + k]; } }); }
+    else { if (v.length) zero[k].add(ym); l.forEach(r => { if (isNum(raw(r, k))) { r['_' + k] = raw(r, k); r[k] = null; } }); }
+  });
+  S._rec = rec; S._zero = zero;
+  return rows;
+}
+const mSum = (rows, k) => { const v = rows.map(r => r[k]).filter(isNum); return v.length ? { n: v.length, total: sum(v), mean: mean(v), max: Math.max(...v) } : { n: 0, total: null, mean: null, max: null }; };
+// สัดส่วนลูกค้าทาง MRT = ผลรวม MRT ÷ ผลรวมลูกค้า (เฉพาะวันที่มีทั้งสองค่า — กันวันที่ไม่ได้บันทึก MRT ทำให้สัดส่วนต่ำเกินจริง)
+const mrtShare = rows => { const l = rows.filter(r => isNum(r.mrt) && r.cust > 0); return l.length ? sum(l.map(r => r.mrt)) / sum(l.map(r => r.cust)) : null; };
+function modeCoverage(k) {
+  const all = [...new Set(S.all.map(r => r.ym))].sort(), rec = [...(S._rec && S._rec[k] || [])].sort();
+  if (!rec.length) return { none: true, zero: S._zero && S._zero[k] && S._zero[k].size, txt: S._zero && S._zero[k] && S._zero[k].size ? `ไม่มีการบันทึก (เป็น 0 ทุกวัน ${S._zero[k].size} เดือน)` : 'ไม่พบในไฟล์' };
+  const gap = all.filter(ym => ym >= rec[0] && ym <= rec[rec.length - 1] && !S._rec[k].has(ym));
+  const before = all.filter(ym => ym < rec[0]).length, after = all.filter(ym => ym > rec[rec.length - 1]);
+  return { first: rec[0], last: rec[rec.length - 1], n: rec.length, gap, after, before, txt: `${ymTH(rec[0])} – ${ymTH(rec[rec.length - 1])} (${rec.length} เดือน)` + (gap.length ? ` · ไม่มีบันทึก ${gap.length} เดือน` : '') + (after.length ? ` · ไม่ได้บันทึกตั้งแต่ ${ymTH(after[0])}` : '') };
+}
+
+/* ---------- v17: การ์ด KPI ช่องทางอื่น (จยย. · เดลิเวอรี่ · MRT เข้า) สำหรับหน้าภาพรวม ----------
+   cur = แถวของงวดปัจจุบัน · bases = [{ short, rows }] ฐานเทียบ (ตัวแรก = ฐานหลักที่แสดงเป็นชิป)
+   ใช้ "ค่าเฉลี่ยต่อวัน" เทียบเสมอ (จำนวนวันต่างกันก็เทียบได้ยุติธรรม) · ยอดที่ไม่ได้บันทึกในงวด → แสดง "—" ไม่ใช่ 0 */
+const MODE_DASH = ['moto', 'deli', 'mrt'];
+function modeKpiRow(cur, bases, opt = {}) {
+  if (typeof MODE_M === 'undefined' || !S._rec) return '';
+  const list = MODE_M.filter(m => MODE_DASH.includes(m.k) && S._rec[m.k] && S._rec[m.k].size);
+  if (!list.length) return '';
+  const one = !!opt.single, avg = (rows, k) => { const v = rows.map(r => r[k]).filter(isNum); return v.length ? { n: v.length, mean: mean(v), total: sum(v) } : null; };
+  const cards = list.map(m => {
+    const a = avg(cur, m.k);
+    if (!a) return kpiCard({ ico: m.ico, icon: m.icon, label: m.label, value: '—', unit: '', chip: '', note: 'ช่วงนี้ไม่ได้บันทึกยอดนี้' });
+    const bs = bases.map(b => ({ b, x: avg(b.rows, m.k) }));
+    const main = bs[0] && bs[0].x ? growth(a.mean, bs[0].x.mean) : null;
+    const rest = bs.slice(1).filter(o => o.x).map(o => `${o.b.short} ${P(growth(a.mean, o.x.mean))}`).join(' · ');
+    const note = one ? `${bs[0] ? (bs[0].x ? `${bs[0].b.short} ${N(bs[0].x.mean)} ${m.unit}` : `${bs[0].b.short}: ไม่มีข้อมูล`) : ''}${rest ? ' · ' + rest : ''}`
+      : `เฉลี่ย ${N(a.mean)} ${m.unit}/วัน${bs[0] ? bs[0].x ? ` · ${bs[0].b.short} ${N(bs[0].x.mean)}/วัน` : ` · ${bs[0].b.short}: ไม่มีข้อมูล` : ''}${a.n < cur.length ? ` · มีข้อมูล ${a.n}/${cur.length} วัน` : ''}`;
+    return kpiCard({ ico: m.ico, icon: m.icon, label: one ? m.label : m.label + ' รวม', value: N(one ? a.mean : a.total), unit: m.unit, chip: bs[0] ? chipHTML(main) : '', note });
+  });
+  const sh = mrtShare(cur), shB = bases[0] ? mrtShare(bases[0].rows) : null;
+  if (ok(sh)) cards.push(kpiCard({ ico: 'ico-o', icon: 'percent', label: 'สัดส่วนลูกค้าเข้าทาง MRT', value: P(sh, 1, false), unit: '', chip: ok(shB) ? `<span class="chip ${sh >= shB ? 'chip-up' : 'chip-down'}">${sh >= shB ? '+' : ''}${((sh - shB) * 100).toFixed(1)} จุด</span>` : '', note: ok(shB) ? `${bases[0].short} ${P(shB, 1, false)} ของลูกค้าทั้งหมด` : 'ของลูกค้าเข้าทั้งหมด' }));
+  return `<div class="md-strip"><div class="md-strip-h"><span class="font-semibold text-sm">${I('car', 15)} ช่องทางอื่น: จยย. · เดลิเวอรี่ · MRT (ยอดเข้า)</span><span class="text-xs muted">${opt.note || ''}</span><button class="btn btn-sm ml-auto" data-goto="modes">ดูรายละเอียด ${I('chevronsLeft', 13).replace('<svg', '<svg style="transform:scaleX(-1)"')}</button></div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 xl:gap-4">${cards.join('')}</div></div>`;
+}
+
+/* ---------- v17: หน้า "จยย. · เดลิเวอรี่ · MRT" — เลือกงวด รายวัน / รายสัปดาห์ / รายเดือน / รายปี ----------
+   ฐานเทียบมาตรฐานของแต่ละงวด (ตรงกับศูนย์ออกรายงาน):
+     รายวัน    = เมื่อวาน · วันเดียวกันสัปดาห์ก่อน (−7) · วันเดียวกันปีก่อน (−364 = วันเดียวกันในสัปดาห์)
+     รายสัปดาห์ = สัปดาห์ก่อน · สัปดาห์เดียวกันปีก่อน (ตัดจำนวนวันให้เท่ากันถ้าสัปดาห์ยังไม่ครบ)
+     รายเดือน   = เดือนก่อน · เดือนเดียวกันปีก่อน (ตัดที่วันที่เดียวกันถ้าเดือนยังไม่ครบ)
+     รายปี      = ปีก่อน ช่วงเดียวกัน (YTD) */
+const MD_CMP = {
+  day: [['d1', 'เมื่อวาน'], ['d7', 'วันเดียวกันสัปดาห์ก่อน'], ['d364', 'วันเดียวกันปีก่อน']],
+  week: [['b1', 'สัปดาห์ก่อน'], ['b2', 'สัปดาห์เดียวกันปีก่อน']],
+  month: [['b1', 'เดือนก่อน'], ['b2', 'เดือนเดียวกันปีก่อน']],
+  year: [['py', 'ปีก่อน (ช่วงเดียวกัน)']]
+};
+function modePeriod(md) {
+  const by = new Map(S.all.map(r => [r.key, r])), last = S.all[S.all.length - 1].key;
+  if (md.type === 'day') {
+    const k = by.has(md.day) ? md.day : last, off = { d1: -1, d7: -7, d364: -364 }[md.cmp] || -7, bk = addDaysKey(k, off), r = by.get(k), b = by.get(bk);
+    const short = { d1: 'เมื่อวาน', d7: 'สัปดาห์ก่อน', d364: 'ปีก่อน' }[md.cmp] || 'สัปดาห์ก่อน';
+    return { kind: 'day', key: k, off, C: { rows: [r], s: k, e: k }, B: { rows: b ? [b] : [], s: bk, e: bk, label: `${short} (${TH_DAYS_S[dateFromKey(bk).dow]} ${dShort(bk)})`, short },
+      name: `${TH_DAYS[r.dow]} ${dTH(k)}`, nameShort: dShort(k), multi: [[-1, 'เมื่อวาน'], [-7, 'สัปดาห์ก่อน'], [-364, 'ปีก่อน']].map(([o, l]) => ({ short: l, k: addDaysKey(k, o), rows: by.get(addDaysKey(k, o)) ? [by.get(addDaysKey(k, o))] : [] })) };
+  }
+  if (md.type === 'year') {
+    const Q = yearCompare(md.year, 'ytd'); if (!Q) return { err: 'ไม่มีข้อมูลรายปี' };
+    return { kind: 'year', Y: Q.Y, C: { rows: Q.cur, s: Q.cur[0].key, e: Q.cur[Q.cur.length - 1].key }, B: { rows: Q.prev, s: Q.prev.length ? Q.prev[0].key : null, e: Q.prev.length ? Q.prev[Q.prev.length - 1].key : null, label: `ปี ${Q.Y + 542}${Q.rangeTxt !== 'ทั้งปี' ? ' ช่วงเดียวกัน ' + Q.rangeTxt : ''}`, short: `ปี ${Q.Y + 542}` },
+      name: `ปี ${Q.Y + 543}${Q.rangeTxt !== 'ทั้งปี' ? ' (' + Q.rangeTxt + ')' : ''}`, nameShort: `ปี ${Q.Y + 543}` };
+  }
+  const R = rcResolve(md.type === 'week' ? { type: 'week', week: md.week } : { type: 'month', ym: md.ym }); if (R.err) return { err: R.err };
+  const B = R.bases[md.cmp === 'b2' ? 1 : 0];
+  return { kind: md.type, R, C: R.C, B: Object.assign({}, B, { label: `${B.label} ${rngShort(B.s, B.e)}` }), name: md.type === 'week' ? `สัปดาห์ ${wkLabel(R.s, R.pe)}${R.e < R.pe ? ` (ข้อมูลถึง ${dShort(R.e)})` : ''}` : `${ymTH(md.ym, true)}${R.e < R.pe ? ` (1–${+R.e.slice(8)})` : ''}`, nameShort: md.type === 'week' ? rngShort(R.s, R.pe) : ymTH(md.ym) };
+}
+function renderModes(body) {
+  const last = S.all[S.all.length - 1].key, months = [...new Set(S.all.map(r => r.ym))].sort().reverse(), wks = rcWeeks(), years = rcYears();
+  const md = S.md || (S.md = { type: 'month', ym: months[0], week: wks[0].s, day: last, year: years[0], cmp: 'b2', k: 'mrt' });
+  if (!MD_CMP[md.type].some(c => c[0] === md.cmp)) md.cmp = md.type === 'day' ? 'd7' : md.type === 'year' ? 'py' : 'b2';
+  if (!months.includes(md.ym)) md.ym = months[0]; if (!wks.some(w => w.s === md.week)) md.week = wks[0].s; if (!years.includes(md.year)) md.year = years[0];
+  const avail = MODE_M.filter(m => S._rec && S._rec[m.k] && S._rec[m.k].size);
+  if (!avail.length) { body.innerHTML = emptyHTML('ยังไม่มียอด จยย. / เดลิเวอรี่ / แท็กซี่ / MRT', 'ยอดเหล่านี้อ่านจากไฟล์รายเดือน — ยอด MRT ต้องใช้ Code_CCA_v7.gs ขึ้นไป (หน้า Google Drive / Sheets → ดาวน์โหลดโค้ด แล้ว Deploy เป็น New version)', false); return; }
+  if (!avail.some(m => m.k === md.k)) md.k = avail[0].k;
+  const picker = md.type === 'day' ? `<input type="date" id="mdDay" class="field field-sm" style="width:auto" value="${md.day}" min="${S.all[0].key}" max="${last}">`
+    : md.type === 'week' ? `<select id="mdWeek" class="field field-sm" style="width:auto;max-width:100%">${wks.map(w => `<option value="${w.s}" ${w.s === md.week ? 'selected' : ''}>${wkLabel(w.s, w.e)} (${w.n}/7)</option>`).join('')}</select>`
+    : md.type === 'month' ? `<select id="mdYm" class="field field-sm" style="width:auto">${months.map(m => `<option value="${m}" ${m === md.ym ? 'selected' : ''}>${ymTH(m, true)}</option>`).join('')}</select>`
+    : `<select id="mdYear" class="field field-sm" style="width:auto">${years.map(y => `<option value="${y}" ${y === md.year ? 'selected' : ''}>ปี ${y + 543}</option>`).join('')}</select>`;
+  const controls = `<div class="card st-ctrl p-4"><div class="md-ctrl">
+    <div class="md-ctrl-g"><span class="text-xs muted">มุมมอง</span><div class="seg seg-sm">${[['day', 'รายวัน'], ['week', 'รายสัปดาห์'], ['month', 'รายเดือน'], ['year', 'รายปี']].map(([k, l]) => `<button data-mdt="${k}" class="${md.type === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
+    <div class="md-ctrl-g"><span class="text-xs muted">งวด</span>${picker}</div>
+    <div class="md-ctrl-g"><span class="text-xs muted">เทียบกับ</span><div class="seg seg-sm">${MD_CMP[md.type].map(([k, l]) => `<button data-mdc="${k}" class="${md.cmp === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
+    <div class="md-ctrl-g ml-auto"><button class="btn btn-sm" data-export="mdcsv">${I('sheet')}CSV</button></div>
+  </div>
+  <div class="flex flex-wrap gap-1.5 mt-3"><span class="text-xs muted">ข้อมูลที่มี:</span>${MODE_M.map(m => { const cv = modeCoverage(m.k); return `<span class="chip ${cv.none ? 'chip-flat' : cv.after && cv.after.length ? 'chip-o' : 'chip-up'}" title="${esc(cv.txt)}"><span style="background:${m.color};width:7px;height:7px;border-radius:50%;display:inline-block"></span>${m.short} ${cv.none ? 'ไม่ได้บันทึก' : `${cv.n} เดือน${cv.gap.length ? ` (ขาด ${cv.gap.length})` : ''}${cv.after.length ? ' · เลิกบันทึก' : ''}`}</span>`; }).join('')}</div></div>`;
+  const Pd = modePeriod(md); if (Pd.err) { body.innerHTML = controls + emptyHTML('ไม่มีข้อมูลงวดที่เลือก', Pd.err, false); return; }
+  const C = Pd.C, B = Pd.B, single = Pd.kind === 'day', M = MODE_M.find(m => m.k === md.k);
+  const recIn = (k, rows) => rows.some(r => isNum(r[k]));
+  const card = m => {
+    const a = mSum(C.rows, m.k), b = mSum(B.rows, m.k);
+    if (!a.n) { const z = C.rows.some(r => r['_' + m.k] !== undefined); return kpiCard({ ico: m.ico, icon: m.icon, label: m.label, value: '—', unit: '', chip: '', note: z ? 'งวดนี้เป็น 0 ทุกวัน = ไม่ได้บันทึก' : 'งวดนี้ไม่มีข้อมูลในไฟล์' }); }
+    return kpiCard({ ico: m.ico, icon: m.icon, label: single ? m.label : m.label + ' / วัน', value: N(a.mean), unit: m.unit, chip: b.n ? chipHTML(growth(a.mean, b.mean)) : '', note: single ? `${B.short}: ${b.n ? N(b.mean) + ' ' + m.unit : 'ไม่มีข้อมูล'}` : `รวม ${N(a.total)} ${m.unit} (${a.n} วัน)${b.n ? ` · ${B.short} ${N(b.mean)}/วัน` : ` · ${B.short}: ไม่มีข้อมูล`}` });
+  };
+  const shA = mrtShare(C.rows), shB = mrtShare(B.rows);
+  const kpi = `<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 xl:gap-4">${MODE_M.map(card).join('')}
+    ${kpiCard({ ico: 'ico-o', icon: 'percent', label: 'สัดส่วนลูกค้าเข้าทาง MRT', value: ok(shA) ? P(shA, 1, false) : '—', unit: '', chip: ok(shA) && ok(shB) ? `<span class="chip ${shA >= shB ? 'chip-up' : 'chip-down'}">${shA >= shB ? '+' : ''}${((shA - shB) * 100).toFixed(1)} จุด</span>` : '', note: ok(shB) ? `${B.short} ${P(shB, 1, false)} ของลูกค้าทั้งหมด` : 'ของลูกค้าเข้าทั้งหมด' })}</div>`;
+  const ins = modeInsights(Pd, true);
+  // ตารางด้านขวา: รายวัน = ทุกยอดเทียบหลายฐาน · งวดอื่น = เฉลี่ยตามวันในสัปดาห์ของยอดที่เลือก
+  const cellV = v => ok(v) ? N(v) : '<span class="muted">—</span>';
+  let side;
+  if (single) {
+    side = `<div class="card p-5">${cardHead('เทียบหลายฐาน (วันที่เลือก)', `${Pd.nameShort} · % = เทียบกับฐาน`)}<div class="scroll-x"><table class="tbl"><thead><tr><th>ยอด</th><th class="num">${Pd.nameShort}</th>${Pd.multi.map(b => `<th class="num">${b.short}<div class="th-sub">${dShort(b.k)}</div></th>`).join('')}</tr></thead><tbody>
+      ${avail.map(m => { const v = C.rows[0][m.k]; return `<tr><td>${m.short}</td><td class="num font-semibold">${cellV(v)}</td>${Pd.multi.map(b => { const x = b.rows[0] ? b.rows[0][m.k] : null; return `<td class="num">${ok(x) ? N(x) + `<div>${ok(v) ? chipHTML(growth(v, x)) : ''}</div>` : '<span class="muted">—</span>'}</td>`; }).join('')}</tr>`; }).join('')}</tbody></table></div></div>`;
+  } else {
+    const dowT = [1, 2, 3, 4, 5, 6, 0].map(d => { const a = mSum(C.rows.filter(r => r.dow === d), M.k), b = mSum(B.rows.filter(r => r.dow === d), M.k); return { d, a, b, g: growth(a.mean, b.mean) }; });
+    side = `<div class="card p-5">${cardHead(`${M.short} เฉลี่ยตามวันในสัปดาห์`, `${M.unit}/วัน · เทียบ${B.short}`)}<div class="scroll-x"><table class="tbl"><thead><tr><th>วัน</th><th class="num">${Pd.nameShort}</th><th class="num">${B.short}</th><th class="num">%</th></tr></thead><tbody>${dowT.map(x => `<tr><td>${TH_DAYS[x.d]}</td><td class="num font-semibold">${cellV(x.a.mean)}</td><td class="num">${cellV(x.b.mean)}</td><td class="num">${x.a.n && x.b.n ? chipHTML(x.g) : ''}</td></tr>`).join('')}</tbody></table></div></div>`;
+  }
+  // ตารางสรุปรายเดือน
+  const byYm = groupBy(S.all, r => r.ym);
+  const tRows = months.map(ym => { const l = byYm.get(ym); return { ym, n: l.length, v: Object.fromEntries(MODE_KEYS.map(k => [k, S._rec[k].has(ym) ? mSum(l, k).mean : null])), sh: S._rec.mrt.has(ym) ? mrtShare(l) : null }; });
+  const tbl = `<div class="scroll-x"><table class="tbl"><thead><tr><th>เดือน</th><th class="num">วัน</th>${MODE_M.map(m => `<th class="num">${m.short}<div class="th-sub">${m.unit}/วัน</div></th>`).join('')}<th class="num">MRT<div class="th-sub">% ของลูกค้า</div></th></tr></thead><tbody>
+    ${tRows.map(t => `<tr${C.rows.some(r => r.ym === t.ym) ? ' style="background:var(--soft)"' : ''}><td class="whitespace-nowrap">${ymTH(t.ym, true)}</td><td class="num">${t.n}</td>${MODE_KEYS.map(k => `<td class="num">${cellV(t.v[k])}</td>`).join('')}<td class="num">${ok(t.sh) ? P(t.sh, 1, false) : '<span class="muted">—</span>'}</td></tr>`).join('')}</tbody></table></div>`;
+  const chartTitle = { day: `${M.label} · 28 วันล่าสุดถึง ${Pd.nameShort}`, week: `${M.label} รายวัน · ${Pd.name}`, month: `${M.label} รายวัน · ${Pd.name}`, year: `${M.label} เฉลี่ย/วัน รายเดือน · ${Pd.name}` }[Pd.kind];
+  const chartSub = { day: 'แท่ง = รายวัน (แท่งเข้ม = วันที่เลือก · สีอ่อน = วันหยุด) · เส้น = วันเดียวกันปีก่อน (−364 วัน)', week: `แท่ง = สัปดาห์นี้ · เส้น = ${B.short} (วันเดียวกันในสัปดาห์)`, month: `แท่ง = เดือนนี้ (สีอ่อน = วันหยุด) · เส้น = ${B.short} (วันที่เดียวกัน)`, year: `แท่ง = ปี ${Pd.Y + 543} · เส้น = ${B.short}` }[Pd.kind];
+  body.innerHTML = controls + kpi + insightHTML(ins, 'สรุปช่องทางอื่น', C.rows.length + B.rows.length) + `
+  <div class="flex flex-wrap items-center gap-2"><span class="text-sm font-semibold">ดูกราฟของ</span><div class="seg seg-sm">${avail.map(m => `<button data-mdk="${m.k}" class="${md.k === m.k ? 'on' : ''}">${m.short}</button>`).join('')}</div></div>
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <div class="card p-5 xl:col-span-2">${cardHead(chartTitle, chartSub)}<div class="md-chart"><canvas id="chMdD"></canvas></div></div>
+    ${side}
+  </div>
+  <div class="card p-5">${cardHead(`แนวโน้มรายเดือน: ${M.label} (เฉลี่ย/วัน)`, 'เดือนที่ไม่ได้บันทึกจะเว้นว่าง ไม่นับเป็น 0 · แท่งเข้ม = เดือนในงวดที่เลือก')}<div class="md-chart"><canvas id="chMdM"></canvas></div></div>
+  <div class="card p-5">${cardHead('ตารางสรุปรายเดือน (เฉลี่ยต่อวัน)', '— = เดือนนั้นไม่ได้บันทึกยอดนี้ (ว่าง หรือเป็น 0 ทั้งเดือน) · แถวเน้น = เดือนในงวดที่เลือก')}${tbl}</div>`;
+  // ----- กราฟหลักตามมุมมอง -----
+  const by = new Map(S.all.map(r => [r.key, r])), light = hex => hex + '88';
+  const val = k => { const r = k && by.get(k); return r && isNum(r[M.k]) ? r[M.k] : null; };
+  const isOff = k => { const r = by.get(k); return r && (r.we || r.hol); };
+  let labels, bars, line, cols, lineLab;
+  if (Pd.kind === 'day') {
+    const ks = Array.from({ length: 28 }, (_, i) => addDaysKey(Pd.key, i - 27));
+    labels = ks.map(k => { const o = dateFromKey(k); return `${TH_DAYS_S[o.dow]} ${o.d}`; }); bars = ks.map(val); line = ks.map(k => val(addDaysKey(k, -364))); lineLab = 'ปีก่อน (−364 วัน)';
+    cols = ks.map(k => k === Pd.key ? M.color : isOff(k) ? light(M.color) : M.color + 'bb');
+  } else if (Pd.kind === 'year') {
+    const mm = Array.from({ length: 12 }, (_, i) => i + 1), avgM = (rows, m) => { const l = rows.filter(r => r.m === m && isNum(r[M.k])); return l.length ? mean(l.map(r => r[M.k])) : null; };
+    labels = mm.map(m => TH_MONTHS[m - 1]); bars = mm.map(m => avgM(C.rows, m)); line = mm.map(m => avgM(B.rows, m)); lineLab = B.short; cols = mm.map(() => M.color);
+  } else {
+    const n = daysBetween(Pd.R.s, Pd.R.pe) + 1, ks = Array.from({ length: n }, (_, i) => addDaysKey(Pd.R.s, i));
+    const bk = (k, i) => Pd.kind === 'week' ? addDaysKey(k, md.cmp === 'b2' ? -364 : -7) : (() => { const x = B.s.slice(0, 8) + String(i + 1).padStart(2, '0'); return x.slice(0, 7) === B.s.slice(0, 7) && dateFromKey(x) ? x : null; })();
+    labels = ks.map(k => { const o = dateFromKey(k); return Pd.kind === 'week' ? `${TH_DAYS_S[o.dow]} ${o.d}` : String(o.d); });
+    bars = ks.map(k => k <= Pd.R.e ? val(k) : null); line = ks.map((k, i) => val(bk(k, i))); lineLab = B.short; cols = ks.map(k => isOff(k) ? light(M.color) : M.color);
+  }
+  mkChart('chMdD', { type: 'bar', data: { labels, datasets: [
+    { type: 'bar', label: Pd.nameShort, data: bars, backgroundColor: cols, borderRadius: 4, maxBarThickness: 30, order: 2 },
+    { type: 'line', label: lineLab, data: line, borderColor: '#f59e0b', backgroundColor: '#f59e0b', borderDash: [5, 4], borderWidth: 2, pointRadius: 2, tension: .3, spanGaps: true, order: 1 }] },
+    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'top', align: 'end' }, tooltip: { callbacks: { label: it => ` ${it.dataset.label}: ${N(it.raw)} ${M.unit}` } } }, scales: { x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true } }, y: { beginAtZero: true, ticks: { callback: tickK } } } } });
+  const ms = months.slice().reverse(), inP = new Set(C.rows.map(r => r.ym));
+  mkChart('chMdM', { type: 'bar', data: { labels: ms.map(ym => ymTH(ym)), datasets: [{ label: M.label, data: ms.map(ym => S._rec[M.k].has(ym) ? mSum(byYm.get(ym), M.k).mean : null), backgroundColor: ms.map(ym => inP.has(ym) ? M.color : light(M.color)), borderRadius: 4, maxBarThickness: 26 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: it => ` ${N(it.raw)} ${M.unit}/วัน` } } }, scales: { x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true } }, y: { beginAtZero: true, ticks: { callback: tickK } } } } });
+  S._mdLast = Pd;
+}
+function modeInsights(Pd, html) {
+  const C = Pd.C, Bm = Pd.B, B = s => html ? `<b>${s}</b>` : s, out = [], nm = Pd.name, single = Pd.kind === 'day';
+  const unitTxt = single ? '' : '/วัน', av = single ? 'ยอด' : 'เฉลี่ย';
+  const mrtA = mSum(C.rows, 'mrt'), mrtB = mSum(Bm.rows, 'mrt'), sh = mrtShare(C.rows);
+  if (mrtA.n) {
+    out.push(`${nm} ลูกค้าเข้าทางสะพาน MRT ${av} ${B(N(mrtA.mean))} คน${unitTxt} = ${B(P(sh, 1, false))} ของลูกค้าทั้งหมด${mrtB.n ? ` — ${trendWord(growth(mrtA.mean, mrtB.mean))}เมื่อเทียบ${Bm.short} (${P(growth(mrtA.mean, mrtB.mean))})` : ` · ${Bm.short}: ไม่มีข้อมูลเทียบ`}`);
+    if (!single) {
+      const wd = mrtShare(C.rows.filter(r => r.type === 'wd')), we = mrtShare(C.rows.filter(r => r.type !== 'wd'));
+      if (ok(wd) && ok(we)) out.push(`สัดส่วนลูกค้าทาง MRT วันทำงาน ${B(P(wd, 1, false))} · วันหยุด ${B(P(we, 1, false))} — ${wd > we ? 'วันทำงานพึ่งพารถไฟฟ้ามากกว่า (กลุ่มคนทำงาน/นักเรียน)' : 'วันหยุดมีสัดส่วนมาทางรถไฟฟ้ามากกว่า'}`);
+      const l = C.rows.filter(r => isNum(r.mrt)); if (l.length >= 7) { const rr = pearson(l.map(r => r.mrt), l.map(r => r.cust)); if (ok(rr)) out.push(`ยอด MRT กับยอดลูกค้ารวมรายวัน สัมพันธ์กัน r = ${B(N(rr, 2))} (${corrLabel(rr)})`); }
+    }
+  }
+  ['moto', 'deli'].forEach(k => { const m = MODE_M.find(x => x.k === k), a = mSum(C.rows, k), b = mSum(Bm.rows, k); if (!a.n) return;
+    const wd = mSum(C.rows.filter(r => r.type === 'wd'), k), we = mSum(C.rows.filter(r => r.type !== 'wd'), k);
+    out.push(`${m.label} ${av} ${B(N(a.mean))} ${m.unit}${unitTxt}${b.n ? ` (${Bm.short} ${P(growth(a.mean, b.mean))})` : ''}${!single && wd.n && we.n ? ` · วันหยุด${we.mean >= wd.mean ? 'มากกว่า' : 'น้อยกว่า'}วันทำงาน ${P(Math.abs(growth(we.mean, wd.mean)), 1, false)}` : ''}`); });
+  const tc = modeCoverage('taxi'); if (tc.none) out.push(`ยอดแท็กซี่: ${tc.txt} — จึงไม่นำมาคำนวณ`); else if (!recInRows('taxi', C.rows)) out.push('ยอดแท็กซี่: งวดนี้ไม่ได้บันทึก');
+  const mo = mSum(C.rows, 'moto'); if (mo.n && ok(C.carA || mean(C.rows.map(r => r.car)))) out.push(`สัดส่วน จยย. ต่อรถยนต์ ${B(N(mo.mean / (C.carA || mean(C.rows.map(r => r.car))), 2))} คัน จยย. ต่อรถยนต์ 1 คัน`);
+  if (single && Bm.rows.length && !!C.rows[0].hol !== !!Bm.rows[0].hol) out.push(`หมายเหตุ: วันที่เลือกกับ${Bm.short}เป็นคนละประเภทวัน (วันนักขัตฤกษ์ vs วันปกติ) — % อาจไม่สะท้อนแนวโน้มจริง`);
+  return out;
+}
+const recInRows = (k, rows) => rows.some(r => isNum(r[k]));
+function exportModesCSV() {
+  const Pd = S._mdLast; if (!Pd) { toast('เปิดหน้าช่องทางอื่นให้โหลดข้อมูลก่อน', 'warn'); return; }
+  const q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const lines = [[`ยอด จยย. / เดลิเวอรี่ / แท็กซี่ / MRT — ${Pd.name}`, `เทียบ ${Pd.B.label}`].map(q).join(','), '',
+    ['ยอด', 'หน่วย', 'งวดนี้ (เฉลี่ย/วัน)', 'งวดนี้ (รวม)', Pd.B.short + ' (เฉลี่ย/วัน)', '% เปลี่ยนแปลง'].map(q).join(',')];
+  MODE_M.forEach(m => { const a = mSum(Pd.C.rows, m.k), b = mSum(Pd.B.rows, m.k); lines.push([m.label, m.unit, a.n ? a.mean.toFixed(2) : 'ไม่ได้บันทึก', a.n ? a.total : '', b.n ? b.mean.toFixed(2) : '', a.n && b.n ? (growth(a.mean, b.mean) * 100).toFixed(2) + '%' : ''].map(q).join(',')); });
+  lines.push('', ['วันที่ (พ.ศ.)', 'วันที่ (ค.ศ.)', 'วัน', 'ประเภท', 'ลูกค้าเข้า'].concat(MODE_M.map(m => `${m.label} (${m.unit})`)).concat(['MRT % ของลูกค้า']).map(q).join(','));
+  Pd.C.rows.forEach(r => lines.push([dTH(r.key), r.key, TH_DAYS[r.dow], DAYTYPE_TH[dayTypeOf(r)], r.cust].concat(MODE_KEYS.map(k => isNum(r[k]) ? r[k] : '')).concat([isNum(r.mrt) && r.cust ? (r.mrt / r.cust * 100).toFixed(2) + '%' : '']).map(q).join(',')));
+  lines.push('', ['สรุปรายเดือน (เฉลี่ย/วัน) — ว่าง = ไม่ได้บันทึก'].map(q).join(','), ['เดือน', 'วัน'].concat(MODE_M.map(m => m.short)).concat(['MRT % ของลูกค้า']).map(q).join(','));
+  for (const [ym, l] of [...groupBy(S.all, r => r.ym).entries()].sort()) lines.push([ymTH(ym, true), l.length].concat(MODE_KEYS.map(k => S._rec[k].has(ym) ? mSum(l, k).mean.toFixed(2) : '')).concat([S._rec.mrt.has(ym) ? (mrtShare(l) * 100).toFixed(2) + '%' : '']).map(q).join(','));
+  download(new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }), `ช่องทางอื่น_${Pd.kind}_${Pd.C.s}_${Pd.C.e}.csv`);
+  toast('ส่งออก CSV สำเร็จ', 'success');
 }
 
 function renderRaw(body) {
@@ -3147,9 +3409,9 @@ async function _sheetsLoad() {
   let res = null;
   for (let round = 1; round <= 6; round++) {
     res = await jsonp({ action: 'read' }, 340000);
-    if (res && !res.ok && /getSheetByName|getActiveSpreadsheet/.test(res.error || '')) throw new Error('สคริปต์ที่ Deploy ไว้ยังเป็นเวอร์ชันเก่า (ผูกกับชีตไม่ได้) — กรุณาวางโค้ด Code_CCA_v6.gs แล้ว Deploy → Manage deployments → Edit → New version');
+    if (res && !res.ok && /getSheetByName|getActiveSpreadsheet/.test(res.error || '')) throw new Error('สคริปต์ที่ Deploy ไว้ยังเป็นเวอร์ชันเก่า (ผูกกับชีตไม่ได้) — กรุณาวางโค้ด Code_CCA_v7.gs แล้ว Deploy → Manage deployments → Edit → New version');
     if (!res || !res.ok) throw new Error((res && res.error) || 'อ่านข้อมูลไม่สำเร็จ');
-    if (!Array.isArray(res.rows)) throw new Error('รูปแบบข้อมูลจากสคริปต์ไม่ถูกต้อง (ไม่มีรายการ rows) — ตรวจว่า Deploy เป็น Code_CCA_v6.gs แล้ว');
+    if (!Array.isArray(res.rows)) throw new Error('รูปแบบข้อมูลจากสคริปต์ไม่ถูกต้อง (ไม่มีรายการ rows) — ตรวจว่า Deploy เป็น Code_CCA_v7.gs แล้ว');
     if (res.complete !== false) break;
     const done = (res.files || []).filter(f => !f.pending).length, all = (res.files || []).length;
     toast(`กำลังเตรียมข้อมูลจากโฟลเดอร์ Drive ครั้งแรก… อ่านแล้ว ${done}/${all} ไฟล์ (รอบ ${round})`, 'info', 6000);
@@ -3163,7 +3425,7 @@ async function _sheetsLoad() {
   }
   if (res.complete === false) toast('ยังอ่านไฟล์ไม่ครบทุกไฟล์ (สคริปต์ใช้เวลานาน) — แสดงข้อมูลเท่าที่อ่านได้ ระบบจะอ่านต่อในรอบถัดไป · แนะนำ Run "warmup" ใน Apps Script', 'warn', 9000);
   SH.api = res.api || 2; SH.sig = res.sig || null; SH.complete = res.complete !== false;
-  if (SH.api < 6 && !SH.apiHint) { SH.apiHint = true; setTimeout(() => toast('แนะนำ: อัปเดต Apps Script เป็น Code_CCA_v6.gs เพื่อใช้ข้อมูลรายชั่วโมงและปฏิทินเหตุการณ์ (หน้า Google Drive / Sheets → ดาวน์โหลดโค้ด) เพื่อความเสถียรขณะมีการแก้ไฟล์', 'info', 7000), 4000); }
+  if (SH.api < 6 && !SH.apiHint) { SH.apiHint = true; setTimeout(() => toast('แนะนำ: อัปเดต Apps Script เป็น Code_CCA_v7.gs เพื่อใช้ข้อมูลรายชั่วโมงและปฏิทินเหตุการณ์ (หน้า Google Drive / Sheets → ดาวน์โหลดโค้ด) เพื่อความเสถียรขณะมีการแก้ไฟล์', 'info', 7000), 4000); }
   if (res.rows.length === 0 && S.all.length > 30) throw new Error('สคริปต์ตอบกลับว่าไม่มีข้อมูลเลย (ก่อนหน้านี้มี ' + S.all.length + ' วัน) — ไม่แทนที่ข้อมูลเดิม กรุณาตรวจโฟลเดอร์/สิทธิ์ไฟล์');
   const pr = ingest(res);
   S.offline = false; S.cacheTime = null;
@@ -3543,7 +3805,7 @@ function renderStudio(body) {
   if (!one && cA.maxR) ins.push(`วันที่ลูกค้าสูงสุดของ ${tA}: ${dTH(cA.maxR.key)} (${N(cA.max)} คน)`);
   if (st.dayType !== 'all' || st.dow !== 'all') ins.push(`ตัวกรอง: ${dtLabel[st.dayType]}${st.dow !== 'all' ? ' · เฉพาะวัน' + TH_DAYS[+st.dow] : ''}`);
 
-  body.innerHTML = controls + head + insightHTML(ins, 'สรุปผลเปรียบเทียบ') + tbl + `
+  body.innerHTML = controls + head + insightHTML(ins, 'สรุปผลเปรียบเทียบ', a.length + b.length) + tbl + `
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
     <div class="card p-5 ${one ? 'xl:col-span-3' : 'xl:col-span-1'}">${cardHead('% เปลี่ยนแปลงรายตัวชี้วัด', one ? `${NM.a} เทียบ ${NM.b}` : `จากค่าเฉลี่ยต่อวัน · ${NM.a} เทียบ ${NM.b}`)}<div style="height:${Math.max(260, gl.length * 34)}px"><canvas id="chStGrow"></canvas></div></div>
     ${!one ? `<div class="card p-5 xl:col-span-2">${cardHead(`แนวโน้ม ${mm.label}: ${NM.a} เทียบ ${NM.b}`, st.mode === 'year' ? 'ค่าเฉลี่ยต่อวันของแต่ละเดือน' : 'เรียงตามลำดับวันในงวด (วันแรกของงวดหลัก คู่กับวันแรกของงวดที่นำมาเทียบ)',
@@ -3717,7 +3979,7 @@ function buildReport() {
       </div>
       <div class="rp-fill" style="display:grid;grid-template-columns:1.55fr 1fr;gap:12px;margin-top:12px">
         <div class="rp-box"><div class="rp-t">นิยามและวิธีคำนวณ</div>
-<div class="rp-list" style="display:grid;grid-template-columns:1fr 1fr;column-gap:18px"><div class="rp-li"><span class="n">•</span><span>ยอดลูกค้า = "ยอดลูกค้าเข้าใช้บริการ" จากชีตรายวัน (รวมทุกประตู ตลอดเวลาเปิดให้บริการ)</span></div><div class="rp-li"><span class="n">•</span><span>ยอดรถยนต์ = ${basis}</span></div><div class="rp-li"><span class="n">•</span><span>Ratio = ยอดรวมลูกค้า ÷ ยอดรวมรถยนต์ (ถ่วงน้ำหนักตามปริมาณ)</span></div><div class="rp-li"><span class="n">•</span><span>SD = ส่วนเบี่ยงเบนมาตรฐานแบบตัวอย่าง (n−1) · CV = SD ÷ ค่าเฉลี่ย</span></div><div class="rp-li"><span class="n">•</span><span>* MoM คำนวณจากค่าเฉลี่ยต่อวัน เพื่อเทียบเดือนที่จำนวนวันต่างกันได้ยุติธรรม</span></div><div class="rp-li"><span class="n">•</span><span>ค่าเฉลี่ยนับเฉพาะวันที่มีข้อมูล (วันที่ขาดหายไม่ถูกนับเป็น 0)</span></div><div class="rp-li"><span class="n">•</span><span>วันหยุดนักขัตฤกษ์ตามประกาศ ครม. 2567–2569 (★ ในตาราง) + รายการเพิ่มเติมของศูนย์</span></div><div class="rp-li"><span class="n">•</span><span>ค่าผิดปกติ = |robust z| &gt; 3.5 เทียบวันเดียวกันในสัปดาห์</span></div></div></div>
+<div class="rp-list" style="display:grid;grid-template-columns:1fr 1fr;column-gap:18px"><div class="rp-li"><span class="n">•</span><span>ยอดลูกค้า = "ยอดลูกค้าเข้าใช้บริการ" จากชีตรายวัน — ตัดยอด 10.00–22.00 น. (ประตู Donki / Uniqlo 09.00–24.00 น.) ตามที่ระบุในชีต</span></div><div class="rp-li"><span class="n">•</span><span>ยอดรถยนต์ = ${basis}</span></div><div class="rp-li"><span class="n">•</span><span>Ratio = ยอดรวมลูกค้า ÷ ยอดรวมรถยนต์ (ถ่วงน้ำหนักตามปริมาณ)</span></div><div class="rp-li"><span class="n">•</span><span>SD = ส่วนเบี่ยงเบนมาตรฐานแบบตัวอย่าง (n−1) · CV = SD ÷ ค่าเฉลี่ย</span></div><div class="rp-li"><span class="n">•</span><span>* MoM คำนวณจากค่าเฉลี่ยต่อวัน เพื่อเทียบเดือนที่จำนวนวันต่างกันได้ยุติธรรม</span></div><div class="rp-li"><span class="n">•</span><span>ค่าเฉลี่ยนับเฉพาะวันที่มีข้อมูล (วันที่ขาดหายไม่ถูกนับเป็น 0)</span></div><div class="rp-li"><span class="n">•</span><span>วันหยุดนักขัตฤกษ์ตามประกาศ ครม. 2567–2569 (★ ในตาราง) + รายการเพิ่มเติมของศูนย์</span></div><div class="rp-li"><span class="n">•</span><span>ค่าผิดปกติ = |robust z| &gt; 3.5 เทียบวันเดียวกันในสัปดาห์</span></div></div></div>
         <div class="rp-box"><div class="rp-t">สรุปรายปี (ค่าเฉลี่ยต่อวัน)</div>
           <table class="rp-tbl"><thead><tr><th>ปี</th><th class="num">วัน</th><th class="num">ลูกค้า</th><th class="num">YoY</th><th class="num">รถยนต์</th><th class="num">YoY</th><th class="num">Ratio</th></tr></thead><tbody>
           ${ys.map(y => `<tr><td>พ.ศ. ${y.y + 543}</td><td class="num">${y.days}/${y.diy}</td><td class="num"><b>${N(y.custAvg)}</b></td><td class="num">${P(y.yoyCustAvg)}</td><td class="num"><b>${N(y.carAvg)}</b></td><td class="num">${P(y.yoyCarAvg)}</td><td class="num">${N(y.ratio, 2)}</td></tr>`).join('')}
@@ -3877,6 +4139,7 @@ function renderDaily(body) {
       </tbody></table></div>
     </div>
   </div>
+  ${(() => { const by = new Map(S.all.map(x => [x.key, x])), rs = b => b.keys.map(k => by.get(k)).filter(Boolean); return modeKpiRow([r], [{ short: 'สัปดาห์ก่อน', rows: rs(b2) }, { short: 'เมื่อวาน', rows: rs(b1) }, { short: 'ปีก่อน', rows: rs(b5) }], { single: true, note: '% = เทียบวันเดียวกันสัปดาห์ก่อน' }); })()}
   ${insightHTML(dailyInsights(D), 'สรุปประจำวัน')}
   <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
     <div class="card p-5">${cardHead('14 วันล่าสุด', `ถึง ${dTH(key)} · แท่ง = ลูกค้า · เส้น = รถยนต์ · แท่งเข้ม = วันที่เลือก`)}<div style="height:300px"><canvas id="chDay14"></canvas></div></div>
@@ -4277,6 +4540,13 @@ function buildPeriodReport(R) {
   const pages = R.kind === 'month' ? 2 : 1, doc = R.kind === 'week' ? 'WK' : 'MO';
   const head = pg => rpHeader({ title: R.title, sub: `${R.period}${R.bases.length ? ' · เทียบ' + R.bases.map(b => b.short).join(' และ') : ''}`, period: R.name, doc, page: pg + '/' + pages });
   const ins = rcInsights(R, true), notes = rcNotes(R);
+  // v16: ช่องทางอื่น (จยย./เดลิเวอรี่/แท็กซี่/MRT) — แสดงเฉพาะยอดที่มีการบันทึกในงวดนี้
+  const mdList = (typeof MODE_M !== 'undefined' ? MODE_M : []).filter(m => C.rows.some(r => isNum(r[m.k])));
+  const mdAvg = (rows, k) => { const v = rows.map(r => r[k]).filter(isNum); return v.length ? mean(v) : null; };
+  const mdTbl = mdList.length ? `<table class="rp-tbl"><thead><tr><th>ช่องทาง</th><th class="num">เฉลี่ย/วัน</th><th class="num">รวม</th>${R.bases.map(b => `<th class="num">vs ${b.short}</th>`).join('')}</tr></thead><tbody>
+    ${mdList.map(m => { const a = mdAvg(C.rows, m.k), t = sum(C.rows.map(r => r[m.k]).filter(isNum)); return `<tr><td>${m.short} <span style="color:#94a3b8">(${m.unit})</span></td><td class="num"><b>${N(a)}</b></td><td class="num">${N(t)}</td>${R.bases.map(b => { const x = mdAvg(b.rows, m.k); return `<td class="num">${ok(x) ? gTxt(growth(a, x)) : '<span style="color:#94a3b8">ไม่มีข้อมูล</span>'}</td>`; }).join('')}</tr>`; }).join('')}
+    ${C.rows.some(r => isNum(r.mrt)) ? `<tr><td>MRT % ของลูกค้า</td><td class="num"><b>${P(mrtShare(C.rows), 1, false)}</b></td><td></td>${R.bases.map(b => { const x = mrtShare(b.rows); return `<td class="num">${ok(x) ? (((mrtShare(C.rows) - x) * 100) >= 0 ? '+' : '') + ((mrtShare(C.rows) - x) * 100).toFixed(1) + ' จุด' : ''}</td>`; }).join('')}</tr>` : ''}</tbody></table>` : '';
+  const mdLine = mdList.length ? `<div style="font-size:9.5px;margin-top:5px;line-height:1.5"><b style="color:#0f766e">ช่องทางอื่น (เฉลี่ย/วัน):</b> ${mdList.filter(m => m.k !== 'mrtOut').map(m => { const a = mdAvg(C.rows, m.k), b = R.bases[0] ? mdAvg(R.bases[0].rows, m.k) : null; return `${m.short} <b>${N(a)}</b> ${m.unit}${ok(b) ? ' ' + gTxt(growth(a, b)) : ''}`; }).join(' · ')}${C.rows.some(r => isNum(r.mrt)) ? ` · MRT = ${P(mrtShare(C.rows), 1, false)} ของลูกค้า` : ''}</div>` : '';
   // ตารางเทียบงวดมาตรฐาน
   const cell = (b, f, d = 0) => b.n ? N(b[f], d) : '-';
   const gCell = (b, f) => `<td class="num">${gTxt(gb(b, f))}</td>`;
@@ -4297,6 +4567,8 @@ function buildPeriodReport(R) {
     ${cmpRows.map(([l, f, g]) => `<tr><td>${l}</td><td class="num" style="background:#f7f5ff">${f(C)}</td>${R.bases.map(b => `<td class="num">${f(b)}</td><td class="num">${g ? gTxt(g(b)) : ''}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   // ตารางรายละเอียด: สัปดาห์ = รายวัน 7 วัน · เดือน = ตามวันในสัปดาห์
   const typeTxt = r => r.hol ? `<span style="color:#b45309">${esc(r.hol.length > 16 ? r.hol.slice(0, 15) + '…' : r.hol)}</span>` : r.we ? 'เสาร์–อาทิตย์' : 'วันทำงาน';
+  // ตารางรายวันทั้งเดือน (หน้า 2) — ข้อความสั้น 1 บรรทัด: ★ = มีเหตุการณ์ · ◆ = วันหยุดยาว
+  const typeShort = r => (r.hol ? `<span style="color:#b45309">${esc(r.hol.length > 11 ? r.hol.slice(0, 10) + '…' : r.hol)}</span>` : r.we ? 'ส.–อา.' : 'ทำงาน') + (r.lw ? ' <span style="color:#db2777">◆</span>' : '') + (r.ev ? ' <span style="color:#7c3aed">★</span>' : '');
   const evMark = r => (r.ev ? ` <span style="color:#7c3aed">★ ${esc(r.ev[0].title.length > 14 ? r.ev[0].title.slice(0, 13) + '…' : r.ev[0].title)}</span>` : '') + (r.lw ? ' <span style="color:#db2777">หยุดยาว</span>' : '');
   let detail;
   if (R.kind === 'week') {
@@ -4329,7 +4601,7 @@ function buildPeriodReport(R) {
         <div class="rp-box"><div class="rp-t">ตารางเปรียบเทียบงวดมาตรฐาน</div>${cmpTbl}</div>
       </div>
       <div class="rp-fill" style="display:grid;grid-template-columns:1.18fr 1fr;gap:12px;margin-top:10px">
-        <div class="rp-box">${detail}<div style="font-size:9px;color:#6e6a86;margin-top:6px;line-height:1.5">${RC_FOOT.join('<br>')}</div></div>
+        <div class="rp-box">${detail}${R.kind === 'week' ? mdLine : ''}<div style="font-size:9px;color:#6e6a86;margin-top:6px;line-height:1.5">${RC_FOOT.join('<br>')}</div></div>
         <div class="rp-box" style="background:linear-gradient(135deg, ${mixW('#8b5cf6', 9)}, #fff);border-color:${mixW('#8b5cf6', 25)}"><div class="rp-t" style="color:#6d28d9">สรุปผลการวิเคราะห์</div>
           <div class="rp-list">${ins.slice(0, R.kind === 'week' ? 6 : 7).map((t, i) => `<div class="rp-li"><span class="n">${i + 1}.</span><span>${t}</span></div>`).join('')}</div>
           ${R.kind === 'week' ? `<div class="rp-t" style="color:#b45309;margin-top:6px">ข้อสังเกตด้านข้อมูล</div><div class="rp-list">${notes.slice(0, 3).map(t => `<div class="rp-li"><span class="n">•</span><span>${t}</span></div>`).join('')}</div>` : ''}</div>
@@ -4344,7 +4616,7 @@ function buildPeriodReport(R) {
       ${list.map(k => { const r = by.get(k), o = dateFromKey(k); if (!r) return `<tr><td style="white-space:nowrap">${TH_DAYS_S[o.dow]} ${o.d}</td><td colspan="5" style="color:#94a3b8">${k > R.e ? '—' : 'ไม่มีข้อมูล'}</td></tr>`;
         // เทียบ "วันเดียวกันในสัปดาห์" ของเดือนก่อน (−28 วัน = 4 สัปดาห์พอดี) — ยุติธรรมกว่าวันที่เดียวกันซึ่งอาจตรงกับคนละวันในสัปดาห์
         const p = by.get(addDaysKey(k, -28));
-        return `<tr><td style="white-space:nowrap">${TH_DAYS_S[o.dow]} ${o.d}</td><td>${typeTxt(r)}${evMark(r)}</td><td class="num"><b>${N(r.cust)}</b></td><td class="num">${gDay(r, p, 'cust')}</td><td class="num">${N(r.car)}</td><td class="num">${N(r.ratio, 2)}</td></tr>`; }).join('')}</tbody></table>`;
+        return `<tr><td style="white-space:nowrap">${TH_DAYS_S[o.dow]} ${o.d}</td><td>${typeShort(r)}</td><td class="num"><b>${N(r.cust)}</b></td><td class="num">${gDay(r, p, 'cust')}</td><td class="num">${N(r.car)}</td><td class="num">${N(r.ratio, 2)}</td></tr>`; }).join('')}</tbody></table>`;
     // สรุปรายสัปดาห์ในเดือน (จันทร์–อาทิตย์ ตัดที่ขอบเดือน)
     const wk = []; keys.forEach(k => { const r = by.get(k); const o = dateFromKey(k), ws = addDaysKey(k, -((o.dow + 6) % 7)); let w = wk.find(x => x.ws === ws); if (!w) { w = { ws, s: k, e: k, rows: [] }; wk.push(w); } w.e = k; if (r) w.rows.push(r); });
     const evs = (S.events || []).filter(ev => ev.to >= R.s && ev.from <= R.pe);
@@ -4352,8 +4624,9 @@ function buildPeriodReport(R) {
       ${head(2)}
       <div class="rp-body">
         <div class="rp-fill" style="display:grid;grid-template-columns:1.62fr 1fr;gap:12px">
-          <div class="rp-box"><div class="rp-t">ตารางยอดรายวัน ${ymTH(R.ym, true)} <span style="font-weight:400;color:#6e6a86">(vs 4 สป.ก่อน = เทียบวันเดียวกันในสัปดาห์ เมื่อ 28 วันก่อน)</span></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${dayTbl(keys.slice(0, half))}${dayTbl(keys.slice(half))}</div></div>
+          <div class="rp-box"><div class="rp-t">ตารางยอดรายวัน ${ymTH(R.ym, true)} <span style="font-weight:400;color:#6e6a86">(vs 4 สป.ก่อน = เทียบวันเดียวกันในสัปดาห์ เมื่อ 28 วันก่อน · ◆ วันหยุดยาว · ★ มีเหตุการณ์)</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${dayTbl(keys.slice(0, half))}${dayTbl(keys.slice(half))}</div>
+            ${mdTbl ? `<div class="rp-t" style="color:#0f766e;margin-top:10px">ช่องทางอื่น: จยย. · เดลิเวอรี่ · แท็กซี่ · MRT <span style="font-weight:400;color:#6e6a86">(ช่องทางที่ไม่ได้บันทึกในเดือนนี้จะไม่แสดง)</span></div>${mdTbl}` : ''}</div>
           <div style="display:flex;flex-direction:column;gap:10px;min-height:0">
             <div class="rp-box"><div class="rp-t">ยอดรถยนต์รายวัน (24 ชม.)</div><canvas id="rpWChart2" width="360" height="150" style="width:360px;height:150px"></canvas></div>
             <div class="rp-box"><div class="rp-t">สรุปรายสัปดาห์ในเดือน</div><table class="rp-tbl"><thead><tr><th>สัปดาห์</th><th class="num">วัน</th><th class="num">ลูกค้ารวม</th><th class="num">เฉลี่ย/วัน</th><th class="num">รถยนต์/วัน</th></tr></thead><tbody>
@@ -4401,9 +4674,9 @@ function rcPeriodCSV(R) {
   row('รถยนต์รวม (คัน)', 'carT', 0, b => totComparable(C, b) ? growth(C.carT, b.carT) : null);
   row('รถยนต์เฉลี่ย/วัน', 'carA', 2, b => b.n ? growth(C.carA, b.carA) : null);
   row('Ratio (คน/คัน)', 'ratio', 4, b => b.n ? growth(C.ratio, b.ratio) : null);
-  L.push('', ['วันที่ (พ.ศ.)', 'วันที่ (ค.ศ.)', 'วัน', 'ประเภท', 'วันหยุด', 'เหตุการณ์', 'หยุดยาว', 'ลูกค้า', 'รถยนต์ 24 ชม.', 'Ratio', R.kind === 'month' ? 'ลูกค้า 4 สัปดาห์ก่อน (วันเดียวกันในสัปดาห์)' : R.kind === 'week' ? 'ลูกค้า 7 วันก่อน' : R.cmp === 'yoy' ? 'ลูกค้าวันเดียวกันปีก่อน' : `ลูกค้า ${R.span + 1} วันก่อน`, '% เทียบ'].map(q).join(','));
+  L.push('', ['วันที่ (พ.ศ.)', 'วันที่ (ค.ศ.)', 'วัน', 'ประเภท', 'วันหยุด', 'เหตุการณ์', 'หยุดยาว', 'ลูกค้า', 'รถยนต์ 24 ชม.', 'Ratio', 'จยย.', 'เดลิเวอรี่', 'แท็กซี่', 'MRT เข้า', 'MRT ออก', R.kind === 'month' ? 'ลูกค้า 4 สัปดาห์ก่อน (วันเดียวกันในสัปดาห์)' : R.kind === 'week' ? 'ลูกค้า 7 วันก่อน' : R.cmp === 'yoy' ? 'ลูกค้าวันเดียวกันปีก่อน' : `ลูกค้า ${R.span + 1} วันก่อน`, '% เทียบ'].map(q).join(','));
   const pk = k => R.kind === 'month' ? addDaysKey(k, -28) : R.kind === 'week' ? addDaysKey(k, -7) : R.cmp === 'yoy' ? shiftYearKey(k, -1) : addDaysKey(k, -(R.span + 1));
-  C.rows.forEach(r => { const p = R.kind === 'custom' && R.cmp === 'none' ? null : by.get(pk(r.key)); L.push([dTH(r.key), r.key, TH_DAYS[r.dow], DAYTYPE_TH[dayTypeOf(r)], r.hol || '', r.ev ? r.ev.map(e => e.title).join(' / ') : '', r.lw ? 'ใช่' : '', r.cust, r.car, ok(r.ratio) ? r.ratio.toFixed(4) : '', p ? p.cust : '', p ? ((growth(r.cust, p.cust) || 0) * 100).toFixed(2) + '%' : ''].map(q).join(',')); });
+  C.rows.forEach(r => { const p = R.kind === 'custom' && R.cmp === 'none' ? null : by.get(pk(r.key)); L.push([dTH(r.key), r.key, TH_DAYS[r.dow], DAYTYPE_TH[dayTypeOf(r)], r.hol || '', r.ev ? r.ev.map(e => e.title).join(' / ') : '', r.lw ? 'ใช่' : '', r.cust, r.car, ok(r.ratio) ? r.ratio.toFixed(4) : '', ...MODE_KEYS.map(k => isNum(r[k]) ? r[k] : ''), p ? p.cust : '', p ? ((growth(r.cust, p.cust) || 0) * 100).toFixed(2) + '%' : ''].map(q).join(',')); });
   L.push('', [`ข้อค้นพบ`].map(q).join(','));
   rcInsights(R, false).forEach((t, i) => L.push(q(`${i + 1}. ${t}`)));
   download(new Blob(['﻿' + L.join('\r\n')], { type: 'text/csv;charset=utf-8' }), `${R.title.replace(/\s/g, '')}_${R.s}_${R.e}.csv`);
@@ -4415,6 +4688,7 @@ function rcPeriodLine(R) {
   bs.forEach(b => L.push(`   เทียบ${b.short} ${g(b, 'custA')}`));
   L.push(`🚗 รถยนต์รวม ${N(C.carT)} คัน (เฉลี่ย ${N(C.carA)} คัน/วัน)`); bs.forEach(b => L.push(`   เทียบ${b.short} ${g(b, 'carA')}`));
   L.push(`⚖️ Ratio ${N(C.ratio, 2)} คน/คัน`);
+  MODE_M.filter(m => m.k !== 'mrtOut' && C.rows.some(r => isNum(r[m.k]))).forEach(m => { const v = C.rows.map(r => r[m.k]).filter(isNum), a = mean(v), bb = bs[0] ? bs[0].rows.map(r => r[m.k]).filter(isNum) : []; L.push(`${m.k === 'mrt' ? '🚇' : m.k === 'moto' ? '🛵' : m.k === 'deli' ? '📦' : '🚕'} ${m.short} เฉลี่ย ${N(a)} ${m.unit}/วัน${bb.length ? ` (${bs[0].short} ${P(growth(a, mean(bb)))})` : ''}${m.k === 'mrt' ? ` · ${P(mrtShare(C.rows), 1, false)} ของลูกค้า` : ''}`); });
   if (C.cust.maxRow) L.push(`🔝 สูงสุด ${TH_DAYS_S[C.cust.maxRow.dow]} ${dShort(C.cust.maxRow.key)} ${N(C.cust.max)} คน`);
   const ins = rcInsights(R, false).slice(4).filter(t => !/Welch/.test(t)).slice(0, 3); if (ins.length) L.push('', ...ins.map(t => '• ' + t));
   L.push('', `% เทียบจากค่าเฉลี่ยต่อวัน · ข้อมูล ${C.n}/${C.cal} วัน · ที่มา: SBK Customer & Car Compare Analytics · ${dTH(todayKey())}`);
@@ -4590,6 +4864,10 @@ async function exportReport(type) {
 function handleEvents() {
   document.addEventListener('change', e => {
     if (e.target.id === 'hrYm') { S.hr.ym = e.target.value; render(); return; }
+    if (e.target.id === 'mdYm') { S.md.ym = e.target.value; render(); return; }
+    if (e.target.id === 'mdWeek') { S.md.week = e.target.value; render(); return; }
+    if (e.target.id === 'mdYear') { S.md.year = +e.target.value; render(); return; }
+    if (e.target.id === 'mdDay' && e.target.value) { const v = e.target.value; if (!S.all.some(r => r.key === v)) { toast(`ไม่มีข้อมูลวันที่ ${dTH(v)} — แสดงวันที่ใกล้ที่สุดที่มีข้อมูลแทน`, 'warn'); const p0 = S.all.filter(r => r.key <= v); S.md.day = (p0.length ? p0[p0.length - 1] : S.all[0]).key; } else S.md.day = v; render(); return; }
     if (e.target.id !== 'dayPick' || !e.target.value) return;
     const v = e.target.value, have = S.all.some(r => r.key === v);
     if (!have) { toast(`ไม่มีข้อมูลวันที่ ${dTH(v)} — แสดงวันที่ใกล้ที่สุดที่มีข้อมูลแทน`, 'warn'); const prior = S.all.filter(r => r.key <= v); S.dayKey = (prior.length ? prior[prior.length - 1] : S.all[0]).key; }
@@ -4598,7 +4876,7 @@ function handleEvents() {
     applyFilter(); render();
   });
   document.addEventListener('click', e => {
-    const t = e.target.closest('[data-page],[data-goto],[data-action],[data-export],[data-range],[data-gran],[data-mm],[data-ym],[data-t],[data-sort],[data-pg],[data-hm],[data-cb],[data-dow],[data-dcq],[data-edit],[data-del],[data-stm],[data-stp],[data-std],[data-dnav],[data-ysel],[data-ybasis],[data-evedit],[data-evdel],[data-evact],[data-hrc],[data-hrt]');
+    const t = e.target.closest('[data-page],[data-goto],[data-action],[data-export],[data-range],[data-gran],[data-mm],[data-ym],[data-t],[data-sort],[data-pg],[data-hm],[data-cb],[data-dow],[data-dcq],[data-edit],[data-del],[data-stm],[data-stp],[data-std],[data-dnav],[data-ysel],[data-ybasis],[data-evedit],[data-evdel],[data-evact],[data-hrc],[data-hrt],[data-mdc],[data-mdk],[data-mdt]');
     if (!t) return;
     if (t.dataset.page) goto(t.dataset.page);
     else if (t.dataset.goto) goto(t.dataset.goto);
@@ -4618,6 +4896,7 @@ function handleEvents() {
       if (x === 'dailycsv' || (x === 'csv' && dayMode)) exportDailyCSV();
       else if (x === 'dailyline') copyDailyLine();
       else if (x === 'hrcsv') exportHourlyCSV();
+      else if (x === 'mdcsv') exportModesCSV();
       else if (x === 'csv') exportCSV();
       else if (S.page === 'hourly' && (x === 'pdf' || x === 'jpg')) exportReport('hrpdf');
       else { const yearPg = S.page === 'yearly'; exportReport(x === 'pdf' && dayMode ? 'dailypdf' : x === 'jpg' && dayMode ? 'dailyjpg' : x === 'pdf' && yearPg ? 'yearpdf' : x === 'jpg' && yearPg ? 'yearjpg' : x); }
@@ -4635,6 +4914,9 @@ function handleEvents() {
     else if (t.dataset.evact === 'cancel') { S.evEdit = null; render(); }
     else if (t.dataset.hrc) { S.hr.cmp = t.dataset.hrc; render(); }
     else if (t.dataset.hrt) { S.hr.t = t.dataset.hrt; render(); }
+    else if (t.dataset.mdc) { S.md.cmp = t.dataset.mdc; render(); }
+    else if (t.dataset.mdk) { S.md.k = t.dataset.mdk; render(); }
+    else if (t.dataset.mdt) { S.md.type = t.dataset.mdt; S.md.cmp = { day: 'd7', week: 'b1', month: 'b2', year: 'py' }[S.md.type]; render(); }
     else if (t.dataset.ysel) { S.yearSel = +t.dataset.ysel; render(); }
     else if (t.dataset.ybasis) { S.yearBasis = t.dataset.ybasis; render(); }
     else if (t.dataset.t) { S.table.type = t.dataset.t; S.table.page = 1; $$('#tType button').forEach(b => b.classList.toggle('on', b === t)); drawRawTable(); }
@@ -4680,7 +4962,7 @@ function handleEvents() {
   ['#fDate', '#fCust', '#fCar'].forEach(id => $(id).addEventListener('input', updateFormPreview));
   ['#fCust', '#fCar', '#fNote'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') saveRecord(); }));
   $('#btnCopyGas').addEventListener('click', copyGas);
-  $('#btnDlGas').addEventListener('click', () => { download(new Blob([gasText()], { type: 'text/plain;charset=utf-8' }), 'Code_CCA_v6.gs'); toast('ดาวน์โหลด Code_CCA_v6.gs แล้ว', 'success'); });
+  $('#btnDlGas').addEventListener('click', () => { download(new Blob([gasText()], { type: 'text/plain;charset=utf-8' }), 'Code_CCA_v7.gs'); toast('ดาวน์โหลด Code_CCA_v7.gs แล้ว', 'success'); });
   $('#btnHolApply').addEventListener('click', () => {
     S.customHolText = $('#holInput').value; S.customHol = parseHolidayText(S.customHolText, S.order);
     const lines = S.customHolText.split(/\r?\n/).filter(l => l.trim()).length, got = Object.keys(S.customHol).length;
