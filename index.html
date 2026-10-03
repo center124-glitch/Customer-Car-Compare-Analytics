@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <!--
-  Customer & Car Compare Analytics — v20
+  Customer & Car Compare Analytics — v22
+  v22: + รายงาน PDF/JPEG ประจำวัน: ตารางเปรียบเทียบฐานมาตรฐาน 5 แบบ (เต็มความกว้าง) เพิ่ม จยย. · เดลิเวอรี่ · MRT เข้า พร้อม % ครบทุกฐาน
+  v21: + ตาราง "เปรียบเทียบกับฐานมาตรฐาน 5 แบบ" (รายวัน) เพิ่มคอลัมน์ จยย. · เดลิเวอรี่ · MRT เข้า พร้อม % เทียบทุกฐาน · CSV/LINE ประจำวันมียอดเหล่านี้ด้วย
   v20: + ชื่อเมนูยาวไม่ตัด "…" — ย่อขนาดตัวอักษรอัตโนมัติจนพอดี (ไม่พอจริงจึงขึ้นบรรทัดใหม่) · ลูกศรย่อ/ขยายเมนูชี้ตามทิศทางที่จะเกิดขึ้น (« ย่อ · » ขยาย)
   v19: + เมนูด้านข้างไม่มีแถบเลื่อนซ้าย–ขวา/ขึ้น–ลง (กว้างคงที่ · ย่อระยะอัตโนมัติตามความสูงจอ · ชื่อยาวตัด …) · หน้าไม่เลื่อนแนวนอน
        + กราฟสูงพอดีจอ · เลื่อนหน้าแล้วหยุดพอดีหัวการ์ด (scroll snap) · รองรับ Mobile / Tablet / Laptop / Desktop · iOS (safe area, ไม่ซูมเมื่อแตะช่องกรอก, 100dvh) / Android
@@ -314,6 +316,8 @@
   .spin-ic svg{ animation:spin .9s linear infinite; }
   #modal{ position:fixed; inset:0; z-index:95; background:rgba(15,10,35,.5); backdrop-filter:blur(3px); display:none; align-items:center; justify-content:center; padding:16px; }
   #modal.show{ display:flex; }
+  /* v21: คอลัมน์ช่องทางอื่นในตารางฐาน 5 แบบ — แยกกลุ่มด้วยเส้นและสีพื้นอ่อน */
+  .tbl-day .th-ext{ color:#0f766e; } .tbl-day .th-ext1, .tbl-day .td-ext1{ border-left:2px solid var(--border); padding-left:14px; } .tbl-day .td-ext{ background:rgba(16,185,129,.035); }
   /* v17: แถบ KPI ช่องทางอื่น + แผงควบคุมหน้า จยย./MRT */
   .md-strip{ display:flex; flex-direction:column; gap:10px; }
   .md-strip-h{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px; padding:0 2px; }
@@ -388,6 +392,7 @@
   .rp-dot{ font-size:9px; margin-right:5px; } /* ใช้ตัวอักษร ● แทนกล่องสี — html2canvas วางตำแหน่ง inline-block เพี้ยน */
   #rpC .rp-tbl td, #rpD .rp-tbl td{ padding:1.3px 6px; } #rpY .rp-tbl td{ padding:1.8px 6px; font-size:10.5px; } #rpY .rp-list{ line-height:1.5; } #rpC .rp-tbl th, #rpD .rp-tbl th{ padding:2px 6px; } #rpC .rp-list, #rpD .rp-list{ line-height:1.45; } #rpC .rp-box, #rpD .rp-box{ padding:7px 12px; } #rpC .rp-t, #rpD .rp-t{ margin-bottom:2px; }
   .hr-rp td{ padding:6px 4px !important; } .hr-rp th{ padding:4px !important; }
+  #rpD .rp-base5 td{ padding:2px 6px; font-size:10.3px; } #rpD .rp-base5 th{ padding:2.5px 6px; font-size:10px; }
   #rpC .rp-kpi, #rpD .rp-kpi{ padding:7px 12px; } #rpC .rp-kpi .v, #rpD .rp-kpi .v{ font-size:18px; line-height:1.3; }
   .rp-list{ margin:0; font-size:10.8px; line-height:1.6; }
   .rp-li{ display:flex; gap:6px; } .rp-li .n{ flex-shrink:0; min-width:14px; font-weight:600; color:#6d28d9; }
@@ -681,7 +686,7 @@
 
     <footer class="px-4 md:px-6 lg:px-8 py-4 text-xs muted flex flex-wrap justify-between gap-2" style="border-top:1px solid var(--border)">
       <span>SBK Customer & Car Compare Analytics · Single File Web App</span>
-      <span>v20.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
+      <span>v22.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
     </footer>
   </div>
 </div>
@@ -4172,12 +4177,15 @@ function dailyKey() {
   if (S.dayAuto !== false || !S.dayKey || S.dayKey > last || !S.all.some(r => r.key === S.dayKey)) { S.dayKey = last; S.dayAuto = true; }
   return S.dayKey;
 }
+const mavg = (list, k) => { const v = list.map(x => x[k]).filter(isNum); return v.length ? mean(v) : null; };
 function dailyData(key) {
   const by = new Map(S.all.map(r => [r.key, r])), r = by.get(key);
   const pack = (label, short, list, sub) => {
     const cars = list.filter(x => isNum(x.car));
     return { label, short, sub, n: list.length, keys: list.map(x => x.key),
-      cust: list.length ? mean(list.map(x => x.cust)) : null, car: cars.length ? mean(cars.map(x => x.car)) : null, ratio: list.length ? groupRatio(list) : null };
+      cust: list.length ? mean(list.map(x => x.cust)) : null, car: cars.length ? mean(cars.map(x => x.car)) : null, ratio: list.length ? groupRatio(list) : null ,
+      // v21: ช่องทางอื่น — เฉลี่ยเฉพาะวันที่มีการบันทึก (เดือนที่ไม่ได้บันทึก = null ไม่ใช่ 0)
+      moto: mavg(list, 'moto'), deli: mavg(list, 'deli'), mrt: mavg(list, 'mrt') };
   };
   const one = (k, label, short) => { const x = by.get(k); return pack(label, short, x ? [x] : [], `${TH_DAYS_S[dateFromKey(k).dow]} ${dTH(k)}${x ? '' : ' · ไม่มีข้อมูล'}`); };
   // 1) วันก่อนหน้า — วันที่มีข้อมูลก่อนหน้าจริง (ปกติ = เมื่อวาน)
@@ -4230,6 +4238,8 @@ function dailyLineText(D) {
     `👥 ลูกค้าเข้า: ${N(r.cust)} คน`, `🚗 รถยนต์ (${basis}): ${N(r.car)} คัน`, `⚖️ Ratio: ${N(r.ratio, 2)} คน/คัน`, ''];
   [b1, b2, b3, b5].forEach(b => { if (b.n) L.push(`• เทียบ${b.label}: ลูกค้า ${g(r.cust, b.cust)} · รถยนต์ ${g(r.car, b.car)}`); });
   if (D.rankN >= 8) L.push(`• อันดับ ${D.rank}/${D.rankN} ของวัน${TH_DAYS[r.dow]}ในรอบปี (${D.status.t})`);
+  const ch = [['moto', '🛵 จยย.', 'คัน'], ['deli', '📦 เดลิเวอรี่', 'คัน'], ['mrt', '🚇 MRT เข้า', 'คน']].filter(([k]) => isNum(r[k]));
+  if (ch.length) { L.push(''); ch.forEach(([k, l, u]) => L.push(`${l}: ${N(r[k])} ${u}${ok(b2[k]) ? ` (สัปดาห์ก่อน ${g(r[k], b2[k])}` + (ok(b5[k]) ? ` · ปีก่อน ${g(r[k], b5[k])}` : '') + ')' : ''}`)); }
   L.push('', `ที่มา: SBK Customer & Car Compare Analytics · ${dTH(todayKey())}`);
   return L.join('\n');
 }
@@ -4244,9 +4254,9 @@ function exportDailyCSV() {
   if (!S.all.length) return;
   const D = dailyData(dailyKey()), r = D.r, q = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const lines = [[`สรุปยอดประจำวัน ${dTH(r.key, true)}`, DAYTYPE_TH[dayTypeOf(r)] + (r.hol ? ' · ' + r.hol : '')].map(q).join(','), '',
-    ['ฐานเปรียบเทียบ', 'ช่วง/วันที่', 'จำนวนวัน', 'ลูกค้า (คน)', '% ลูกค้า', 'รถยนต์ (คัน)', '% รถยนต์', 'Ratio', 'ส่วนต่าง Ratio'].map(q).join(','),
-    ['วันที่เลือก', dTH(r.key), 1, r.cust, '', r.car, '', ok(r.ratio) ? r.ratio.toFixed(3) : '', ''].map(q).join(',')];
-  D.base.forEach(b => lines.push([b.label, b.sub, b.n, ok(b.cust) ? Math.round(b.cust) : '', P(growth(r.cust, b.cust)), ok(b.car) ? Math.round(b.car) : '', P(growth(r.car, b.car)), ok(b.ratio) ? b.ratio.toFixed(3) : '', ok(b.ratio) && ok(r.ratio) ? (r.ratio - b.ratio).toFixed(3) : ''].map(q).join(',')));
+    ['ฐานเปรียบเทียบ', 'ช่วง/วันที่', 'จำนวนวัน', 'ลูกค้า (คน)', '% ลูกค้า', 'รถยนต์ (คัน)', '% รถยนต์', 'Ratio', 'ส่วนต่าง Ratio', 'จยย. (คัน)', '% จยย.', 'เดลิเวอรี่ (คัน)', '% เดลิเวอรี่', 'MRT เข้า (คน)', '% MRT'].map(q).join(','),
+    ['วันที่เลือก', dTH(r.key), 1, r.cust, '', r.car, '', ok(r.ratio) ? r.ratio.toFixed(3) : '', '', ...['moto', 'deli', 'mrt'].flatMap(k => [isNum(r[k]) ? r[k] : '', ''])].map(q).join(',')];
+  D.base.forEach(b => lines.push([b.label, b.sub, b.n, ok(b.cust) ? Math.round(b.cust) : '', P(growth(r.cust, b.cust)), ok(b.car) ? Math.round(b.car) : '', P(growth(r.car, b.car)), ok(b.ratio) ? b.ratio.toFixed(3) : '', ok(b.ratio) && ok(r.ratio) ? (r.ratio - b.ratio).toFixed(3) : '', ...['moto', 'deli', 'mrt'].flatMap(k => [ok(b[k]) ? Math.round(b[k]) : '', ok(b[k]) && isNum(r[k]) ? P(growth(r[k], b[k])) : ''])].map(q).join(',')));
   lines.push('', ['ตัวชี้วัดทั้งหมด', 'วันที่เลือก', D.base[0].label, D.base[1].label].map(q).join(','));
   const by = new Map(S.all.map(x => [x.key, x])), k1 = D.base[0].keys[0], k2 = D.base[1].keys[0];
   availMetrics().forEach(m => lines.push([m.label + ' (' + m.unit + ')', r[m.k], k1 ? by.get(k1)[m.k] : '', k2 ? by.get(k2)[m.k] : ''].map(q).join(',')));
@@ -4288,12 +4298,16 @@ function renderDaily(body) {
       </div>
     </div>
     <div class="card p-5 xl:col-span-2">
-      ${cardHead('เปรียบเทียบกับฐานมาตรฐาน 5 แบบ', `ลูกค้า / รถยนต์ / Ratio ของ ${dShort(key)} เทียบกับแต่ละฐาน · % = (วันที่เลือก − ฐาน) ÷ ฐาน`)}
-      <div class="scroll-x"><table class="tbl tbl-day"><thead><tr><th>ฐานเปรียบเทียบ</th><th class="num">ลูกค้า (คน)</th><th class="num">รถยนต์ (คัน)</th><th class="num">Ratio</th></tr></thead><tbody>
-        <tr class="day-cur"><td><div class="font-semibold">${dShort(key)} (วันที่เลือก)</div><div class="text-[11px] muted">${DAYTYPE_TH[dayTypeOf(r)]}</div></td><td class="num font-bold">${N(r.cust)}</td><td class="num font-bold">${N(r.car)}</td><td class="num font-bold">${N(r.ratio, 2)}</td></tr>
+      ${(() => {
+        // v21: คอลัมน์ช่องทางอื่น แสดงเฉพาะยอดที่มีการบันทึก (วันที่เลือกหรือฐานใดฐานหนึ่ง)
+        const ext = [['moto', 'จยย.', 'คัน'], ['deli', 'เดลิเวอรี่', 'คัน'], ['mrt', 'MRT เข้า', 'คน']].filter(([k]) => isNum(r[k]) || D.base.some(b => ok(b[k])));
+        const extCell = (b, k) => !b.n ? '<span class="muted">—</span>' : ok(b[k]) ? (isNum(r[k]) ? cmpCell(r[k], b[k]) : `<div class="font-semibold">${N(b[k])}</div>`) : '<span class="muted" title="ฐานนี้ไม่ได้บันทึกยอดนี้">—</span>';
+        return `${cardHead('เปรียบเทียบกับฐานมาตรฐาน 5 แบบ', `ลูกค้า / รถยนต์ / Ratio${ext.length ? ' / ' + ext.map(e => e[1]).join(' / ') : ''} ของ ${dShort(key)} เทียบกับแต่ละฐาน · % = (วันที่เลือก − ฐาน) ÷ ฐาน`)}
+      <div class="scroll-x"><table class="tbl tbl-day"><thead><tr><th>ฐานเปรียบเทียบ</th><th class="num">ลูกค้า (คน)</th><th class="num">รถยนต์ (คัน)</th><th class="num">Ratio</th>${ext.map(([k, l, u], i) => `<th class="num th-ext${i ? '' : ' th-ext1'}">${l} (${u})</th>`).join('')}</tr></thead><tbody>
+        <tr class="day-cur"><td><div class="font-semibold">${dShort(key)} (วันที่เลือก)</div><div class="text-[11px] muted">${DAYTYPE_TH[dayTypeOf(r)]}</div></td><td class="num font-bold">${N(r.cust)}</td><td class="num font-bold">${N(r.car)}</td><td class="num font-bold">${N(r.ratio, 2)}</td>${ext.map(([k], i) => `<td class="num font-bold td-ext${i ? '' : ' td-ext1'}">${isNum(r[k]) ? N(r[k]) : '<span class="muted" title="วันนี้ไม่ได้บันทึก">—</span>'}</td>`).join('')}</tr>
         ${D.base.map(b => `<tr><td><div class="font-medium">${b.label}</div><div class="text-[11px] muted">${b.sub}</div></td>
-          <td class="num">${b.n ? cmpCell(r.cust, b.cust) : '<span class="muted">ไม่มีข้อมูล</span>'}</td><td class="num">${b.n ? cmpCell(r.car, b.car) : '<span class="muted">—</span>'}</td><td class="num">${b.n ? cmpCell(r.ratio, b.ratio, 2) : '<span class="muted">—</span>'}</td></tr>`).join('')}
-      </tbody></table></div>
+          <td class="num">${b.n ? cmpCell(r.cust, b.cust) : '<span class="muted">ไม่มีข้อมูล</span>'}</td><td class="num">${b.n ? cmpCell(r.car, b.car) : '<span class="muted">—</span>'}</td><td class="num">${b.n ? cmpCell(r.ratio, b.ratio, 2) : '<span class="muted">—</span>'}</td>${ext.map(([k], i) => `<td class="num td-ext${i ? '' : ' td-ext1'}">${extCell(b, k)}</td>`).join('')}</tr>`).join('')}
+      </tbody></table></div>`; })()}
     </div>
   </div>
   ${(() => { const by = new Map(S.all.map(x => [x.key, x])), rs = b => b.keys.map(k => by.get(k)).filter(Boolean); return modeKpiRow([r], [{ short: 'สัปดาห์ก่อน', rows: rs(b2) }, { short: 'เมื่อวาน', rows: rs(b1) }, { short: 'ปีก่อน', rows: rs(b5) }], { single: true, note: '% = เทียบวันเดียวกันสัปดาห์ก่อน' }); })()}
@@ -4345,20 +4359,21 @@ function buildDailyReport() {
         ${kp('Ratio ลูกค้า : รถยนต์', N(r.ratio, 2), 'คน/คัน', '#ec4899', `เฉลี่ย 4 สัปดาห์ ${N(b3.ratio, 2)} · ${gTxt(g(r.ratio, b3.ratio))}`)}
         ${kp(`อันดับวัน${TH_DAYS[r.dow]}ในรอบปี`, D.rankN >= 8 ? D.rank : '-', D.rankN >= 8 ? 'จาก ' + D.rankN + ' วัน' : '', '#10b981', `มัธยฐาน ${N(D.med)} คน`)}
       </div>
+      ${(() => {
+        // v22: ตารางฐานมาตรฐาน 5 แบบ เต็มความกว้าง + ช่องทางอื่น (แสดงเฉพาะยอดที่มีการบันทึก) — ตรงกับตารางบนหน้าจอ
+        const ext = [['moto', 'จยย.', 'คัน'], ['deli', 'เดลิเวอรี่', 'คัน'], ['mrt', 'MRT เข้า', 'คน']].filter(([k]) => isNum(r[k]) || D.base.some(b => ok(b[k])));
+        const sep = 'border-left:1.5px solid #d9f2ea;';
+        const extTd = (b, k, i) => `<td class="num" style="${i ? '' : sep}background:#f6fdfa">${b ? (ok(b[k]) ? N(b[k]) : '<span style="color:#94a3b8">—</span>') : (isNum(r[k]) ? `<b>${N(r[k])}</b>` : '<span style="color:#94a3b8">—</span>')}</td>` + (b ? `<td class="num" style="white-space:nowrap;background:#f6fdfa">${b.n && ok(b[k]) && isNum(r[k]) ? gTxt(g(r[k], b[k])) : '—'}</td>` : '<td style="background:#f6fdfa"></td>');
+        const other = [['custOut', 'ลูกค้าออก', 'คน'], ['carOut', 'รถยนต์ออก 24 ชม.', 'คัน'], ['mrtOut', 'MRT ออก', 'คน']].filter(([k]) => isNum(r[k]));
+        return `<div class="rp-box" style="margin-top:10px"><div class="rp-t">เปรียบเทียบกับฐานมาตรฐาน 5 แบบ <span style="font-weight:400;color:#6e6a86">· % = (วันที่เลือก − ฐาน) ÷ ฐาน${ext.length ? ' · ช่องทางอื่นเฉลี่ยเฉพาะวันที่มีการบันทึก' : ''}</span></div>
+          <table class="rp-tbl rp-base5"><thead><tr><th>ฐานเปรียบเทียบ</th><th>ช่วง/วันที่</th><th class="num">ลูกค้า</th><th class="num">%</th><th class="num">รถยนต์</th><th class="num">%</th><th class="num">Ratio</th>${ext.map(([k, l, u], i) => `<th class="num" style="${i ? '' : sep}color:#0f766e;background:#effaf6">${l} (${u})</th><th class="num" style="color:#0f766e;background:#effaf6">%</th>`).join('')}</tr></thead><tbody>
+          <tr style="background:#faf9ff"><td><b>วันที่เลือก</b></td><td>${dShort(key)}</td><td class="num"><b>${N(r.cust)}</b></td><td></td><td class="num"><b>${N(r.car)}</b></td><td></td><td class="num"><b>${N(r.ratio, 2)}</b></td>${ext.map(([k], i) => extTd(null, k, i)).join('')}</tr>
+          ${D.base.map(b => `<tr><td>${b.label}</td><td style="color:#6e6a86;white-space:nowrap">${b.n > 1 ? `เฉลี่ย ${b.n} วัน` : b.keys[0] ? dShort(b.keys[0]) : 'ไม่มีข้อมูล'}</td><td class="num">${N(b.cust)}</td><td class="num" style="white-space:nowrap">${b.n ? gTxt(g(r.cust, b.cust)) : '—'}</td><td class="num">${N(b.car)}</td><td class="num" style="white-space:nowrap">${b.n ? gTxt(g(r.car, b.car)) : '—'}</td><td class="num">${N(b.ratio, 2)}</td>${ext.map(([k], i) => extTd(b, k, i)).join('')}</tr>`).join('')}
+          </tbody></table>
+          ${other.length ? `<div style="font-size:9.5px;color:#4b4766;margin-top:4px">ยอดอื่นของวัน: ${other.map(([k, l, u]) => `${l} <b>${N(r[k])}</b> ${u}${p1 && isNum(p1[k]) ? ` (${b1.short} ${gTxt(g(r[k], p1[k]))})` : ''}`).join(' · ')}</div>` : ''}</div>`; })()}
       <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:12px;margin-top:10px">
-        <div class="rp-box"><div class="rp-t">เปรียบเทียบกับฐานมาตรฐาน</div>
-          <table class="rp-tbl"><thead><tr><th>ฐานเปรียบเทียบ</th><th>ช่วง/วันที่</th><th class="num">ลูกค้า</th><th class="num">%</th><th class="num">รถยนต์</th><th class="num">%</th><th class="num">Ratio</th></tr></thead><tbody>
-          <tr style="background:#faf9ff"><td><b>วันที่เลือก</b></td><td>${dShort(key)}</td><td class="num"><b>${N(r.cust)}</b></td><td></td><td class="num"><b>${N(r.car)}</b></td><td></td><td class="num"><b>${N(r.ratio, 2)}</b></td></tr>
-          ${D.base.map(b => `<tr><td>${b.label}</td><td style="color:#6e6a86;white-space:nowrap">${b.n > 1 ? `เฉลี่ย ${b.n} วัน` : b.keys[0] ? dShort(b.keys[0]) : 'ไม่มีข้อมูล'}</td><td class="num">${N(b.cust)}</td><td class="num" style="white-space:nowrap">${b.n ? gTxt(g(r.cust, b.cust)) : '—'}</td><td class="num">${N(b.car)}</td><td class="num" style="white-space:nowrap">${b.n ? gTxt(g(r.car, b.car)) : '—'}</td><td class="num">${N(b.ratio, 2)}</td></tr>`).join('')}
-          </tbody></table></div>
-        <div class="rp-box"><div class="rp-t">14 วันล่าสุด (ลูกค้า × รถยนต์)</div><canvas id="rpDChart" width="470" height="150" style="width:470px;height:150px"></canvas></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:12px;margin-top:10px">
-        <div class="rp-box"><div class="rp-t">ตัวชี้วัดทั้งหมดของวัน</div>
-          <table class="rp-tbl"><thead><tr><th>ตัวชี้วัด</th><th class="num">${dShort(key)}</th><th class="num">${b1.short}</th><th class="num">%</th><th class="num">${b2.short}</th><th class="num">%</th></tr></thead><tbody>
-          ${mets.map(m => `<tr><td><span class="rp-dot" style="color:${m.color}">●</span>${m.label}</td><td class="num"><b>${N(r[m.k])}</b></td><td class="num">${p1 ? N(p1[m.k]) : '-'}</td><td class="num">${p1 ? gTxt(g(r[m.k], p1[m.k])) : '—'}</td><td class="num">${p2 ? N(p2[m.k]) : '-'}</td><td class="num">${p2 ? gTxt(g(r[m.k], p2[m.k])) : '—'}</td></tr>`).join('')}
-          </tbody></table></div>
         <div class="rp-box"><div class="rp-t">สรุปผลการวิเคราะห์</div><div class="rp-list">${ins.map((t, i) => `<div class="rp-li"><span class="n">${i + 1}.</span><span>${t}</span></div>`).join('')}</div></div>
+        <div class="rp-box"><div class="rp-t">14 วันล่าสุด (ลูกค้า × รถยนต์)</div><canvas id="rpDChart" width="470" height="150" style="width:470px;height:150px"></canvas></div>
       </div>
       <div class="rp-fill" style="display:grid;grid-template-columns:1.1fr 1fr;gap:12px;margin-top:10px">
         <div class="rp-box"><div class="rp-t">ลูกค้าวัน${TH_DAYS[r.dow]} 12 สัปดาห์ล่าสุด (เส้นประ = มัธยฐานรอบปี)</div><canvas id="rpDChart2" width="520" height="128" style="width:520px;height:128px"></canvas></div>
