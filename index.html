@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <!--
-  Customer & Car Compare Analytics — v17
+  Customer & Car Compare Analytics — v20
+  v20: + ชื่อเมนูยาวไม่ตัด "…" — ย่อขนาดตัวอักษรอัตโนมัติจนพอดี (ไม่พอจริงจึงขึ้นบรรทัดใหม่) · ลูกศรย่อ/ขยายเมนูชี้ตามทิศทางที่จะเกิดขึ้น (« ย่อ · » ขยาย)
+  v19: + เมนูด้านข้างไม่มีแถบเลื่อนซ้าย–ขวา/ขึ้น–ลง (กว้างคงที่ · ย่อระยะอัตโนมัติตามความสูงจอ · ชื่อยาวตัด …) · หน้าไม่เลื่อนแนวนอน
+       + กราฟสูงพอดีจอ · เลื่อนหน้าแล้วหยุดพอดีหัวการ์ด (scroll snap) · รองรับ Mobile / Tablet / Laptop / Desktop · iOS (safe area, ไม่ซูมเมื่อแตะช่องกรอก, 100dvh) / Android
+  v18: + แถบกรองแบบงวดปฏิทิน: รายวัน · รายสัปดาห์ · รายเดือน · รายไตรมาส · รายปี · ทั้งหมด · กำหนดเอง (เลือกงวดได้ + เทียบช่วงก่อนหน้า/ปีก่อน แบบจำนวนวันเท่ากัน)
+       + ตัวเลขนับขึ้นแบบนุ่มนวลเมื่อเปลี่ยนตัวเลือก · การ์ดค่อย ๆ ปรากฏ · ตรวจ edge case ทุกหน้า/ทุกงวด + กันข้อมูลว่าง/วันที่ผิดรูปแบบ
   v17: + หน้าภาพรวม: การ์ด KPI ช่องทางอื่น (จยย. · เดลิเวอรี่ · MRT เข้า · สัดส่วน MRT) เทียบช่วงก่อน/ฐานรายวันเหมือนยอดหลัก
        + หน้า จยย./เดลิเวอรี่/MRT เลือกมุมมอง รายวัน / รายสัปดาห์ / รายเดือน / รายปี พร้อมฐานเทียบมาตรฐานของแต่ละงวด
   v16: + หน้า "จยย. · เดลิเวอรี่ · MRT" — ยอด จยย. / เดลิเวอรี่ / แท็กซี่ / ลูกค้าเข้า-ออกทางสะพาน MRT (ต้องใช้ Code_CCA_v7.gs สำหรับ MRT)
@@ -45,7 +50,10 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1b1336">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>SBK Compare · Customer & Car Analytics</title>
 <!-- v6: ไอคอนแอป (แสดงเมื่อเพิ่มลงหน้าจอหลัก มือถือ/คอมพิวเตอร์) — ฝังในไฟล์ ไม่ต้องมีไฟล์รูปแยก -->
 <meta name="application-name" content="SBK Compare">
@@ -162,6 +170,26 @@
   .g-text{ background:linear-gradient(90deg,var(--p1),var(--p2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
 
   /* ============ Sidebar ============ */
+  /* v19: เมนูด้านข้าง — กว้างคงที่ (ไม่ขยายตามความยาวข้อความ/ฟอนต์ของแต่ละเครื่อง เช่น Windows ที่ฟอนต์ไทยกว้างกว่า)
+     · ไม่มีแถบเลื่อนแนวนอน · เลื่อนแนวตั้งเฉพาะรายการเมนูเมื่อจอเตี้ยมาก (แถบเลื่อนบางและซ่อนจนกว่าจะชี้) · ส่วนล่างแสดงสถานะข้อมูลตลอด */
+  html{ overflow-x:clip; } body{ overflow-x:clip; }
+  #sidebar{ min-width:264px; max-width:264px; overflow:hidden; height:100vh; height:100dvh; }
+  @media (max-width:1023px){ #sidebar{ min-width:min(296px, 86vw); max-width:min(296px, 86vw); padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom); } }
+  #nav{ overflow-x:hidden !important; overflow-y:auto; min-height:0; scrollbar-width:thin; scrollbar-color:transparent transparent; overscroll-behavior:contain; }
+  #nav:hover{ scrollbar-color:rgba(255,255,255,.22) transparent; }
+  #nav::-webkit-scrollbar{ width:5px; height:0; } #nav::-webkit-scrollbar-thumb{ background:transparent; border-radius:9px; } #nav:hover::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.22); }
+  .nav-item{ min-width:0; max-width:calc(100% - 24px); box-sizing:border-box; }
+  .nav-item > span.hide-collapsed:not(.nav-badge){ flex:1; min-width:0; overflow:hidden; line-height:1.3; } /* v20: ไม่ตัด … — JS ย่อขนาดตัวอักษรให้พอดีแทน */
+  .nav-item > span.nav-fit-wrap{ white-space:normal; }
+  /* v20: ลูกศรย่อ/ขยายเมนู — เมนูเปิด = « (กดเพื่อพับไปทางซ้าย) · เมนูพับ = » (กดเพื่อดึงออกมาทางขวา) */
+  #btnCollapse svg{ transition:transform .25s ease; } body.collapsed #btnCollapse svg{ transform:scaleX(-1); }
+  .nav-item > .nav-badge{ flex:0 0 auto; }
+  body.collapsed #sidebar{ min-width:78px; max-width:78px; }
+  /* จอเตี้ย (แล็ปท็อป 720–960px): ลดระยะห่างให้เมนูทั้งหมดพอดีจอโดยไม่ต้องเลื่อน */
+  @media (min-width:1024px) and (max-height:960px){ #nav .nav-item{ padding:8px 12px; margin:1px 12px; font-size:14px; } #nav .side-label{ padding:12px 22px 4px; } #nav{ padding-bottom:6px; } #sidebar .side-brand{ padding-top:14px; padding-bottom:8px; } #sidebar .side-foot{ margin:8px 12px; padding:9px 12px; } }
+  @media (min-width:1024px) and (max-height:800px){ #nav .nav-item{ padding:6px 12px; font-size:13.5px; } #nav .side-label{ padding:8px 22px 3px; font-size:10.5px; } }
+  @media (max-width:1023px) and (max-height:860px){ #nav .nav-item{ padding:8px 12px; margin:1px 12px; } #nav .side-label{ padding:10px 22px 3px; } }
+  @media (min-width:1024px) and (max-height:680px){ #nav .side-label{ display:none; } }
   #sidebar{ width:264px; background:linear-gradient(180deg,var(--side),var(--side2)); color:var(--sideText); transition:width .25s ease, transform .25s ease; flex-shrink:0; }
   .side-label{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--sideMuted); padding:18px 22px 6px; font-weight:500; }
   .nav-item{ display:flex; align-items:center; gap:12px; margin:2px 12px; padding:10px 12px; border-radius:12px; cursor:pointer; font-size:14.5px; color:var(--sideText); transition:all .18s; white-space:nowrap; border:0; background:none; width:calc(100% - 24px); text-align:left; font-family:inherit; }
@@ -178,6 +206,17 @@
     body.collapsed .hide-collapsed{ display:initial !important; }
     body.collapsed .nav-item{ justify-content:flex-start; padding:10px 12px; }
   }
+
+  /* v19: กราฟสูงพอดีจอ — การ์ดกราฟ 1 ใบไม่ถูกตัดที่ขอบล่างของจอ (จอเตี้ยกราฟเตี้ยลง · จอสูงไม่เกินค่าเดิมมากนัก) */
+  .page div:has(> canvas)[style*="height:"]:not(.spark):not([style*="position:relative"]){ height:clamp(210px, calc(100vh - var(--tbH, 88px) - 210px), 360px) !important; height:clamp(210px, calc(100dvh - var(--tbH, 88px) - 210px), 360px) !important; }
+  .page .md-chart{ height:clamp(210px, calc(100dvh - var(--tbH, 88px) - 210px), 340px); }
+  /* เลื่อนหน้าแล้วหยุดพอดีหัวการ์ด/แถว (proximity = ช่วยจัดเมื่อใกล้ ไม่บังคับ) — ไม่ตัดเนื้อหาครึ่ง ๆ ใต้แถบบน */
+  html{ scroll-snap-type:y proximity; scroll-padding-top:var(--snapTop, 112px); }
+  .page [data-body] > *{ scroll-snap-align:start; }
+  #filterBar, main > :first-child{ scroll-snap-align:start; } /* จุดหยุดบนสุด — กันหน้าเลื่อนลงเองตอนโหลดจนแถบกรองหายใต้แถบบน */
+  @media (max-width:1023px) and (pointer:coarse){ input.field, select.field, textarea.field, #rcModal input, #rcModal select{ font-size:16px !important; } } /* iOS: ช่องกรอก < 16px จะซูมหน้าจออัตโนมัติ */
+  @supports (padding:max(0px)){ main{ padding-left:max(16px, env(safe-area-inset-left)) ; padding-right:max(16px, env(safe-area-inset-right)); padding-bottom:max(24px, env(safe-area-inset-bottom)); } }
+  @media (hover:none){ .nav-item:hover{ background:transparent; } .nav-item.active:hover{ background:#fff; } }
 
   /* ============ Components ============ */
   .card{ background:var(--card); border:1px solid var(--border); border-radius:20px; box-shadow:var(--shadow); }
@@ -233,6 +272,14 @@
   .scroll-x{ overflow-x:auto; } .scroll-x::-webkit-scrollbar{ height:8px; } .scroll-x::-webkit-scrollbar-thumb{ background:var(--border); border-radius:8px; }
   .page{ display:none; } .page.active{ display:block; animation:fade .3s ease; }
   @keyframes fade{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:none; } }
+  /* v18: เอฟเฟกต์เมื่อเปลี่ยนตัวเลือก — การ์ดเลื่อนขึ้นและจางเข้าทีละแถว */
+  @keyframes fxIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
+  .fx-in > *{ animation:fxIn .42s cubic-bezier(.2,.7,.2,1) both; }
+  .fx-in > *:nth-child(2){ animation-delay:.05s; } .fx-in > *:nth-child(3){ animation-delay:.1s; } .fx-in > *:nth-child(4){ animation-delay:.15s; } .fx-in > *:nth-child(n+5){ animation-delay:.2s; }
+  .fx-in .kpi{ animation:fxIn .45s cubic-bezier(.2,.7,.2,1) both; } .fx-in .kpi:nth-child(2){ animation-delay:.04s; } .fx-in .kpi:nth-child(3){ animation-delay:.08s; } .fx-in .kpi:nth-child(4){ animation-delay:.12s; } .fx-in .kpi:nth-child(5){ animation-delay:.16s; } .fx-in .kpi:nth-child(6){ animation-delay:.2s; }
+  .kpi-val{ font-variant-numeric:tabular-nums; }
+  #rangeSeg button, .seg button{ transition:background .2s, color .2s, box-shadow .2s, transform .15s; } .seg button:active{ transform:scale(.96); }
+  @media (prefers-reduced-motion: reduce){ .fx-in > *, .fx-in .kpi{ animation:none !important; } }
   .spinner{ width:18px; height:18px; border:2.5px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; }
   .spinner.dark-s{ border-color:rgba(124,58,237,.25); border-top-color:var(--p1); width:38px; height:38px; border-width:4px; }
   @keyframes spin{ to{ transform:rotate(360deg); } }
@@ -284,7 +331,7 @@
   .rc-sec{ margin-bottom:14px; }
   .rc-h{ display:flex; align-items:center; gap:8px; font-weight:600; font-size:14px; margin-bottom:8px; }
   .rc-n{ width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px; color:#fff; background:linear-gradient(135deg,var(--p1),var(--p2)); }
-  .rc-types{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; }
+  .rc-types{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; }
   .rc-type{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; text-align:left; padding:10px 11px; border-radius:14px; border:1.5px solid var(--border); background:var(--card); color:var(--text); cursor:pointer; font-family:inherit; transition:all .15s; }
   .rc-type:hover{ border-color:var(--p1); }
   .rc-type.on{ border-color:var(--p1); background:var(--soft); box-shadow:0 8px 18px -12px rgba(124,58,237,.8); }
@@ -303,7 +350,7 @@
   .rc-warn{ display:flex; gap:6px; align-items:flex-start; font-size:12px; color:#b45309; margin-top:6px; line-height:1.5; } .rc-warn svg{ flex-shrink:0; margin-top:2px; }
   .rc-err{ color:#b91c1c; display:flex; gap:8px; align-items:center; font-size:13.5px; }
   .rc-link{ color:var(--p1); text-decoration:underline; }
-  @media (max-width:760px){ .rc-types{ grid-template-columns:repeat(2,minmax(0,1fr)); } .rc-types .rc-type:last-child{ grid-column:span 2; } .rc-fmts{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media (max-width:760px){ .rc-types{ grid-template-columns:repeat(2,minmax(0,1fr)); }  .rc-fmts{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
   @media (max-width:520px){ #rcModal{ padding:0; align-items:stretch; } #rcModal .rc-card{ max-height:100vh; border-radius:0; } .rc-bodyin{ padding:12px 14px; } .rc-top{ padding:12px 14px; } .rc-sum-g{ grid-template-columns:1fr; gap:0; } .rc-sum-g .muted{ margin-top:4px; font-size:11.5px; } }
   #rpW1 .rp-tbl td, #rpW2 .rp-tbl td{ padding:1.6px 6px; } #rpW1 .rp-list{ line-height:1.5; } #rpW1 .rp-box, #rpW2 .rp-box{ padding:7px 12px; } #rpW1 .rp-kpi{ padding:7px 12px; } #rpW1 .rp-kpi .v{ font-size:18px; line-height:1.3; }
   .rc-cmp td, .rc-cmp th{ font-size:10px; white-space:nowrap; } .rc-cmp td{ padding:2.6px 5px !important; } .rc-day td{ font-size:10.5px; padding:3.3px 5px !important; white-space:nowrap; } .rc-day th{ font-size:9.8px; padding:2px 5px !important; }
@@ -425,6 +472,7 @@
     #filterBar .seg{ width:100%; display:grid; gap:4px; }
     #rangeSeg{ grid-template-columns:repeat(4,1fr); } /* v17: 2 แถวพอดีจอ (เดิม 3 แถว กินพื้นที่) */
     #rangeSeg [data-range=day]{ grid-column:span 2; }
+    #perPick, #cmpPick{ width:100%; } #perSel{ flex:1; } #cmpSeg{ flex:1; display:grid; grid-template-columns:1fr 1fr; }
     #filterBar .seg button{ font-size:13px; }
     #filterBar .seg button{ padding:8px 4px; text-align:center; white-space:nowrap; }
     #filterBar .seg.hidden{ display:none; }
@@ -459,8 +507,8 @@
   <div id="overlay" class="fixed inset-0 z-40 hidden" style="background:rgba(10,6,25,.5)"></div>
 
   <!-- ===================== SIDEBAR ===================== -->
-  <aside id="sidebar" class="lg:sticky lg:top-0 h-screen flex flex-col">
-    <div class="flex items-center gap-3 px-5 pt-5 pb-3">
+  <aside id="sidebar" class="lg:sticky lg:top-0 h-screen flex flex-col" aria-label="เมนูหลัก">
+    <div class="side-brand flex items-center gap-3 px-5 pt-5 pb-3 flex-shrink-0">
       <img data-logo alt="SBK Compare" style="width:44px;height:44px;border-radius:13px;flex-shrink:0;box-shadow:0 8px 20px -6px rgba(219,39,119,.55)">
       <div class="hide-collapsed leading-tight">
         <div style="color:#fff;font-weight:600;font-size:15.5px">SBK Compare</div>
@@ -468,7 +516,7 @@
       </div>
     </div>
     <nav id="nav" class="flex-1 overflow-y-auto pb-4"></nav>
-    <div class="hide-collapsed m-3 p-3 rounded-2xl" style="background:rgba(255,255,255,.06);font-size:12px">
+    <div class="side-foot hide-collapsed m-3 p-3 rounded-2xl flex-shrink-0" style="background:rgba(255,255,255,.06);font-size:12px">
       <div class="flex items-center gap-2"><span id="dataDot" class="dot" style="background:#f59e0b"></span><span id="dataStatus" style="color:#fff;font-weight:500">ยังไม่มีข้อมูล</span></div>
       <div id="dataStatusSub" style="color:var(--sideMuted)">กรุณานำเข้าข้อมูลเพื่อเริ่มวิเคราะห์</div>
     </div>
@@ -480,7 +528,7 @@
       <div class="flex items-center gap-3 px-4 md:px-6 lg:px-8 py-3">
         <button id="btnMenu" class="icon-btn lg:hidden" title="เมนู" data-i="menu"></button>
         <img data-logo alt="" class="m-logo lg:hidden">
-        <button id="btnCollapse" class="icon-btn hidden lg:inline-flex" title="ย่อ/ขยายเมนู" data-i="chevronsLeft"></button>
+        <button id="btnCollapse" class="icon-btn hidden lg:inline-flex" title="ย่อเมนู" aria-label="ย่อเมนู" aria-expanded="true" data-i="chevronsLeft"></button>
         <!-- หัวข้อหน้า: อยู่ในแถบบนแบบ sticky เพื่อให้มองเห็นตลอดเวลาเลื่อนดูข้อมูล -->
         <div class="min-w-0 flex-1 leading-tight">
           <div class="tb-crumb text-[11px] muted truncate">หน้าหลัก / <span id="bc" style="color:var(--p1)"></span><span class="hidden md:inline"> · <span id="topRange">ช่วงข้อมูล: —</span></span></div>
@@ -509,12 +557,19 @@
       <div id="filterBar" class="card p-3 flex flex-wrap items-center gap-3 hidden">
         <div class="seg" id="rangeSeg">
           <button data-range="day" class="seg-day" title="สรุปยอดประจำวัน เทียบเมื่อวาน/สัปดาห์ก่อน/ปีก่อน"><span class="live-dot" style="width:7px;height:7px"></span>รายวัน (ล่าสุด)</button>
+          <button data-range="week" title="สัปดาห์ จันทร์–อาทิตย์">รายสัปดาห์</button>
+          <button data-range="month">รายเดือน</button>
+          <button data-range="quarter">รายไตรมาส</button>
+          <button data-range="year">รายปี</button>
           <button data-range="all">ทั้งหมด</button>
-          <button data-range="7">7 วัน</button>
-          <button data-range="30">30 วัน</button>
-          <button data-range="90">90 วัน</button>
-          <button data-range="year">ปีล่าสุด</button>
           <button data-range="custom">กำหนดเอง</button>
+        </div>
+        <div id="perPick" class="hidden flex items-center gap-2 flex-wrap">
+          <select id="perSel" class="field field-sm" style="width:auto;max-width:100%" aria-label="เลือกงวด"></select>
+        </div>
+        <div id="cmpPick" class="hidden flex items-center gap-2 flex-wrap">
+          <span class="text-xs muted">เทียบกับ</span>
+          <div class="seg seg-sm" id="cmpSeg"><button data-cmpb="prev">ช่วงก่อนหน้า</button><button data-cmpb="yoy">ช่วงเดียวกันปีก่อน</button></div>
         </div>
         <div id="customRange" class="hidden flex items-center gap-2 flex-wrap">
           <input type="date" id="dFrom" class="field" style="width:auto;padding:6px 10px">
@@ -626,7 +681,7 @@
 
     <footer class="px-4 md:px-6 lg:px-8 py-4 text-xs muted flex flex-wrap justify-between gap-2" style="border-top:1px solid var(--border)">
       <span>SBK Customer & Car Compare Analytics · Single File Web App</span>
-      <span>v17.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
+      <span>v20.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
     </footer>
   </div>
 </div>
@@ -1810,7 +1865,7 @@ function hydrateIcons(root = document) { root.querySelectorAll('[data-i]').forEa
 const STORE_KEY = 'sbk_customer_car_compare_v1'; // ใช้ key เดิม เพื่อให้ข้อมูลที่เคยบันทึกจาก v1 ยังอยู่
 const S = {
   page: 'dashboard', theme: 'light', order: 'dmy', org: 'ศูนย์การค้าซีคอน บางแค',
-  all: [], rows: [], prev: [], range: 'all', from: null, to: null, rangeStart: null, rangeEnd: null, prevLabel: '',
+  all: [], rows: [], prev: [], range: 'all', pk: {}, cmpBase: 'prev', from: null, to: null, rangeStart: null, rangeEnd: null, prevLabel: '',
   gran: 'auto', monthMode: 'avg', yearMetric: 'cust', yearSel: null, yearBasis: 'ytd',
   holMode: false, carBasis: '24', source: 'local', sheetHol: {}, customHol: {}, customHolText: '', quiet: false,
   dc: { dow: null, a: null, b: null },
@@ -1924,9 +1979,27 @@ function sparkline(id, data, color) {
 /* =====================================================================
    NAVIGATION
    ===================================================================== */
+// v20: ย่อขนาดตัวอักษรชื่อเมนูทีละ 0.5px จนพอดีความกว้าง (ต่ำสุด 11.5px) — ถ้ายังไม่พอ (ฟอนต์เครื่องกว้างมาก) ให้ขึ้นบรรทัดใหม่แทนการตัดคำ
+function fitNavLabels() {
+  try {
+    if (document.body.classList.contains('collapsed') && innerWidth >= 1024) return;
+    $$('#nav .nav-item > span.hide-collapsed:not(.nav-badge)').forEach(sp => {
+      sp.style.fontSize = ''; sp.classList.remove('nav-fit-wrap');
+      if (!sp.clientWidth) return;
+      let fs = parseFloat(getComputedStyle(sp).fontSize) || 14;
+      while (sp.scrollWidth > sp.clientWidth + 0.5 && fs > 11.5) { fs -= 0.5; sp.style.fontSize = fs + 'px'; }
+      if (sp.scrollWidth > sp.clientWidth + 0.5) sp.classList.add('nav-fit-wrap');
+    });
+  } catch (e) { /* ไม่ให้การจัดขนาดเมนูกระทบการทำงานหลัก */ }
+}
+function syncCollapseBtn() {
+  const b = $('#btnCollapse'); if (!b) return; const c = document.body.classList.contains('collapsed');
+  b.title = c ? 'ขยายเมนู' : 'ย่อเมนู'; b.setAttribute('aria-label', b.title); b.setAttribute('aria-expanded', String(!c));
+}
 function renderNav() {
   $('#nav').innerHTML = NAV.map(n => n.sec ? `<div class="side-label hide-collapsed">${n.sec}</div>` :
     `<button class="nav-item ${S.page === n.id ? 'active' : ''}" data-page="${n.id}" title="${n.label}">${I(n.icon)}<span class="hide-collapsed">${n.label}</span>${n.id === 'sheets' && SH.connected ? '<span class="nav-badge live hide-collapsed">Live</span>' : n.id === 'quality' ? (S.qCount ? `<span class="nav-badge hide-collapsed" style="background:linear-gradient(90deg,#f59e0b,#ef4444)">${S.qCount > 99 ? '99+' : S.qCount}</span>` : '') : n.badge ? `<span class="nav-badge hide-collapsed">${n.badge}</span>` : ''}</button>`).join('');
+  requestAnimationFrame(fitNavLabels);
 }
 const NO_FILTER = ['sheets', 'studio', 'quality', 'hourly', 'events', 'modes']; // หน้าที่มีตัวเลือกช่วงเวลาของตัวเอง
 function goto(page) {
@@ -1951,20 +2024,68 @@ function goto(page) {
 /* =====================================================================
    DATA — ประมวลผล + ตัวกรองช่วงเวลา
    ===================================================================== */
+/* ---------- v18: งวดปฏิทิน (สัปดาห์/เดือน/ไตรมาส/ปี) ----------
+   key: week = วันจันทร์ (YYYY-MM-DD) · month = YYYY-MM · quarter = YYYY-Qn · year = YYYY */
+const Q_TH = ['ไตรมาส 1 (ม.ค.–มี.ค.)', 'ไตรมาส 2 (เม.ย.–มิ.ย.)', 'ไตรมาส 3 (ก.ค.–ก.ย.)', 'ไตรมาส 4 (ต.ค.–ธ.ค.)'];
+function perBounds(type, key) {
+  if (type === 'week') return { s: key, pe: addDaysKey(key, 6) };
+  if (type === 'month') { const [y, m] = key.split('-').map(Number); return { s: key + '-01', pe: key + '-' + String(daysInMonth(y, m)).padStart(2, '0') }; }
+  if (type === 'quarter') { const y = +key.slice(0, 4), q = +key.slice(6), m1 = q * 3 - 2, m3 = q * 3; return { s: `${y}-${String(m1).padStart(2, '0')}-01`, pe: `${y}-${String(m3).padStart(2, '0')}-${String(daysInMonth(y, m3)).padStart(2, '0')}` }; }
+  return { s: key + '-01-01', pe: key + '-12-31' };
+}
+const perKeyOf = (type, r) => type === 'week' ? weekStartKey(r) : type === 'month' ? r.ym : type === 'quarter' ? `${r.y}-Q${Math.ceil(r.m / 3)}` : String(r.y);
+function perLabel(type, key, long) {
+  const b = perBounds(type, key);
+  if (type === 'week') return 'สัปดาห์ ' + wkLabel(b.s, b.pe);
+  if (type === 'month') return ymTH(key, true);
+  if (type === 'quarter') return `${long ? Q_TH[+key.slice(6) - 1] : 'ไตรมาส ' + key.slice(6)} ปี ${+key.slice(0, 4) + 543}`;
+  return `ปี ${+key + 543}`;
+}
+function perOptions(type) {
+  const m = new Map(); S.all.forEach(r => { const k = perKeyOf(type, r); m.set(k, (m.get(k) || 0) + 1); });
+  return [...m.entries()].sort((a, b) => a[0] < b[0] ? 1 : -1).map(([key, n]) => { const b = perBounds(type, key), cal = daysBetween(b.s, b.pe) + 1; return { key, n, label: `${perLabel(type, key, true)} (${n}/${cal} วัน)` }; });
+}
+// ขอบเขตงวด + ฐานเทียบ (จำนวนวันเท่ากันเมื่องวดยังไม่ครบ)
+function perResolve(type, key, cmp) {
+  const last = S.all[S.all.length - 1].key, opts = perOptions(type);
+  if (!key || !opts.some(o => o.key === key)) key = opts.length ? opts[0].key : perKeyOf(type, S.all[S.all.length - 1]);
+  const { s, pe } = perBounds(type, key), e = pe < last ? pe : last, done = e === pe, span = daysBetween(s, e);
+  let bs, be, bLabel;
+  if (cmp === 'yoy') {
+    if (type === 'week') { bs = addDaysKey(s, -364); be = addDaysKey(e, -364); bLabel = 'สัปดาห์เดียวกันปีก่อน'; }
+    else { const k2 = type === 'year' ? String(+key - 1) : (+key.slice(0, 4) - 1) + key.slice(4), b2 = perBounds(type, k2); bs = b2.s; be = done ? b2.pe : (shiftYearKey(e, -1) < b2.pe ? shiftYearKey(e, -1) : b2.pe); bLabel = `${type === 'month' ? 'เดือนเดียวกันปีก่อน' : type === 'quarter' ? 'ไตรมาสเดียวกันปีก่อน' : 'ปีก่อน'} (${perLabel(type, k2)}${done ? '' : ' ช่วงเดียวกัน'})`; }
+  } else {
+    if (type === 'week') { bs = addDaysKey(s, -7); be = addDaysKey(e, -7); bLabel = 'สัปดาห์ก่อน'; }
+    else {
+      let k2;
+      if (type === 'month') k2 = prevMonthKey(key);
+      else if (type === 'quarter') { const y = +key.slice(0, 4), q = +key.slice(6); k2 = q === 1 ? `${y - 1}-Q4` : `${y}-Q${q - 1}`; }
+      else k2 = String(+key - 1);
+      const b2 = perBounds(type, k2); bs = b2.s;
+      // งวดยังไม่ครบ: เดือน/ปี = ตัดที่วันที่เดียวกัน · ไตรมาส = นับจำนวนวันเท่ากันจากต้นไตรมาส
+      const cut = type === 'month' ? b2.s.slice(0, 8) + String(Math.min(+e.slice(8), +b2.pe.slice(8))).padStart(2, '0') : type === 'year' ? shiftYearKey(e, -1) : addDaysKey(b2.s, span);
+      be = done ? b2.pe : (cut < b2.pe ? cut : b2.pe);
+      bLabel = `${type === 'month' ? 'เดือนก่อน' : type === 'quarter' ? 'ไตรมาสก่อน' : 'ปีก่อน'} (${perLabel(type, k2)}${done ? '' : ' ช่วงเดียวกัน'})`;
+    }
+  }
+  return { type, key, s, pe, e, done, partial: !done, span, bs, be, bLabel, label: perLabel(type, key) };
+}
 function applyFilter() {
   const all = S.all; if (!all.length) { S.rows = []; S.prev = []; return; }
   const first = all[0].key, last = all[all.length - 1].key;
   let start = first, end = last, pStart = null, pEnd = null;
-  if (['7', '30', '90'].includes(S.range)) {
-    const L = +S.range; start = addDaysKey(last, -(L - 1)); if (start < first) start = first;
-    pEnd = addDaysKey(start, -1); pStart = addDaysKey(pEnd, -(L - 1)); S.prevLabel = `${L} วันก่อนหน้า`;
-  } else if (S.range === 'year') {
-    start = last.slice(0, 4) + '-01-01'; if (start < first) start = first;
-    const py = +last.slice(0, 4) - 1; pStart = py + '-01-01'; pEnd = py + last.slice(4);
-    if (!dateFromKey(pEnd)) pEnd = py + '-02-28'; S.prevLabel = `ช่วงเดียวกันปี ${py + 543}`;
+  if (['week', 'month', 'quarter', 'year'].includes(S.range)) {
+    // v18: งวดปฏิทิน — เลือกงวดได้ (ค่าเริ่มต้น = งวดล่าสุด) · ถ้างวดยังไม่ครบ ฐานเทียบจะถูกตัดให้มีจำนวนวันเท่ากัน (period-to-date)
+    // งวดล่าสุด = ติดตามอัตโนมัติ (มีข้อมูลเดือน/สัปดาห์ใหม่เข้ามา → เลื่อนตามให้เอง) · ผู้ใช้เลือกงวดเก่าเอง = คงงวดนั้นไว้
+    const P = perResolve(S.range, (S.pkAuto || {})[S.range] === false ? S.pk[S.range] : null, S.cmpBase);
+    S.pk[S.range] = P.key; start = P.s; end = P.e; pStart = P.bs; pEnd = P.be; S.prevLabel = P.bLabel; S.perInfo = P;
   } else if (S.range === 'custom') {
     start = S.from || first; end = S.to || last; if (start > end) [start, end] = [end, start];
-    const L = daysBetween(start, end) + 1; pEnd = addDaysKey(start, -1); pStart = addDaysKey(pEnd, -(L - 1)); S.prevLabel = `${L} วันก่อนหน้า`;
+    if (start < first) start = first; if (end > last) end = last; // v18: ตัดช่วงให้อยู่ในข้อมูลจริง (กันเลือกวันอนาคต/ก่อนมีข้อมูล)
+    if (start > end) { start = end = last; }
+    const L = daysBetween(start, end) + 1;
+    if (S.cmpBase === 'yoy') { pStart = shiftYearKey(start, -1); pEnd = shiftYearKey(end, -1); S.prevLabel = 'ช่วงเดียวกันปีก่อน'; }
+    else { pEnd = addDaysKey(start, -1); pStart = addDaysKey(pEnd, -(L - 1)); S.prevLabel = `${L} วันก่อนหน้า`; }
   } else if (S.range === 'day') {
     // v8: รายวัน — เลือก 1 วัน (ค่าเริ่มต้น = วันล่าสุด) · ช่วงก่อนหน้า = วันที่มีข้อมูลก่อนหน้า
     start = end = dailyKey(); const i = all.findIndex(r => r.key === start);
@@ -1976,10 +2097,17 @@ function applyFilter() {
   // UI ของแถบกรอง
   $$('#rangeSeg button').forEach(b => b.classList.toggle('on', b.dataset.range === S.range));
   $('#customRange').classList.toggle('hidden', S.range !== 'custom');
+  // v18: ตัวเลือกงวด + ฐานเทียบ
+  const isPer = ['week', 'month', 'quarter', 'year'].includes(S.range);
+  $('#perPick').classList.toggle('hidden', !isPer || S.page === 'yearly');
+  $('#cmpPick').classList.toggle('hidden', !(isPer || S.range === 'custom') || S.page === 'yearly');
+  $$('#cmpSeg button').forEach(b => b.classList.toggle('on', b.dataset.cmpb === S.cmpBase));
+  if (isPer) { const sel = $('#perSel'), opts = perOptions(S.range); sel.innerHTML = opts.map(o => `<option value="${o.key}" ${o.key === S.pk[S.range] ? 'selected' : ''}>${o.label}</option>`).join(''); }
   $('#dFrom').min = $('#dTo').min = first; $('#dFrom').max = $('#dTo').max = last;
   $('#dFrom').value = start; $('#dTo').value = end;
   $('#rangeBadge').textContent = `${dTH(start)} – ${dTH(end)}`;
-  $('#rangeInfo').textContent = `${N(S.rows.length)} วันที่มีข้อมูล` + (S.prev.length ? ` · เทียบกับ ${S.prevLabel}` : '');
+  const calN = daysBetween(start, end) + 1, partial = isPer && S.perInfo && S.perInfo.partial;
+  $('#rangeInfo').textContent = `${N(S.rows.length)}${S.range !== 'day' && S.rows.length < calN ? '/' + N(calN) : ''} วันที่มีข้อมูล` + (partial ? ' · งวดยังไม่ครบ' : '') + (S.prev.length ? ` · เทียบกับ ${S.prevLabel}` : (pStart ? ` · ${S.prevLabel}: ไม่มีข้อมูล` : ''));
 }
 function updateStatus() {
   const has = S.all.length > 0;
@@ -1996,6 +2124,7 @@ function updateStatus() {
    ===================================================================== */
 // Error boundary: ถ้าหน้าใดคำนวณ/วาดผิดพลาด แสดงการ์ดแจ้งเตือนแทนหน้าว่าง และหน้าอื่นยังใช้งานได้
 function render() {
+  if (S._setTb) requestAnimationFrame(S._setTb); // v19: ตำแหน่งจุดหยุดเลื่อนเปลี่ยนตามหน้า (มี/ไม่มีแถบกรอง)
   try { destroyCharts(); } catch (e) { S.charts = {}; }
   // v14.0: บรรทัดย่อยใต้ชื่อหน้า (มือถือ/แท็บเล็ต) — บอกจำนวนวันและวันล่าสุดของข้อมูล แทน breadcrumb ที่ยาวเกินจอ
   try {
@@ -2011,12 +2140,37 @@ function render() {
     if (!body) return;
     if (!S.all.length) { body.innerHTML = emptyHTML(); return; }
     if (!NO_FILTER.includes(S.page) && S.page !== 'yearly' && !S.rows.length) { body.innerHTML = emptyHTML('ไม่มีข้อมูลในช่วงเวลาที่เลือก', 'กรุณาเลือกช่วงเวลาอื่นจากแถบด้านบน', false); return; }
+    body.classList.remove('fx-in'); if (!S.quiet) { void body.offsetWidth; body.classList.add('fx-in'); } // v18: การ์ดค่อย ๆ ปรากฏเมื่อเปลี่ยนตัวเลือก
     ({ dashboard: renderDashboard, weekday: renderWeekday, monthly: renderMonthly, yearly: renderYearly, raw: renderRaw, daycmp: renderDayCmp, studio: renderStudio, quality: renderQuality, hourly: renderHourly, modes: renderModes, events: renderEvents })[S.page](body);
+    if (!S.quiet) countUp(body);
   } catch (e) {
     console.error('[render]', S.page, e);
     if (body) body.innerHTML = `<div class="card empty"><div class="empty-ic" style="color:var(--down)">${I('alert')}</div><div class="text-lg font-semibold">แสดงผลหน้านี้ไม่สำเร็จ</div>
       <div class="muted text-sm mt-1">${esc(e.message || e)}</div><div class="flex justify-center gap-2 mt-5"><button class="btn btn-primary" data-action="rerender">${I('refresh')}ลองใหม่</button><button class="btn" data-page="dashboard">กลับหน้าภาพรวม</button></div></div>`;
   }
+}
+/* v18: ตัวเลข KPI นับขึ้น/ลงอย่างนุ่มนวลจากค่าก่อนหน้า (จำค่าตามชื่อการ์ด) — เคารพ prefers-reduced-motion
+   แสดงค่าสุดท้ายที่ถูกต้องเสมอเมื่อจบแอนิเมชัน (ใช้ข้อความต้นฉบับ ไม่ใช่ค่าที่คำนวณระหว่างทาง) */
+const _kv = {}; let _cuTok = 0;
+function countUp(root) {
+  if (!root) return;
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches, tok = ++_cuTok;
+  const els = [...root.querySelectorAll('.kpi-val, .day-stat .v')];
+  els.forEach(el => {
+    const tn = [...el.childNodes].find(n => n.nodeType === 3 && n.textContent.trim()); if (!tn) return;
+    const txt = tn.textContent.trim(), m = txt.match(/^([+−-]?)([\d,]+(?:\.\d+)?)(%?)$/); if (!m) return;
+    const card = el.closest('.kpi, .day-stat'), lab = card && card.querySelector('.kpi-label, .l');
+    const key = S.page + '|' + (lab ? lab.textContent.trim() : '') + '|' + els.indexOf(el);
+    const to = parseFloat(m[2].replace(/,/g, '')) * (m[1] ? -1 : 1), dec = (m[2].split('.')[1] || '').length, from = _kv[key];
+    _kv[key] = to;
+    if (reduce || !isFinite(to)) return;
+    const start = from === undefined ? to * 0.6 : from; if (start === to) return;
+    const fmt = v => (v < 0 ? '-' : m[1] === '+' ? '+' : '') + Math.abs(v).toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + m[3];
+    const t0 = performance.now(), dur = 650;
+    const step = now => { if (tok !== _cuTok || !tn.isConnected) return; const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      tn.textContent = k >= 1 ? txt : fmt(start + (to - start) * e); if (k < 1) requestAnimationFrame(step); };
+    tn.textContent = fmt(start); requestAnimationFrame(step);
+  });
 }
 function emptyHTML(title, sub, btns = true) {
   const st = SH.state === 'err' ? `<div class="text-sm mt-3" style="color:var(--down)">${esc(SH.err || 'เชื่อมต่อไม่สำเร็จ')}</div>` : SH.state === 'sync' ? '<div class="text-sm mt-3 muted">กำลังดึงข้อมูลจาก Google Drive…</div>' : '';
@@ -2079,7 +2233,9 @@ function aggregate(rows, gran) {
   const m = groupBy(rows, gran === 'week' ? weekStartKey : (r => r.ym));
   return Array.from(m.entries()).map(([k, l]) => ({
     label: gran === 'week' ? dShort(k) : ymTH(k), full: gran === 'week' ? 'สัปดาห์เริ่ม ' + dTH(k) : ymTH(k, true),
-    cust: sum(l.map(r => r.cust)), car: sum(l.map(r => r.car)), days: l.length, evs: evsOf(l)
+    cust: sum(l.map(r => r.cust)), car: sum(l.map(r => r.car)), days: l.length, evs: evsOf(l),
+    // v18: งวดที่ข้อมูลไม่ครบ (ต้น/ท้ายช่วง หรือวันขาดหาย) → ยอดรวมต่ำกว่าจริง ต้องแสดงให้รู้ ไม่ให้อ่านเป็น "ยอดตก"
+    cal: gran === 'week' ? 7 : daysInMonth(+k.slice(0, 4), +k.slice(5, 7)), get partial() { return this.days < this.cal; }
   }));
 }
 function renderDashboard(body) {
@@ -2174,11 +2330,11 @@ function renderDashboard(body) {
   const ag = aggregate(rows, gran);
   mkChart('chMain', {
     data: { labels: ag.map(a => a.label), datasets: [
-      { type: 'bar', label: 'ยอดลูกค้า', data: ag.map(a => a.cust), yAxisID: 'y', backgroundColor: vgrad('#8b5cf6', '#c4b5fd88'), borderRadius: 6, maxBarThickness: 26, order: 2 },
+      { type: 'bar', label: 'ยอดลูกค้า', data: ag.map(a => a.cust), yAxisID: 'y', backgroundColor: (g => ctx => { const a = ag[ctx.dataIndex]; return a && a.partial ? 'rgba(196,181,253,.45)' : g(ctx); })(vgrad('#8b5cf6', '#c4b5fd88')), borderRadius: 6, maxBarThickness: 26, order: 2 },
       { type: 'line', label: 'ยอดรถยนต์', data: ag.map(a => a.car), yAxisID: 'y1', borderColor: COL.car, backgroundColor: COL.car, borderWidth: 2.5, tension: .4, pointRadius: ag.length > 60 ? 0 : 2.5, pointHoverRadius: 5, order: 1 }
     ] },
     options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-      plugins: { legend: { position: 'top', align: 'end' }, tooltip: { callbacks: { title: it => ag[it[0].dataIndex].full, label: it => ` ${it.dataset.label}: ${N(it.raw)} ${it.datasetIndex ? 'คัน' : 'คน'}`, afterBody: it => { const a = ag[it[0].dataIndex]; const ev = (a.evs || []); return [`Ratio: ${N(a.car ? a.cust / a.car : null, 2)} คน/คัน`].concat(a.days > 1 ? [`จำนวนวัน: ${a.days} วัน`] : []).concat(ev.slice(0, 4).map(t => '★ ' + t)).concat(ev.length > 4 ? [`… และอีก ${ev.length - 4} เหตุการณ์`] : []); } } } },
+      plugins: { legend: { position: 'top', align: 'end' }, tooltip: { callbacks: { title: it => ag[it[0].dataIndex].full, label: it => ` ${it.dataset.label}: ${N(it.raw)} ${it.datasetIndex ? 'คัน' : 'คน'}`, afterBody: it => { const a = ag[it[0].dataIndex]; const ev = (a.evs || []); return [`Ratio: ${N(a.car ? a.cust / a.car : null, 2)} คน/คัน`].concat(a.days > 1 || a.cal ? [`จำนวนวัน: ${a.days}${a.cal ? '/' + a.cal : ''} วัน${a.partial ? ' (ไม่ครบงวด — ยอดรวมต่ำกว่าจริง ดูค่าเฉลี่ย/วัน ' + N(a.cust / a.days) + ' คน)' : ''}`] : []).concat(ev.slice(0, 4).map(t => '★ ' + t)).concat(ev.length > 4 ? [`… และอีก ${ev.length - 4} เหตุการณ์`] : []); } } } },
       scales: { x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 14 } }, y: { beginAtZero: true, ticks: { callback: tickK }, title: { display: true, text: 'ลูกค้า (คน)' } }, y1: { beginAtZero: true, position: 'right', grid: { display: false }, ticks: { callback: tickK }, title: { display: true, text: 'รถยนต์ (คัน)' } } } }
   });
   mkChart('chShare', { type: 'doughnut', data: { labels: ['Weekday (จ.–ศ.)', 'Weekend (ส.–อา.)'], datasets: [{ data: [ww.wd.cust.total, ww.we.cust.total], backgroundColor: [COL.wd, COL.we], borderWidth: 4, borderColor: css('--card'), hoverOffset: 6, borderRadius: 8 }] },
@@ -3916,7 +4072,8 @@ function buildReport() {
   const ins = buildInsights(rows, prev).filter(t => t.indexOf('วันหยุด (ส.–อา.)') < 0).map(t => t.replace(/style="[^"]*"/g, ''));
   if (W.days && E.days) ins.splice(1, 0, `เสาร์–อาทิตย์ (ไม่รวมนักขัตฤกษ์) ลูกค้าเฉลี่ย${E.cust.mean >= W.cust.mean ? 'สูงกว่า' : 'ต่ำกว่า'}วันทำงาน <b>${P(Math.abs(growth(E.cust.mean, W.cust.mean)), 1, false)}</b>`);
   if (H.days && W.days) ins.push(`วันหยุดนักขัตฤกษ์ (${H.days} วัน) ลูกค้าเฉลี่ย <b>${N(H.cust.mean)}</b> คน/วัน (${P(growth(H.cust.mean, W.cust.mean))} เทียบวันทำงาน)`);
-  const head = (pg, sub) => rpHeader({ title: 'รายงานวิเคราะห์เปรียบเทียบยอดลูกค้าและยอดรถยนต์', sub, period: `${dTH(S.rangeStart, true)} – ${dTH(S.rangeEnd, true)}`, doc: 'CCA', page: pg + '/2' });
+  const perTitle = { week: 'รายงานสรุปประจำสัปดาห์', month: 'รายงานสรุปประจำเดือน', quarter: 'รายงานสรุปประจำไตรมาส', year: 'รายงานสรุปประจำปี' }[S.range];
+  const head = (pg, sub) => rpHeader({ title: perTitle ? `${perTitle} — ${S.perInfo ? S.perInfo.label : ''}` : 'รายงานวิเคราะห์เปรียบเทียบยอดลูกค้าและยอดรถยนต์', sub, period: `${dTH(S.rangeStart, true)} – ${dTH(S.rangeEnd, true)}`, doc: 'CCA', page: pg + '/2' });
   const foot = pg => rpFooter(pg + '/2');
   const grp = (lab, G, col) => `<tr><td><span class="rp-dot" style="color:${col}">●</span>${lab}</td><td class="num">${N(G.days)}</td><td class="num"><b>${N(G.cust.mean)}</b></td><td class="num">${N(G.car.mean)}</td><td class="num">${N(G.ratio, 2)}</td><td class="num">${G === W ? '<span style="color:#64748b">ฐาน</span>' : P(growth(G.cust.mean, W.cust.mean))}</td></tr>`;
   const top5 = [...rows].sort((a, b) => b.cust - a.cust).slice(0, 5), low5 = [...rows].sort((a, b) => a.cust - b.cust).slice(0, 5);
@@ -3941,7 +4098,7 @@ function buildReport() {
         ${kp('สหสัมพันธ์ (Pearson r)', N(r, 3), '', '#10b981', corrLabel(r))}
       </div>
       <div style="display:grid;grid-template-columns:1.62fr 1fr;gap:12px;margin-top:12px">
-        <div class="rp-box"><div class="rp-t">แนวโน้มยอดลูกค้า × ยอดรถยนต์ (${rows.length > 62 ? 'รวมรายเดือน' : 'รายวัน'})</div><canvas id="rpChart" width="640" height="250" style="width:640px;height:250px"></canvas></div>
+        <div class="rp-box"><div class="rp-t">แนวโน้มยอดลูกค้า × ยอดรถยนต์ (${rows.length > 62 ? 'เฉลี่ยต่อวัน รายเดือน — เทียบเดือนที่ข้อมูลไม่ครบได้ยุติธรรม' : 'รายวัน'})</div><canvas id="rpChart" width="640" height="250" style="width:640px;height:250px"></canvas></div>
         <div class="rp-box"><div class="rp-t">เปรียบเทียบตามประเภทวัน (เฉลี่ยต่อวัน)</div>
           <table class="rp-tbl"><thead><tr><th>ประเภทวัน</th><th class="num">วัน</th><th class="num">ลูกค้า</th><th class="num">รถยนต์</th><th class="num">Ratio</th><th class="num">vs ทำงาน</th></tr></thead><tbody>
           ${grp('วันทำงาน (จ.–ศ.)', W, '#8b5cf6')}${grp('เสาร์–อาทิตย์', E, '#ec4899')}${grp('นักขัตฤกษ์', H, '#f59e0b')}</tbody></table>
@@ -3990,7 +4147,7 @@ function buildReport() {
     </div>
     ${foot(2)}
   </div>`;
-  const ag = aggregate(rows, rows.length > 62 ? 'month' : 'day');
+  const ag = aggregate(rows, rows.length > 62 ? 'month' : 'day').map(a => a.days > 1 ? Object.assign({}, a, { cust: a.cust / a.days, car: a.car / a.days }) : a);
   if (S.charts.rpChart) { S.charts.rpChart.destroy(); delete S.charts.rpChart; }
   const prevColor = Chart.defaults.color, prevBorder = Chart.defaults.borderColor;
   Chart.defaults.color = '#6e6a86'; Chart.defaults.borderColor = 'rgba(110,106,134,.13)';
@@ -4392,6 +4549,7 @@ const RC_TYPES = [
   { k: 'day', t: 'รายวัน', icon: 'calendar', d: 'เทียบวันก่อน · สัปดาห์ก่อน · ปีก่อน' },
   { k: 'week', t: 'รายสัปดาห์', icon: 'bars', d: 'จันทร์–อาทิตย์ · เทียบสัปดาห์ก่อน · ปีก่อน' },
   { k: 'month', t: 'รายเดือน', icon: 'table', d: 'เทียบเดือนก่อน · เดือนเดียวกันปีก่อน' },
+  { k: 'quarter', t: 'รายไตรมาส', icon: 'split', d: 'เทียบไตรมาสก่อน · ปีก่อน' },
   { k: 'year', t: 'รายปี', icon: 'calYear', d: 'เทียบปีก่อน (ช่วงเดียวกัน / ทั้งปี)' },
   { k: 'custom', t: 'กำหนดช่วงเอง', icon: 'cols', d: 'เลือกวันเริ่ม–สิ้นสุดได้อิสระ' }
 ];
@@ -4450,6 +4608,9 @@ function rcResolve(sp) {
   } else if (sp.type === 'month') {
     if (!sp.ym) return { err: 'กรุณาเลือกเดือน' };
     const [y, m] = sp.ym.split('-').map(Number); s = sp.ym + '-01'; pe = sp.ym + '-' + String(daysInMonth(y, m)).padStart(2, '0'); kind = 'month'; title = 'รายงานสรุปประจำเดือน';
+  } else if (sp.type === 'quarter') {
+    if (!sp.q) return { err: 'กรุณาเลือกไตรมาส' };
+    var QP = perResolve('quarter', sp.q, sp.cmp === 'yoy' ? 'yoy' : 'prev'); s = QP.s; pe = QP.pe; kind = 'quarter'; title = 'รายงานสรุปประจำไตรมาส';
   } else {
     s = sp.from; pe = sp.to; if (!s || !pe) return { err: 'กรุณาเลือกวันเริ่มต้นและวันสิ้นสุด' };
     if (s > pe) [s, pe] = [pe, s]; kind = 'custom'; title = 'รายงานวิเคราะห์ช่วงที่กำหนด';
@@ -4468,6 +4629,8 @@ function rcResolve(sp) {
     const cut = (ym2, dim2) => ym2 + '-' + String(done ? dim2 : Math.min(dEnd, dim2)).padStart(2, '0');
     bases = [{ id: 'b1', label: `เดือนก่อน (${ymTH(pm, true)})`, short: 'เดือนก่อน', s: pm + '-01', e: cut(pm, daysInMonth(py, pmo)) },
       { id: 'b2', label: `ปีก่อน (${ymTH(ly, true)})`, short: 'ปีก่อน', s: ly + '-01', e: cut(ly, daysInMonth(y - 1, m)) }];
+  } else if (kind === 'quarter') {
+    bases = [{ id: 'b1', label: QP.bLabel, short: sp.cmp === 'yoy' ? 'ปีก่อน' : 'ไตรมาสก่อน', s: QP.bs, e: QP.be }];
   } else if (sp.cmp === 'prev') {
     const L = span + 1; bases = [{ id: 'b1', label: `${N(L)} วันก่อนหน้า`, s: addDaysKey(s, -L), e: addDaysKey(s, -1) }];
   } else if (sp.cmp === 'yoy') {
@@ -4478,10 +4641,10 @@ function rcResolve(sp) {
   bases = bases.map(b => Object.assign(rngStat(b.s, b.e, b.label), { id: b.id, short: b.short || b.label, off: b.off }));
   if (C.n < C.cal) info.push(`งวดนี้ขาดข้อมูล ${C.cal - C.n} วัน — ค่าเฉลี่ยคิดจากวันที่มีข้อมูล`);
   bases.forEach(b => { if (!b.n) warn.push(`${b.label}: ไม่มีข้อมูลสำหรับเทียบ`); else if (b.n < b.cal) info.push(`${b.label} ขาดข้อมูล ${b.cal - b.n} วัน — เทียบด้วยค่าเฉลี่ย/วัน`); });
-  const name = kind === 'week' ? `สัปดาห์ ${wkLabel(s, pe)}` : kind === 'month' ? `เดือน${ymTH(sp.ym, true)}` : rngLabel(s, e);
+  const name = kind === 'week' ? `สัปดาห์ ${wkLabel(s, pe)}` : kind === 'month' ? `เดือน${ymTH(sp.ym, true)}` : kind === 'quarter' ? perLabel('quarter', sp.q) : rngLabel(s, e);
   const pages = kind === 'month' ? 2 : kind === 'week' ? 1 : 2;
-  return { kind, title, name, s, pe, e, span, C, bases, ym: sp.ym, cmp: sp.cmp, pages, warn, info,
-    period: kind === 'week' ? `สัปดาห์ ${wkLabel(s, pe)} (จันทร์–อาทิตย์)` : kind === 'month' ? `${ymTH(sp.ym, true)}${e < pe ? ` (1–${+e.slice(8)} ${TH_MONTHS[+e.slice(5, 7) - 1]})` : ''}` : `${dTH(s)} – ${dTH(e)} (${N(span + 1)} วัน)`,
+  return { kind, title, name, s, pe, e, span, C, bases, ym: sp.ym, q: sp.q, cmp: sp.cmp, pages, warn, info,
+    period: kind === 'quarter' ? `${perLabel('quarter', sp.q, true)}${e < pe ? ` (ข้อมูลถึง ${dTH(e)})` : ''}` : kind === 'week' ? `สัปดาห์ ${wkLabel(s, pe)} (จันทร์–อาทิตย์)` : kind === 'month' ? `${ymTH(sp.ym, true)}${e < pe ? ` (1–${+e.slice(8)} ${TH_MONTHS[+e.slice(5, 7) - 1]})` : ''}` : `${dTH(s)} – ${dTH(e)} (${N(span + 1)} วัน)`,
     cmpTxt: bases.length ? bases.map(b => `${b.label} ${rngLabel(b.s, b.e)}`).join(' · ') : 'ไม่เทียบ' };
 }
 
@@ -4489,7 +4652,7 @@ function rcResolve(sp) {
 function rcInsights(R, html = true) {
   const C = R.C, [B1, B2] = R.bases, B = s => html ? `<b>${s}</b>` : s, out = [];
   const gA = (b, f) => b && b.n ? growth(C[f], b[f]) : null, pct = g => ok(g) ? P(g) : '—';
-  const nm = R.kind === 'week' ? `สัปดาห์ ${rngShort(R.s, R.pe)} ` : R.kind === 'month' ? `${ymTH(R.ym, true)} ` : 'ช่วงที่เลือก';
+  const nm = R.kind === 'week' ? `สัปดาห์ ${rngShort(R.s, R.pe)} ` : R.kind === 'month' ? `${ymTH(R.ym, true)} ` : R.kind === 'quarter' ? `${perLabel('quarter', R.q)} ` : 'ช่วงที่เลือก';
   const cmpPart = f => R.bases.filter(b => b.n).map(b => `${trendWord(gA(b, f))}เมื่อเทียบ${b.short} (${pct(gA(b, f))})`).join(' และ') || 'ไม่มีงวดสำหรับเทียบ';
   out.push(`${nm}ลูกค้ารวม ${B(N(C.custT))} คน (${C.n} วัน) เฉลี่ย ${B(N(C.custA))} คน/วัน — ${cmpPart('custA')}`);
   out.push(`รถยนต์รวม ${B(N(C.carT))} คัน เฉลี่ย ${B(N(C.carA))} คัน/วัน — ${cmpPart('carA')}`);
@@ -4724,6 +4887,7 @@ function openReportCenter(pref) {
   // ค่าเริ่มต้นของงวด = ล่าสุดเสมอ (หรือตามหน้าที่เปิดอยู่)
   s.day = S.page === 'dashboard' && S.range === 'day' ? dailyKey() : last;
   const wks = rcWeeks(); s.week = wks.length ? wks[0].s : null;
+  s.q = S.range === 'quarter' && S.pk.quarter ? S.pk.quarter : perKeyOf('quarter', S.all[S.all.length - 1]);
   s.ym = last.slice(0, 7); s.year = S.page === 'yearly' && S.yearSel ? S.yearSel : +last.slice(0, 4);
   if (S.page === 'yearly' && S.yearBasis) s.basis = S.yearBasis;
   s.from = S.rangeStart || S.all[0].key; s.to = S.rangeEnd || last;
@@ -4731,12 +4895,14 @@ function openReportCenter(pref) {
   else if (S.page === 'dashboard' && S.range === 'day') s.type = 'day';
   else if (S.page === 'yearly') s.type = 'year';
   else if (S.page === 'monthly') s.type = 'month';
-  else if (S.page === 'dashboard' && ['7', '30', '90', 'custom'].includes(S.range)) { s.type = 'custom'; s.cmp = 'prev'; }
+  else if (['week', 'month', 'year'].includes(S.range) && S.page === 'dashboard') { s.type = S.range; if (S.range === 'week') s.week = S.pk.week; if (S.range === 'month') s.ym = S.pk.month; if (S.range === 'year') s.year = +S.pk.year; }
+  else if (S.page === 'dashboard' && S.range === 'quarter') { s.type = 'quarter'; s.cmp = S.cmpBase; }
+  else if (S.page === 'dashboard' && S.range === 'custom') { s.type = 'custom'; s.from = S.rangeStart; s.to = S.rangeEnd; s.cmp = S.cmpBase === 'yoy' ? 'yoy' : 'prev'; }
   rcRender(); $('#rcModal').classList.add('show');
   setTimeout(() => { const b = $('#rcModal .rc-type.on'); if (b) b.focus(); }, 60);
 }
 function closeReportCenter() { $('#rcModal').classList.remove('show'); }
-function rcSpec() { const s = S.rc; return { type: s.type, day: s.day, week: s.week, ym: s.ym, year: s.year, basis: s.basis, from: s.from, to: s.to, cmp: s.cmp }; }
+function rcSpec() { const s = S.rc; return { type: s.type, day: s.day, week: s.week, ym: s.ym, q: s.q, year: s.year, basis: s.basis, from: s.from, to: s.to, cmp: s.cmp }; }
 function rcRender() {
   const s = S.rc, last = S.all[S.all.length - 1].key, first = S.all[0].key;
   let pick = '';
@@ -4752,6 +4918,10 @@ function rcRender() {
     const ms = rcMonths(), full = ms.find(m => m.n === m.dim);
     pick = `<div class="flex flex-wrap items-center gap-2"><select id="rcMonth" class="field" style="width:auto">${ms.map(m => `<option value="${m.ym}" ${m.ym === s.ym ? 'selected' : ''}>${ymTH(m.ym, true)} (${m.n}/${m.dim} วัน)</option>`).join('')}</select>
       <button class="btn btn-sm ${s.ym === ms[0].ym ? 'rc-on' : ''}" data-rcq="ym:${ms[0].ym}">เดือนล่าสุด</button>${full && full.ym !== ms[0].ym ? `<button class="btn btn-sm ${s.ym === full.ym ? 'rc-on' : ''}" data-rcq="ym:${full.ym}">เดือนที่ครบล่าสุด (${ymTH(full.ym)})</button>` : ''}</div>`;
+  } else if (s.type === 'quarter') {
+    const qs = perOptions('quarter');
+    pick = `<div class="flex flex-wrap items-center gap-2"><select id="rcQuarter" class="field" style="width:auto;max-width:100%">${qs.map(o => `<option value="${o.key}" ${o.key === s.q ? 'selected' : ''}>${o.label}</option>`).join('')}</select>
+      <div class="seg seg-sm">${[['prev', 'ไตรมาสก่อน'], ['yoy', 'ไตรมาสเดียวกันปีก่อน']].map(([k, l]) => `<button data-rcc="${k}" class="${(s.cmp === 'yoy' ? 'yoy' : 'prev') === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>`;
   } else if (s.type === 'year') {
     pick = `<div class="flex flex-wrap items-center gap-2"><select id="rcYear" class="field" style="width:auto">${rcYears().map(y => `<option value="${y}" ${y === s.year ? 'selected' : ''}>ปี ${y + 543}</option>`).join('')}</select>
       <div class="seg seg-sm">${[['ytd', 'ช่วงเดียวกัน (YTD)'], ['full', 'ทั้งปี']].map(([k, l]) => `<button data-rcb="${k}" class="${s.basis === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>`;
@@ -4760,7 +4930,7 @@ function rcRender() {
       <div class="flex flex-wrap items-center gap-2 mt-2"><span class="text-xs muted">เทียบกับ</span><div class="seg seg-sm">${[['prev', 'ช่วงก่อนหน้า (จำนวนวันเท่ากัน)'], ['yoy', 'ช่วงเดียวกันปีก่อน'], ['none', 'ไม่เทียบ']].map(([k, l]) => `<button data-rcc="${k}" class="${s.cmp === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>`;
   }
   const R = rcResolve(rcSpec()); S._rcR = R;
-  const pagesTxt = R.err ? '' : s.fmt === 'pdf' || s.fmt === 'jpg' ? `${s.type === 'custom' ? 2 : R.pages} หน้า A4 แนวนอน` : s.fmt === 'csv' ? 'ไฟล์ CSV เปิดด้วย Excel ได้ (ภาษาไทยไม่เพี้ยน)' : 'ข้อความสรุปสำหรับวางใน LINE';
+  const pagesTxt = R.err ? '' : s.fmt === 'pdf' || s.fmt === 'jpg' ? `${s.type === 'custom' || s.type === 'quarter' ? 2 : R.pages} หน้า A4 แนวนอน` : s.fmt === 'csv' ? 'ไฟล์ CSV เปิดด้วย Excel ได้ (ภาษาไทยไม่เพี้ยน)' : 'ข้อความสรุปสำหรับวางใน LINE';
   const sum_ = R.err ? `<div class="rc-sum rc-err">${I('alert', 16)} ${R.err}</div>` : `<div class="rc-sum">
       <div class="rc-sum-t">${I('check', 15)} สิ่งที่จะได้รับ</div>
       <div class="rc-sum-g"><span class="muted">รายงาน</span><b>${R.title}</b><span class="muted">งวด</span><span>${R.period}</span><span class="muted">เทียบกับ</span><span>${R.cmpTxt}</span><span class="muted">ไฟล์</span><span>${RC_FMT.find(f => f[0] === s.fmt)[1]} · ${pagesTxt}</span></div>
@@ -4796,6 +4966,11 @@ async function runReportCenter() {
         const Q = yearCompare(R.year, R.basis);
         if (f === 'csv') { yearCSV(Q); toast('ส่งออก CSV รายงานรายปีสำเร็จ', 'success'); } else if (f === 'line') await copyText(yearLine(Q)); else await exportReport(f === 'pdf' ? 'yearpdf' : 'yearjpg');
       });
+    } else if (R.kind === 'quarter') {
+      if (f === 'csv') { rcPeriodCSV(R); toast('ส่งออก CSV สำเร็จ', 'success'); return; }
+      if (f === 'line') { await copyText(rcPeriodLine(R)); return; }
+      // PDF/JPEG ไตรมาส = รายงานวิเคราะห์ 2 หน้า โดยใช้งวด/ฐานเทียบเดียวกับแถบกรอง "รายไตรมาส"
+      await rcWithState({ range: 'quarter', pk: Object.assign({}, S.pk, { quarter: R.q }), pkAuto: Object.assign({}, S.pkAuto, { quarter: false }), cmpBase: R.cmp === 'yoy' ? 'yoy' : 'prev' }, () => exportReport(f), () => applyFilter());
     } else if (R.kind === 'custom') {
       if (f === 'csv') { rcPeriodCSV(R); toast('ส่งออก CSV สำเร็จ', 'success'); return; }
       if (f === 'line') { await copyText(rcPeriodLine(R)); return; }
@@ -4828,7 +5003,8 @@ function rcChange(e) {
   const s = S.rc, id = e.target.id, v = e.target.value; if (!s) return;
   if (id === 'rcDay' && v) {
     if (!S.all.some(r => r.key === v)) { toast(`ไม่มีข้อมูลวันที่ ${dTH(v)} — เลือกวันที่ใกล้ที่สุดที่มีข้อมูลแทน`, 'warn'); const p = S.all.filter(r => r.key <= v); s.day = (p.length ? p[p.length - 1] : S.all[0]).key; } else s.day = v;
-  } else if (id === 'rcWeek') s.week = v; else if (id === 'rcMonth') s.ym = v; else if (id === 'rcYear') s.year = +v;
+  } else if (id === 'rcQuarter') s.q = v;
+  else if (id === 'rcWeek') s.week = v; else if (id === 'rcMonth') s.ym = v; else if (id === 'rcYear') s.year = +v;
   else if (id === 'rcFrom' && v) s.from = v; else if (id === 'rcTo' && v) s.to = v; else return;
   rcRender();
 }
@@ -4876,7 +5052,7 @@ function handleEvents() {
     applyFilter(); render();
   });
   document.addEventListener('click', e => {
-    const t = e.target.closest('[data-page],[data-goto],[data-action],[data-export],[data-range],[data-gran],[data-mm],[data-ym],[data-t],[data-sort],[data-pg],[data-hm],[data-cb],[data-dow],[data-dcq],[data-edit],[data-del],[data-stm],[data-stp],[data-std],[data-dnav],[data-ysel],[data-ybasis],[data-evedit],[data-evdel],[data-evact],[data-hrc],[data-hrt],[data-mdc],[data-mdk],[data-mdt]');
+    const t = e.target.closest('[data-page],[data-goto],[data-action],[data-export],[data-range],[data-gran],[data-mm],[data-ym],[data-t],[data-sort],[data-pg],[data-hm],[data-cb],[data-dow],[data-dcq],[data-edit],[data-del],[data-stm],[data-stp],[data-std],[data-dnav],[data-ysel],[data-ybasis],[data-evedit],[data-evdel],[data-evact],[data-hrc],[data-hrt],[data-cmpb],[data-mdc],[data-mdk],[data-mdt]');
     if (!t) return;
     if (t.dataset.page) goto(t.dataset.page);
     else if (t.dataset.goto) goto(t.dataset.goto);
@@ -4905,6 +5081,7 @@ function handleEvents() {
       const i = S.all.findIndex(r => r.key === dailyKey()), j = i + (+t.dataset.dnav);
       if (j >= 0 && j < S.all.length) { S.dayKey = S.all[j].key; S.dayAuto = j === S.all.length - 1; applyFilter(); render(); }
     }
+    else if (t.dataset.cmpb) { S.cmpBase = t.dataset.cmpb; applyFilter(); render(); }
     else if (t.dataset.range) { if (t.dataset.range === 'day') S.dayAuto = true; S.range = t.dataset.range; applyFilter(); render(); }
     else if (t.dataset.gran) { S.gran = t.dataset.gran; render(); }
     else if (t.dataset.mm) { S.monthMode = t.dataset.mm; render(); }
@@ -4971,18 +5148,28 @@ function handleEvents() {
   });
   // กลับมาที่แท็บ → ดึงข้อมูลทันที (ระหว่างซ่อนแท็บระบบหยุดดึงเพื่อประหยัดโควตา)
   window.addEventListener('scroll', () => $('#topbar').classList.toggle('scrolled', window.scrollY > 8), { passive: true });
+  // v19: ความสูงแถบบนจริง (มือถือ/เดสก์ท็อปต่างกัน) → ใช้คำนวณความสูงกราฟและจุดหยุดเลื่อนหน้า
+  const setTb = () => { try {
+    const de = document.documentElement; de.style.setProperty('--tbH', ($('#topbar').offsetHeight || 88) + 'px');
+    // จุดหยุดเลื่อน = ตำแหน่งจริงของเนื้อหาแรกใต้แถบบน (วัดจากเลย์เอาต์จริง ไม่เดา) → โหลดหน้าแล้วไม่เลื่อนเอง
+    const m = document.querySelector('main'), f = m && [...m.children].find(e => e.offsetParent !== null);
+    if (f) de.style.setProperty('--snapTop', Math.round(f.getBoundingClientRect().top + window.scrollY) + 'px');
+  } catch (e) { /* ข้าม */ } };
+  setTb(); window.addEventListener('resize', setTb, { passive: true }); S._setTb = setTb; window.addEventListener('orientationchange', () => setTimeout(setTb, 300));
   document.addEventListener('visibilitychange', () => { if (!document.hidden && SH.connected && SH.interval > 0) poll(false); });
   $('#btnExport').addEventListener('click', e => { e.stopPropagation(); openReportCenter(); });
   $('#rcModal').addEventListener('click', rcHandle); $('#rcModal').addEventListener('change', rcChange);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#rcModal').classList.contains('show')) closeReportCenter(); });
   $('#orgName').addEventListener('input', e => { S.org = e.target.value.trim() || 'ศูนย์การค้าซีคอน บางแค'; save(); });
+  $('#perSel').addEventListener('change', e => { const o = perOptions(S.range); S.pk[S.range] = e.target.value; S.pkAuto = S.pkAuto || {}; S.pkAuto[S.range] = !o.length || e.target.value !== o[0].key ? false : true; applyFilter(); render(); });
   $('#dFrom').addEventListener('change', e => { S.from = e.target.value; S.to = $('#dTo').value; applyFilter(); render(); });
   $('#dTo').addEventListener('change', e => { S.to = e.target.value; S.from = $('#dFrom').value; applyFilter(); render(); });
   $('#btnTheme').addEventListener('click', () => { S.theme = S.theme === 'dark' ? 'light' : 'dark'; applyTheme(); save(); render(); });
   // v11: จอกลาง (แท็บเล็ตแนวนอน/โน้ตบุ๊กเล็ก 1024–1279px) ย่อเมนูเป็นไอคอนอัตโนมัติ ให้พื้นที่แดชบอร์ดกว้างพอ — ผู้ใช้กดย่อ/ขยายเองได้ (จำค่าที่กดไว้)
   const autoCollapse = () => { if (S.userCollapse) return; const mid = innerWidth >= 1024 && innerWidth < 1280; if (document.body.classList.contains('collapsed') !== mid) { document.body.classList.toggle('collapsed', mid); setTimeout(() => Object.values(S.charts).forEach(c => { try { c.resize(); } catch (e) { } }), 280); } };
-  autoCollapse(); window.addEventListener('resize', () => { clearTimeout(S._acT); S._acT = setTimeout(autoCollapse, 150); });
-  $('#btnCollapse').addEventListener('click', () => { S.userCollapse = true; document.body.classList.toggle('collapsed'); setTimeout(() => Object.values(S.charts).forEach(c => c.resize()), 280); });
+  autoCollapse(); syncCollapseBtn(); window.addEventListener('resize', () => { clearTimeout(S._acT); S._acT = setTimeout(() => { autoCollapse(); syncCollapseBtn(); fitNavLabels(); }, 150); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNavLabels); // ฟอนต์โหลดเสร็จ ความกว้างข้อความเปลี่ยน → จัดใหม่
+  $('#btnCollapse').addEventListener('click', () => { S.userCollapse = true; document.body.classList.toggle('collapsed'); syncCollapseBtn(); setTimeout(fitNavLabels, 300); setTimeout(() => Object.values(S.charts).forEach(c => c.resize()), 280); });
   $('#btnMenu').addEventListener('click', () => { document.body.classList.add('side-open'); $('#overlay').classList.remove('hidden'); });
   $('#overlay').addEventListener('click', () => { document.body.classList.remove('side-open'); $('#overlay').classList.add('hidden'); });
   $('#btnFull').addEventListener('click', () => { try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); } catch (e) { toast('เบราว์เซอร์ไม่รองรับโหมดเต็มจอ', 'warn'); } });
