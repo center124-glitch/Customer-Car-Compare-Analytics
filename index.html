@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <!--
-  Customer & Car Compare Analytics — v24
+  Customer & Car Compare Analytics — v25
+  v25: + เทียบแบบ "ปรับตามจำนวนวันหยุด" (Day-mix adjusted) — หน้ารายเดือน (ค่าเริ่มต้น), แถบสรุปใต้ KPI หน้าภาพรวม,
+         AI Insight, รายงาน PDF/JPG/LINE · คำตัดสินอ่านง่าย (เพิ่มขึ้นจริง / ลดลงจริง / ผันผวนปกติ) ด้วย Welch t-test บนดัชนีปรับวัน
+       + ปฏิทินวันหยุดปี 2570 (เบื้องต้น) · แท่ง MoM ติดลบเป็นโทนแดง · ลบโค้ดข้อมูลตัวอย่างที่ไม่ได้ใช้
   v24: ปรับโทนสีทั้งแอปให้เข้ากับโลโก้ — น้ำเงินกรมท่า (พื้นหลัง/เมนู) · ฟ้า Cyan (ลูกค้า/ปุ่มหลัก) · ทอง Amber (รถยนต์)
        · Indigo (Ratio/วันหยุด/MRT) · Teal (วันธรรมดา) แทนโทนม่วง-ชมพูเดิม ทั้งหน้าจอ กราฟ และรายงาน PDF/JPG
   v23: + โลโก้ใหม่ (วงลูกค้า × วงรถยนต์ คล้องกัน = เปรียบเทียบ) ทั้งไอคอนแอป/favicon/หน้าจอหลัก iOS-Android/รายงาน
@@ -242,6 +245,16 @@
   #splash{ padding:var(--sat) var(--sar) var(--sab) var(--sal); }
   #overlay{ touch-action:none; }
 
+  /* v25: แถบเทียบแบบปรับตามวันหยุด */
+  .fair-card{ display:flex; flex-wrap:wrap; gap:14px 24px; align-items:center; justify-content:space-between; }
+  .fair-h{ display:flex; gap:12px; align-items:center; min-width:0; flex:1 1 320px; }
+  .fair-g{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; flex:1 1 380px; }
+  .fair-i{ background:var(--soft); border-radius:14px; padding:10px 14px; min-width:0; }
+  .fair-l{ font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+  .fair-v{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:4px; }
+  .fair-w{ font-weight:700; font-size:13px; } .fair-up{ color:var(--up); } .fair-down{ color:var(--down); } .fair-flat{ color:var(--text); }
+  .fair-s{ font-size:11px; color:var(--muted); margin-top:2px; }
+  @media (max-width:480px){ .fair-g{ grid-template-columns:1fr; } .fair-h{ flex-basis:100%; } }
   /* ============ Components ============ */
   .card{ background:var(--card); border:1px solid var(--border); border-radius:20px; box-shadow:var(--shadow); }
   .card-h{ font-weight:600; font-size:16px; }
@@ -708,7 +721,7 @@
 
     <footer class="px-4 md:px-6 lg:px-8 py-4 text-xs muted flex flex-wrap justify-between gap-2" style="border-top:1px solid var(--border)">
       <span>SBK Customer & Car Compare Analytics · Single File Web App</span>
-      <span>v24.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
+      <span>v25.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
     </footer>
   </div>
 </div>
@@ -1503,7 +1516,16 @@ const DEFAULT_HOLIDAYS = {
   '2026-06-03': 'วันเฉลิมพระชนมพรรษา สมเด็จพระราชินี', '2026-07-28': 'วันเฉลิมพระชนมพรรษา ร.10', '2026-07-29': 'วันอาสาฬหบูชา',
   '2026-07-30': 'วันเข้าพรรษา', '2026-08-12': 'วันแม่แห่งชาติ', '2026-10-13': 'วันนวมินทรมหาราช', '2026-10-16': 'วันหยุดพิเศษ (กทม.)',
   '2026-10-23': 'วันปิยมหาราช', '2026-12-05': 'วันพ่อแห่งชาติ', '2026-12-07': 'ชดเชยวันพ่อแห่งชาติ', '2026-12-10': 'วันรัฐธรรมนูญ',
-  '2026-12-31': 'วันสิ้นปี'
+  '2026-12-31': 'วันสิ้นปี',
+  // v25: ปี 2570 ตามปฏิทินวันหยุดเบื้องต้น (myhora / InfoQuest, ต.ค. 69) — ครม. อาจประกาศวันหยุดพิเศษเพิ่ม/ปรับวันชดเชย
+  //   แก้ไขได้ที่ชีต Holidays หรือช่อง "เพิ่มวันหยุดเอง" โดยไม่ต้องแก้โค้ด
+  '2027-01-01': 'วันขึ้นปีใหม่', '2027-02-21': 'วันมาฆบูชา', '2027-02-22': 'ชดเชยวันมาฆบูชา', '2027-04-06': 'วันจักรี',
+  '2027-04-13': 'วันสงกรานต์', '2027-04-14': 'วันสงกรานต์', '2027-04-15': 'วันสงกรานต์', '2027-05-01': 'วันแรงงานแห่งชาติ',
+  '2027-05-03': 'ชดเชยวันแรงงานแห่งชาติ', '2027-05-04': 'วันฉัตรมงคล', '2027-05-10': 'วันพืชมงคล', '2027-05-20': 'วันวิสาขบูชา',
+  '2027-06-03': 'วันเฉลิมพระชนมพรรษา สมเด็จพระราชินี', '2027-07-18': 'วันอาสาฬหบูชา', '2027-07-19': 'วันเข้าพรรษา', '2027-07-20': 'ชดเชยวันอาสาฬหบูชา',
+  '2027-07-28': 'วันเฉลิมพระชนมพรรษา ร.10', '2027-08-12': 'วันแม่แห่งชาติ', '2027-10-13': 'วันนวมินทรมหาราช', '2027-10-23': 'วันปิยมหาราช',
+  '2027-10-25': 'ชดเชยวันปิยมหาราช', '2027-12-05': 'วันพ่อแห่งชาติ', '2027-12-06': 'ชดเชยวันพ่อแห่งชาติ', '2027-12-10': 'วันรัฐธรรมนูญ',
+  '2027-12-31': 'วันสิ้นปี'
 };
 // อ่านรายการวันหยุดที่ผู้ใช้พิมพ์เอง: "16/10/2569 วันหยุดพิเศษ", "2026-10-16, ชื่อ", "16 ต.ค. 2569 ชื่อ"
 function parseHolidayLine(l, order) {
@@ -1586,7 +1608,7 @@ function summarizeGroup(rows) {
 }
 function monthSum_(list, ym) {
   const [y, m] = ym.split('-').map(Number), s = summarizeGroup(list);
-  return { ym, y, m, days: list.length, dim: daysInMonth(y, m), custTotal: s.cust.total, carTotal: s.car.total, custAvg: s.cust.mean, carAvg: s.car.mean, ratio: s.ratio, s };
+  return { ym, y, m, days: list.length, dim: daysInMonth(y, m), custTotal: s.cust.total, carTotal: s.car.total, custAvg: s.cust.mean, carAvg: s.car.mean, ratio: s.ratio, s, list, off: list.filter(isOffDay).length };
 }
 // ref = ข้อมูลทั้งหมด — v7: MoM เป็น "คุณสมบัติของเดือน" จึงคำนวณจากข้อมูลเต็มเดือนเสมอ ไม่ใช่จากเศษเดือนที่ถูกตัดด้วยตัวกรองช่วงเวลา
 // และ MoM ยอดรวม คำนวณเฉพาะเมื่อเทียบได้จริง (ครบเดือนทั้งคู่ หรือจำนวนวันเท่ากัน) — ไม่งั้นจะได้ตัวเลขหลอก เช่น +375% จากเดือนที่มี 5 วัน
@@ -1604,6 +1626,8 @@ function monthlySummary(rows, ref = S.all) {
     o.momCustAvg = p ? growth(c.custAvg, p.custAvg) : null;
     o.momCarAvg = p ? growth(c.carAvg, p.carAvg) : null;
     o.fullDays = c.days; o.prevDays = p ? p.days : null;
+    // v25: MoM ปรับตามจำนวนวันหยุด (ใช้ข้อมูลเต็มเดือนเหมือน MoM เดิม)
+    o.adjCust = p ? fairCmp(c.list, p.list, 'cust') : null; o.adjCar = p ? fairCmp(c.list, p.list, 'car') : null;
   });
   return out;
 }
@@ -1656,28 +1680,6 @@ function corrLabel(r) {
   if (a >= 0.5) return 'สัมพันธ์' + dir + 'ปานกลาง';
   if (a >= 0.3) return 'สัมพันธ์' + dir + 'ต่ำ';
   return 'แทบไม่มีความสัมพันธ์';
-}
-
-// ข้อมูลตัวอย่าง: สุ่มแบบกำหนด seed เพื่อให้ได้ชุดเดิมทุกครั้ง (ตรวจสอบย้อนหลังได้)
-function generateSample() {
-  let seed = 20260926;
-  const rnd = () => { seed = (seed + 0x6D2B79F5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
-  const season = [1.05, 0.96, 0.98, 1.09, 0.97, 0.95, 1.0, 1.02, 0.93, 0.99, 1.03, 1.18];
-  const lines = ['วันที่\tยอดลูกค้า\tยอดรถยนต์'];
-  let t = Date.UTC(2025, 0, 1); const end = Date.UTC(2026, 8, 25);
-  while (t <= end) {
-    const d = new Date(t), dow = d.getUTCDay(), y = d.getUTCFullYear(), m = d.getUTCMonth();
-    const we = dow === 0 || dow === 6;
-    let base = we ? 46000 : (dow === 5 ? 36000 : 31000);
-    base *= season[m]; if (y === 2026) base *= 1.06;
-    let cust = Math.round(base * (1 + (rnd() - 0.5) * 0.16));
-    if (rnd() < 0.03) cust = Math.round(cust * (1.25 + rnd() * 0.2)); // วันจัดกิจกรรมพิเศษ
-    const perCar = (we ? 3.55 : 3.2) + (rnd() - 0.5) * 0.4;
-    const car = Math.round(cust / perCar);
-    lines.push(String(d.getUTCDate()).padStart(2, '0') + '/' + String(m + 1).padStart(2, '0') + '/' + (y + 543) + '\t' + cust.toLocaleString('en-US') + '\t' + car.toLocaleString('en-US'));
-    t += DAY_MS;
-  }
-  return lines.join('\n');
 }
 
 // ---------- v4: ตัวชี้วัดทั้งหมด + การเปรียบเทียบอิสระ (Compare Studio) ----------
@@ -1856,6 +1858,7 @@ const ICONS = {
   trash: '<path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
   info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
   check: '<path d="M20 6 9 17l-5-5"/>',
+  scale: '<path d="M12 3v18"/><path d="M7 21h10"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>',
   alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/>',
   x: '<path d="M18 6 6 18M6 6l12 12"/>',
   users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
@@ -1893,7 +1896,7 @@ const STORE_KEY = 'sbk_customer_car_compare_v1'; // ใช้ key เดิม �
 const S = {
   page: 'dashboard', theme: 'light', order: 'dmy', org: 'ศูนย์การค้าซีคอน บางแค',
   all: [], rows: [], prev: [], range: 'all', pk: {}, cmpBase: 'prev', from: null, to: null, rangeStart: null, rangeEnd: null, prevLabel: '',
-  gran: 'auto', monthMode: 'avg', yearMetric: 'cust', yearSel: null, yearBasis: 'ytd',
+  gran: 'auto', monthMode: 'adj', yearMetric: 'cust', yearSel: null, yearBasis: 'ytd',
   holMode: false, carBasis: '24', source: 'local', sheetHol: {}, customHol: {}, customHolText: '', quiet: false,
   dc: { dow: null, a: null, b: null },
   st: { mode: 'month', a: null, a2: null, b: null, b2: null, dayType: 'all', dow: 'all', align: true, metric: 'cust' },
@@ -2235,6 +2238,7 @@ function buildInsights(rows, prev) {
     const g = growth(c.mean, mean(prev.map(r => r.cust)));
     if (!ok(g)) out.push(`ลูกค้าเฉลี่ย <b>${N(c.mean)}</b> คน/วัน (ไม่มีข้อมูลพอเทียบกับ${S.prevLabel})`); else
     out.push(`ลูกค้าเฉลี่ย <b>${N(c.mean)}</b> คน/วัน ${g >= 0 ? 'เพิ่มขึ้น' : 'ลดลง'} <b style="color:var(${g >= 0 ? '--up' : '--down'})">${P(Math.abs(g), 1, false)}</b> เทียบ ${S.prevLabel}`);
+    const fc = fairCmp(rows, prev, 'cust'); if (fc) out.push(fairText(fc, 'ลูกค้า', S.prevLabel)); // v25
   } else out.push(`ลูกค้าเฉลี่ย <b>${N(c.mean)}</b> คน/วัน · รถยนต์เฉลี่ย <b>${N(v.mean)}</b> คัน/วัน`);
   const ww = weekdayWeekend(rows);
   if (ww.wd.days && ww.we.days) {
@@ -2250,6 +2254,20 @@ function buildInsights(rows, prev) {
   return out;
 }
 
+// v25: แถบ "เทียบแบบปรับตามวันหยุด" ใต้การ์ด KPI — คำตอบเดียวที่ผู้บริหารอ่านแล้วรู้ทันทีว่าดีขึ้น/แย่ลง "จริง" หรือไม่
+function fairStripHTML(rows, prev, label) {
+  if (!prev || !prev.length) return '';
+  const fc = fairCmp(rows, prev, 'cust'), fv = fairCmp(rows, prev, 'car');
+  if (!fc && !fv) return '';
+  const cO = rows.filter(isOffDay).length, pO = prev.filter(isOffDay).length;
+  const pv = f => f && f.w ? ` · ${f.w.p < 0.001 ? 'p < 0.001' : 'p = ' + f.w.p.toFixed(3)}` : '';
+  const item = (lab, f, col) => { const w = fairWord(f); return `<div class="fair-i"><div class="fair-l"><span class="dot" style="background:${col}"></span>${lab}</div>
+    <div class="fair-v">${chipHTML(f ? f.adj : null)}<span class="fair-w fair-${w.tone}">${w.t}</span></div><div class="fair-s">เฉลี่ย/วันแบบดิบ ${f ? P(f.raw) : '-'}${pv(f)}</div></div>`; };
+  return `<div class="card fair-card p-4">
+    <div class="fair-h"><div class="ico ico-b">${I('scale')}</div><div class="min-w-0"><div class="card-h">เทียบแบบปรับตามวันหยุด <span class="chip chip-v" style="font-size:10.5px">ยุติธรรม</span></div>
+      <div class="text-xs muted" style="line-height:1.55">เทียบ ${label} · งวดนี้ วันธรรมดา ${rows.length - cO} · วันหยุด ${cO} วัน | งวดเทียบ ${prev.length - pO} · ${pO} วัน — ตัดผลของจำนวนวันหยุด (ส.–อา. + นักขัตฤกษ์) ที่ไม่เท่ากันออกแล้ว</div></div></div>
+    <div class="fair-g">${item('ลูกค้า', fc, COL.cust)}${item('รถยนต์ (24 ชม.)', fv, COL.car)}</div></div>`;
+}
 /* =====================================================================
    RENDER — แท็บ 1 : Dashboard & Statistics
    ===================================================================== */
@@ -2286,6 +2304,7 @@ function renderDashboard(body) {
     ${kpiCard({ ico: 'ico-p', icon: 'percent', label: 'อัตราส่วน ลูกค้า:รถยนต์', value: N(ratio, 2), unit: 'คน/คัน', chip: chipHTML(prev.length ? growth(ratio, pr) : null), note: 'ยอดรวมลูกค้า ÷ ยอดรวมรถยนต์', spark: 'spR' })}
     ${kpiCard({ ico: 'ico-g', icon: 'link', label: 'สหสัมพันธ์ (Pearson r)', value: N(r, 3), unit: '', chip: `<span class="chip ${Math.abs(r) >= .7 ? 'chip-up' : 'chip-flat'}">${corrLabel(r)}</span>`, note: `R² = ${N(r === null ? null : r * r, 3)}` })}
   </div>
+  ${fairStripHTML(rows, prev, S.prevLabel)}
   ${modeKpiRow(rows, prev.length ? [{ short: S.prevLabel, rows: prev }] : [], { note: prev.length ? 'ตัวเลขใหญ่ = ยอดรวม · % = เฉลี่ย/วัน เทียบ ' + S.prevLabel : 'ยอดรวมทั้งช่วงข้อมูล' })}
 
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -2576,10 +2595,14 @@ function forecastCardHTML(kind) {
 
 function renderMonthly(body) {
   const ms = monthlySummary(S.rows);
-  const avg = S.monthMode === 'avg';
+  // v25: 3 วิธีเทียบ — adj = ปรับตามวันหยุด (ค่าเริ่มต้น, ยุติธรรมที่สุด) · avg = เฉลี่ย/วัน · total = ยอดรวม
+  const mode = ['adj', 'avg', 'total'].includes(S.monthMode) ? S.monthMode : 'adj', adj = mode === 'adj', avg = mode !== 'total';
+  const fa = f => f ? f.adj : null;
   const vC = m => avg ? m.custAvg : m.custTotal, vV = m => avg ? m.carAvg : m.carTotal;
-  const gC = m => avg ? m.momCustAvg : m.momCustTotal, gV = m => avg ? m.momCarAvg : m.momCarTotal;
-  const na = m => !avg && m.momTotalNA, mChip = (m, g) => na(m) ? NA_CHIP : chipHTML(g);
+  const gC = m => adj ? fa(m.adjCust) : avg ? m.momCustAvg : m.momCustTotal, gV = m => adj ? fa(m.adjCar) : avg ? m.momCarAvg : m.momCarTotal;
+  const na = m => mode === 'total' && m.momTotalNA, mChip = (m, g) => na(m) ? NA_CHIP : chipHTML(g);
+  const basisTxt = adj ? 'ปรับตามจำนวนวันหยุด' : avg ? 'ค่าเฉลี่ยต่อวัน' : 'ยอดรวม';
+  const mNote = (f) => adj ? (f ? `${fairWord(f).t} · เฉลี่ย/วันดิบ ${P(f.raw)}` : 'ปรับตามวันหยุดไม่ได้') : null;
   const best = ms.reduce((a, m) => !a || m.custAvg > a.custAvg ? m : a, null);
   const worst = ms.reduce((a, m) => !a || m.custAvg < a.custAvg ? m : a, null);
   const last = ms[ms.length - 1];
@@ -2587,37 +2610,38 @@ function renderMonthly(body) {
   const ins = [
     `เดือนที่ลูกค้าเฉลี่ยสูงสุดคือ <b>${ymTH(best.ym, true)}</b> (${N(best.custAvg)} คน/วัน)`,
     `ต่ำสุดคือ <b>${ymTH(worst.ym, true)}</b> (${N(worst.custAvg)} คน/วัน)`,
+    adj && last.adjCust ? `เดือนล่าสุด ${ymTH(last.ym, true)} — ${fairText(last.adjCust, 'ลูกค้า', 'เดือนก่อน')} · ${fairText(last.adjCar, 'รถยนต์', '')}` :
     ok(gC(last)) ? `เดือนล่าสุด ${ymTH(last.ym, true)} ลูกค้า${avg ? 'เฉลี่ย' : 'รวม'} ${P(gC(last))} · รถยนต์ ${P(gV(last))} MoM` : na(last) ? `เดือนล่าสุด ${ymTH(last.ym, true)} มีข้อมูล ${last.fullDays} วัน แต่เดือนก่อนมี ${last.prevDays} วัน — MoM ยอดรวมจึงไม่เทียบ (เฉลี่ย/วัน: ลูกค้า ${P(last.momCustAvg)} · รถยนต์ ${P(last.momCarAvg)})` : `เดือนล่าสุด ${ymTH(last.ym, true)} ยังไม่มีเดือนก่อนหน้าให้เทียบ`,
-    partial ? `มี <b>${partial}</b> เดือนที่ข้อมูลไม่ครบเดือน — แนะนำดู MoM แบบ "เฉลี่ยต่อวัน"` : 'ข้อมูลครบทุกเดือนในช่วงที่เลือก'
+    partial ? `มี <b>${partial}</b> เดือนที่ข้อมูลไม่ครบเดือน — แนะนำดู MoM แบบ "${adj ? 'ปรับตามวันหยุด' : 'เฉลี่ยต่อวัน'}" (ไม่ใช้ยอดรวม)` : 'ข้อมูลครบทุกเดือนในช่วงที่เลือก'
   ];
   body.innerHTML = `
   <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
     ${kpiCard({ ico: 'ico-v', icon: 'trophy', label: 'เดือนที่ลูกค้าเฉลี่ยสูงสุด', value: ymTH(best.ym), unit: '', note: `${N(best.custAvg)} คน/วัน · รวม ${N(best.custTotal)} คน` })}
     ${kpiCard({ ico: 'ico-p', icon: 'trendDown', label: 'เดือนที่ลูกค้าเฉลี่ยต่ำสุด', value: ymTH(worst.ym), unit: '', note: `${N(worst.custAvg)} คน/วัน · รวม ${N(worst.custTotal)} คน` })}
-    ${kpiCard({ ico: 'ico-i', icon: 'users', label: `MoM ลูกค้า (${ymTH(last.ym)})`, value: na(last) ? P(last.momCustAvg) : P(gC(last)), unit: '', chip: na(last) ? chipHTML(last.momCustAvg) : chipHTML(gC(last)), note: avg || na(last) ? 'เทียบเฉลี่ย/วัน เดือนก่อน' + (na(last) ? ' (วันไม่เท่า)' : '') : 'เทียบยอดรวมเดือนก่อน' })}
-    ${kpiCard({ ico: 'ico-o', icon: 'car', label: `MoM รถยนต์ (${ymTH(last.ym)})`, value: na(last) ? P(last.momCarAvg) : P(gV(last)), unit: '', chip: na(last) ? chipHTML(last.momCarAvg) : chipHTML(gV(last)), note: avg || na(last) ? 'เทียบเฉลี่ย/วัน เดือนก่อน' + (na(last) ? ' (วันไม่เท่า)' : '') : 'เทียบยอดรวมเดือนก่อน' })}
+    ${kpiCard({ ico: 'ico-i', icon: 'users', label: `MoM ลูกค้า (${ymTH(last.ym)})`, value: na(last) ? P(last.momCustAvg) : P(gC(last)), unit: '', chip: na(last) ? chipHTML(last.momCustAvg) : chipHTML(gC(last)), note: adj ? mNote(last.adjCust) : avg || na(last) ? 'เทียบเฉลี่ย/วัน เดือนก่อน' + (na(last) ? ' (วันไม่เท่า)' : '') : 'เทียบยอดรวมเดือนก่อน' })}
+    ${kpiCard({ ico: 'ico-o', icon: 'car', label: `MoM รถยนต์ (${ymTH(last.ym)})`, value: na(last) ? P(last.momCarAvg) : P(gV(last)), unit: '', chip: na(last) ? chipHTML(last.momCarAvg) : chipHTML(gV(last)), note: adj ? mNote(last.adjCar) : avg || na(last) ? 'เทียบเฉลี่ย/วัน เดือนก่อน' + (na(last) ? ' (วันไม่เท่า)' : '') : 'เทียบยอดรวมเดือนก่อน' })}
   </div>
   ${forecastCardHTML('month')}
   <div class="card p-5">
     ${cardHead('ยอดลูกค้า × ยอดรถยนต์ รายเดือน', avg ? 'ค่าเฉลี่ยต่อวันของแต่ละเดือน (เทียบเดือนที่จำนวนวันไม่เท่ากันได้อย่างยุติธรรม)' : 'ยอดรวมของแต่ละเดือน',
-      `<div class="seg" id="monthSeg"><button data-mm="avg" class="${avg ? 'on' : ''}">เฉลี่ยต่อวัน</button><button data-mm="total" class="${!avg ? 'on' : ''}">ยอดรวม</button></div>`)}
+      `<div class="seg" id="monthSeg"><button data-mm="adj" class="${adj ? 'on' : ''}" title="เทียบโดยคิดจำนวนวันหยุดที่ไม่เท่ากันของแต่ละเดือน">ปรับตามวันหยุด</button><button data-mm="avg" class="${mode === 'avg' ? 'on' : ''}">เฉลี่ยต่อวัน</button><button data-mm="total" class="${mode === 'total' ? 'on' : ''}">ยอดรวม</button></div>`)}
     <div style="height:340px"><canvas id="chMonth"></canvas></div>
   </div>
   ${insightHTML(ins)}
   <div class="card p-5">
-    ${cardHead('อัตราเติบโตเดือนต่อเดือน (MoM %)', avg ? 'คำนวณจากค่าเฉลี่ยต่อวัน' : 'คำนวณจากยอดรวมรายเดือน')}
+    ${cardHead('อัตราเติบโตเดือนต่อเดือน (MoM %)', adj ? 'ปรับตามจำนวนวันหยุด (ส.–อา. + นักขัตฤกษ์) ของแต่ละเดือน — เทียบความนิยมจริง' : avg ? 'คำนวณจากค่าเฉลี่ยต่อวัน' : 'คำนวณจากยอดรวมรายเดือน')}
     <div style="height:260px"><canvas id="chMoM"></canvas></div>
   </div>
   <div class="card p-5">
-    ${cardHead('ตารางสรุปรายเดือน', `MoM = (เดือนนี้ − เดือนก่อน) ÷ เดือนก่อน · คำนวณจาก${avg ? 'ค่าเฉลี่ยต่อวัน' : 'ยอดรวม'}`)}
+    ${cardHead('ตารางสรุปรายเดือน', adj ? 'MoM ปรับวัน = ยอดจริง ÷ ยอดคาดหมาย − 1 · ยอดคาดหมาย = วันธรรมดา × เฉลี่ยวันธรรมดาเดือนก่อน + วันหยุด × เฉลี่ยวันหยุดเดือนก่อน' : `MoM = (เดือนนี้ − เดือนก่อน) ÷ เดือนก่อน · คำนวณจาก${basisTxt}`)}
     <div class="scroll-x"><table class="tbl">
-      <thead><tr><th>เดือน</th><th class="num">วันข้อมูล</th><th class="num">ลูกค้ารวม</th><th class="num">ลูกค้าเฉลี่ย/วัน</th><th class="num">MoM ลูกค้า</th><th class="num">รถยนต์รวม</th><th class="num">รถยนต์เฉลี่ย/วัน</th><th class="num">MoM รถยนต์</th><th class="num">Ratio</th><th class="num">SD ลูกค้า</th></tr></thead>
+      <thead><tr><th>เดือน</th><th class="num">วันข้อมูล</th><th class="num" title="ส.–อา. + นักขัตฤกษ์">วันหยุด</th><th class="num">ลูกค้ารวม</th><th class="num">ลูกค้าเฉลี่ย/วัน</th><th class="num">MoM ลูกค้า</th><th class="num">รถยนต์รวม</th><th class="num">รถยนต์เฉลี่ย/วัน</th><th class="num">MoM รถยนต์</th><th class="num">Ratio</th><th class="num">SD ลูกค้า</th></tr></thead>
       <tbody>${ms.map(m => `<tr><td class="font-medium">${ymTH(m.ym, true)}${m === best ? ' <span class="chip chip-up" style="font-size:10.5px">สูงสุด</span>' : ''}${m === worst ? ' <span class="chip chip-down" style="font-size:10.5px">ต่ำสุด</span>' : ''}</td>
         <td class="num">${m.days}/${m.dim}${m.days < m.dim ? ' <span class="chip chip-o" style="font-size:10px">ไม่ครบ</span>' : ''}</td>
-        <td class="num">${N(m.custTotal)}</td><td class="num">${N(m.custAvg)}</td><td class="num">${mChip(m, gC(m))}</td>
+        <td class="num">${m.off}</td><td class="num">${N(m.custTotal)}</td><td class="num">${N(m.custAvg)}</td><td class="num">${mChip(m, gC(m))}</td>
         <td class="num">${N(m.carTotal)}</td><td class="num">${N(m.carAvg)}</td><td class="num">${mChip(m, gV(m))}</td>
         <td class="num">${N(m.ratio, 2)}</td><td class="num muted">${N(m.s.cust.sd)}</td></tr>`).join('')}</tbody>
-      <tfoot><tr><td>รวม ${ms.length} เดือน</td><td class="num">${N(S.rows.length)}</td><td class="num">${N(sum(ms.map(m => m.custTotal)))}</td><td class="num">${N(mean(S.rows.map(r => r.cust)))}</td><td></td><td class="num">${N(sum(ms.map(m => m.carTotal)))}</td><td class="num">${N(mean(S.rows.map(r => r.car)))}</td><td></td><td class="num">${N(groupRatio(S.rows), 2)}</td><td></td></tr></tfoot>
+      <tfoot><tr><td>รวม ${ms.length} เดือน</td><td class="num">${N(S.rows.length)}</td><td class="num">${N(S.rows.filter(isOffDay).length)}</td><td class="num">${N(sum(ms.map(m => m.custTotal)))}</td><td class="num">${N(mean(S.rows.map(r => r.cust)))}</td><td></td><td class="num">${N(sum(ms.map(m => m.carTotal)))}</td><td class="num">${N(mean(S.rows.map(r => r.car)))}</td><td></td><td class="num">${N(groupRatio(S.rows), 2)}</td><td></td></tr></tfoot>
     </table></div>
   </div>`;
   mkChart('chMonth', { data: { labels: ms.map(m => ymTH(m.ym)), datasets: [
@@ -2626,7 +2650,7 @@ function renderMonthly(body) {
   ] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'top', align: 'end' }, tooltip: { callbacks: { title: it => ymTH(ms[it[0].dataIndex].ym, true), label: it => ` ${it.dataset.label}: ${N(it.raw)} ${it.datasetIndex ? 'คัน' : 'คน'}${avg ? '/วัน' : ''}`, afterBody: it => { const m = ms[it[0].dataIndex]; return [`Ratio: ${N(m.ratio, 2)} คน/คัน`, `ข้อมูล ${m.days}/${m.dim} วัน`]; } } } },
     scales: { x: { grid: { display: false } }, y: { beginAtZero: !avg, ticks: { callback: tickK }, title: { display: true, text: 'ลูกค้า (คน)' } }, y1: { beginAtZero: !avg, position: 'right', grid: { display: false }, ticks: { callback: tickK }, title: { display: true, text: 'รถยนต์ (คัน)' } } } } });
   mkChart('chMoM', { type: 'bar', data: { labels: ms.map(m => ymTH(m.ym)), datasets: [
-    { label: 'MoM ลูกค้า', data: ms.map(m => ok(gC(m)) ? gC(m) * 100 : null), backgroundColor: ms.map(m => (gC(m) || 0) >= 0 ? '#06b6d4' : '#818cf8'), borderRadius: 6, maxBarThickness: 22 },
+    { label: 'MoM ลูกค้า', data: ms.map(m => ok(gC(m)) ? gC(m) * 100 : null), backgroundColor: ms.map(m => (gC(m) || 0) >= 0 ? '#06b6d4' : '#f87171'), borderRadius: 6, maxBarThickness: 22 },
     { label: 'MoM รถยนต์', data: ms.map(m => ok(gV(m)) ? gV(m) * 100 : null), backgroundColor: ms.map(m => (gV(m) || 0) >= 0 ? '#f59e0b' : '#fca5a5'), borderRadius: 6, maxBarThickness: 22 }
   ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', align: 'end' }, tooltip: { callbacks: { label: it => ` ${it.dataset.label}: ${ok(it.raw) ? (it.raw > 0 ? '+' : '') + it.raw.toFixed(2) + '%' : '-'}` } } },
     scales: { x: { grid: { display: false } }, y: { ticks: { callback: v => v + '%' } } } } });
@@ -3490,7 +3514,7 @@ function renderDayCmp(body) {
     scales: { x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 14 } }, y: { beginAtZero: true, ticks: { callback: tickK } }, y1: { beginAtZero: true, position: 'right', grid: { display: false }, ticks: { callback: tickK } } } } });
 }
 function renderHolInfo() {
-  const info = $('#holInfo'); if (info) info.textContent = `ปฏิทินในระบบ ${N(Object.keys(DEFAULT_HOLIDAYS).length)} วัน (2567–2569) · จากชีต Holidays ${N(Object.keys(S.sheetHol).length)} วัน · เพิ่มเอง ${N(Object.keys(S.customHol).length)} วัน`;
+  const info = $('#holInfo'); if (info) info.textContent = `ปฏิทินในระบบ ${N(Object.keys(DEFAULT_HOLIDAYS).length)} วัน (2565–2570) · จากชีต Holidays ${N(Object.keys(S.sheetHol).length)} วัน · เพิ่มเอง ${N(Object.keys(S.customHol).length)} วัน`;
 }
 
 /* =====================================================================
@@ -3863,6 +3887,46 @@ function sigText(w) {
     : `ความแตกต่างนี้ <b>ยังไม่มีนัยสำคัญทางสถิติ</b> (Welch t-test, ${pt}) — อาจเป็นความผันผวนตามปกติของแต่ละวัน`;
 }
 
+// ---------- v25: เทียบแบบ "ปรับตามจำนวนวันหยุด" (Day-mix adjusted) ----------
+// ทำไมต้องมี: วันหยุด (ส.–อา. + นักขัตฤกษ์) มีลูกค้ามากกว่าวันธรรมดาราว 30% → งวดที่มีวันหยุดมากกว่าจะดู "โต"
+//   ทั้งที่ความนิยมจริงไม่ได้เพิ่ม (เช่น มี.ค. 69 ยอดรวม +10.9% แต่ปรับวันแล้ว −1.0%)
+// วิธีคิด: ยอดคาดหมาย = (วันธรรมดาของงวดนี้ × เฉลี่ยวันธรรมดางวดก่อน) + (วันหยุดของงวดนี้ × เฉลี่ยวันหยุดงวดก่อน)
+//   % ปรับวัน = ยอดจริง ÷ ยอดคาดหมาย − 1 → ใช้ได้แม้งวดยาวไม่เท่ากัน/ข้อมูลไม่ครบเดือน เพราะเทียบรายวันตามกลุ่ม
+// นัยสำคัญ: แปลงยอดรายวันเป็นดัชนีเทียบฐานกลุ่มเดียวกัน (วันหยุดหารด้วยเฉลี่ยวันหยุด ฯลฯ) แล้วใช้ Welch t-test
+//   → ตัดผลของสัดส่วนวันออกก่อนทดสอบ ไม่งั้นความต่างของวันหยุดจะถูกนับเป็น "ความต่างจริง"
+const isOffDay = r => !!(r.we || r.hol);
+function fairCmp(cur, prev, k = 'cust') {
+  const c = (cur || []).filter(r => isNum(r[k])), p = (prev || []).filter(r => isNum(r[k]));
+  if (!c.length || !p.length) return null;
+  const pw = p.filter(r => !isOffDay(r)).map(r => r[k]), po = p.filter(isOffDay).map(r => r[k]);
+  const cW = c.filter(r => !isOffDay(r)).length, cO = c.length - cW;
+  // งวดนี้มีวันกลุ่มที่งวดก่อนไม่มีเลย → ไม่มีฐานให้เทียบ จึงไม่ปรับ (ดีกว่าเดาค่า)
+  if ((cW && !pw.length) || (cO && !po.length)) return null;
+  const mW = pw.length ? mean(pw) : 0, mO = po.length ? mean(po) : 0;
+  const exp = cW * mW + cO * mO, act = sum(c.map(r => r[k]));
+  if (!(exp > 0)) return null;
+  const idx = L => L.map(r => r[k] / (isOffDay(r) ? mO : mW)).filter(isNum);
+  return { adj: act / exp - 1, raw: growth(mean(c.map(r => r[k])), mean(p.map(r => r[k]))), act, exp,
+    cW, cO, pW: pw.length, pO: po.length, offC: cO / c.length, offP: po.length / p.length, w: welchT(idx(c), idx(p)) };
+}
+// คำตัดสินแบบสั้น อ่านเข้าใจทันที: ทรงตัว / เพิ่มขึ้นจริง / ลดลงจริง / อยู่ในช่วงผันผวนปกติ
+function fairWord(f) {
+  if (!f || !ok(f.adj)) return { t: 'ปรับตามวันไม่ได้', tone: 'flat', sig: false };
+  const sig = !!(f.w && f.w.p < 0.05), a = Math.abs(f.adj);
+  if (a < 0.005) return { t: 'ทรงตัว', tone: 'flat', sig };
+  if (sig) return { t: f.adj > 0 ? 'เพิ่มขึ้นจริง' : 'ลดลงจริง', tone: f.adj > 0 ? 'up' : 'down', sig };
+  return { t: (f.adj > 0 ? 'เพิ่มขึ้น' : 'ลดลง') + 'เล็กน้อย · อยู่ในช่วงผันผวนปกติ', tone: 'flat', sig };
+}
+function fairText(f, unitName, vsLabel, html = true) {
+  const B = x => html ? `<b>${x}</b>` : x;
+  if (!f) return `${unitName}: ปรับตามวันหยุดไม่ได้ (งวดเทียบไม่มีวันประเภทเดียวกัน)`;
+  const w = fairWord(f), pTxt = f.w ? (f.w.p < 0.001 ? 'p < 0.001' : 'p = ' + f.w.p.toFixed(3)) : 'ข้อมูลน้อยเกินทดสอบ';
+  let t = `${unitName}${vsLabel ? 'เทียบ' + vsLabel : ''} แบบปรับตามวันหยุด ${B(P(f.adj))} → ${B(w.t)} (${pTxt})`;
+  // เตือนเมื่อ % ดิบกับ % ปรับวัน "คนละทิศ" — จุดที่ผู้อ่านรายงานมักเข้าใจผิด
+  if (ok(f.raw) && Math.sign(f.raw) !== Math.sign(f.adj) && Math.abs(f.raw - f.adj) >= 0.01)
+    t += ` · ค่าเฉลี่ย/วันดิบ ${P(f.raw)} ต่างทิศเพราะสัดส่วนวันหยุด ${P(f.offC, 0, false)} เทียบ ${P(f.offP, 0, false)}`;
+  return t;
+}
 // v7: ชื่อสั้นของงวด ใช้แทนตัวอักษร A/B ทุกจุด (หัวตาราง, กราฟ, สรุปผล) เพื่อให้อ่านรู้ทันทีว่าเทียบอะไรกับอะไร
 function rangeShort(s, e) {
   const a = dateFromKey(s), b = dateFromKey(e), yy = y => String(y + 543).slice(2);
@@ -4700,7 +4764,11 @@ function rcInsights(R, html = true) {
     const by = new Map(S.all.map(x => [x.key, x])); const d = C.rows.map(r => { const p = by.get(addDaysKey(r.key, -7)); return p ? { r, g: growth(r.cust, p.cust) } : null; }).filter(x => x && ok(x.g));
     if (d.length) { const up = d.reduce((a, x) => x.g > a.g ? x : a), dn = d.reduce((a, x) => x.g < a.g ? x : a); out.push(`เทียบวันเดียวกันของสัปดาห์ก่อน: ${TH_DAYS[up.r.dow]} ${up.g >= 0 ? 'เพิ่ม' : 'ลด'}มากสุด ${B(P(up.g))}${dn !== up ? ` · ${TH_DAYS[dn.r.dow]} ${dn.g < 0 ? 'ลด' : 'เพิ่ม'}${dn.g < 0 ? 'มากสุด' : 'น้อยสุด'} ${B(P(dn.g))}` : ''}`); }
   }
-  if (B1 && B1.n >= 3 && C.n >= 3 && R.kind !== 'week') { const w = welchT(C.rows.map(r => r.cust), B1.rows.map(r => r.cust)); out.push(`ลูกค้าเฉลี่ย/วันเทียบ${B1.short}: ` + (html ? sigText(w) : sigText(w).replace(/<[^>]+>/g, ''))); }
+  { // v25: เทียบแบบปรับตามวันหยุด — ตัดผลจำนวนวันหยุดที่ไม่เท่ากันระหว่างงวด
+    const fl = R.bases.filter(b => b.n).map(b => { const f = fairCmp(C.rows, b.rows, 'cust'); return f ? `${b.short} ${B(P(f.adj))} (${fairWord(f).t})` : null; }).filter(Boolean);
+    if (fl.length) out.push(`ลูกค้าเทียบแบบปรับตามวันหยุด: ${fl.join(' · ')}`);
+  }
+  if (B1 && B1.n >= 3 && C.n >= 3 && R.kind !== 'week') { const w = welchT(C.rows.map(r => r.cust), B1.rows.map(r => r.cust)); out.push(`ลูกค้าเฉลี่ย/วันแบบดิบ (ยังไม่ปรับวันหยุด) เทียบ${B1.short}: ` + (html ? sigText(w) : sigText(w).replace(/<[^>]+>/g, ''))); }
   const evs = (S.events || []).filter(ev => ev.to >= R.s && ev.from <= R.e);
   evs.slice(0, 3).forEach(ev => { const im = eventImpact(ev); out.push(`เหตุการณ์ ★ ${html ? esc(ev.title) : ev.title} (${rngLabel(ev.from, ev.to)})${im && ok(im.g) ? ` ลูกค้าเฉลี่ย ${N(im.act)} คน/วัน ${P(im.g)} จากค่าคาดหมาย` : ''}${ev.exclude ? ' · ตัดออกจากค่าปกติ' : ''}`); });
   const lw = []; C.rows.forEach(r => { if (r.lw && !lw.some(x => x.s === r.lwRun.s)) lw.push(r.lwRun); });
@@ -4716,7 +4784,7 @@ function rcForecast(end, asOf, start) {
   const bt = fcBacktest(); if (bt.relRms) { const wid = (fc, lo, hi) => Math.sqrt(((hi - lo) / 2) ** 2 + (1.96 * bt.relRms * fc) ** 2); const wc = wid(f.fcC, f.loC, f.hiC); f.loC = f.totC - wc; f.hiC = f.totC + wc; }
   return f;
 }
-const RC_FOOT = ['% เปลี่ยนแปลงคิดจากค่าเฉลี่ยต่อวัน · ยอดรวมเทียบเมื่อทั้งสองงวดมีข้อมูลครบทุกวันเท่านั้น (* = เทียบด้วยค่าเฉลี่ย/วัน)', '† = วันที่ใช้เทียบเป็นคนละประเภทวัน (นักขัตฤกษ์ vs วันปกติ) — % ของวันนั้นไม่สะท้อนแนวโน้มจริง'];
+const RC_FOOT = ['‡ ปรับตามวันหยุด = ยอดจริง ÷ ยอดคาดหมาย − 1 (ยอดคาดหมายใช้ค่าเฉลี่ยวันธรรมดา/วันหยุดของงวดเทียบ × จำนวนวันแต่ละประเภทของงวดนี้)', '% เปลี่ยนแปลงคิดจากค่าเฉลี่ยต่อวัน · ยอดรวมเทียบเมื่อทั้งสองงวดมีข้อมูลครบทุกวันเท่านั้น (* = เทียบด้วยค่าเฉลี่ย/วัน)', '† = วันที่ใช้เทียบเป็นคนละประเภทวัน (นักขัตฤกษ์ vs วันปกติ) — % ของวันนั้นไม่สะท้อนแนวโน้มจริง'];
 function rcNotes(R) {
   const C = R.C, out = [];
   out.push(`ข้อมูลงวดนี้ ${C.n}/${C.cal} วัน${C.full ? ' (ครบ)' : ''}${R.bases.map(b => ` · ${b.short} ${b.n}/${b.cal} วัน`).join('')}`);
@@ -4759,6 +4827,7 @@ function buildPeriodReport(R) {
     ['รถยนต์รวม (คัน)', b => b.n ? N(b.carT) : '-', b => totComparable(C, b) ? growth(C.carT, b.carT) : null],
     ['รถยนต์เฉลี่ย/วัน', b => `<b>${cell(b, 'carA')}</b>`, b => gb(b, 'carA')],
     ['Ratio (คน/คัน)', b => cell(b, 'ratio', 2), b => gb(b, 'ratio')],
+    ['ลูกค้า ปรับตามวันหยุด ‡', b => b.n ? `หยุด ${b.rows.filter(isOffDay).length}/${b.n} วัน` : '-', b => { const f = b.n ? fairCmp(C.rows, b.rows, 'cust') : null; return f ? f.adj : null; }],
     ['ลูกค้า วันทำงาน', b => typ(b.dg, 'wd'), b => b.dg.wd.days && C.dg.wd.days ? growth(C.dg.wd.cust.mean, b.dg.wd.cust.mean) : null],
     ['ลูกค้า ส.–อา.', b => typ(b.dg, 'we'), b => b.dg.we.days && C.dg.we.days ? growth(C.dg.we.cust.mean, b.dg.we.cust.mean) : null],
     ['ลูกค้า นักขัตฤกษ์', b => typ(b.dg, 'hol'), b => b.dg.hol.days && C.dg.hol.days ? growth(C.dg.hol.cust.mean, b.dg.hol.cust.mean) : null]
@@ -4801,10 +4870,10 @@ function buildPeriodReport(R) {
         <div class="rp-box"><div class="rp-t">ตารางเปรียบเทียบงวดมาตรฐาน</div>${cmpTbl}</div>
       </div>
       <div class="rp-fill" style="display:grid;grid-template-columns:1.18fr 1fr;gap:12px;margin-top:10px">
-        <div class="rp-box">${detail}${R.kind === 'week' ? mdLine : ''}<div style="font-size:9px;color:#5f6f88;margin-top:6px;line-height:1.5">${RC_FOOT.join('<br>')}</div></div>
+        <div class="rp-box">${detail}${R.kind === 'week' ? mdLine : ''}<div style="font-size:9px;color:#5f6f88;margin-top:6px;line-height:1.5">${(R.kind === 'week' ? RC_FOOT.slice(1) : RC_FOOT).join('<br>')}</div></div>
         <div class="rp-box" style="background:linear-gradient(135deg, ${mixW('#06b6d4', 9)}, #fff);border-color:${mixW('#06b6d4', 25)}"><div class="rp-t" style="color:#0e7490">สรุปผลการวิเคราะห์</div>
           <div class="rp-list">${ins.slice(0, R.kind === 'week' ? 6 : 7).map((t, i) => `<div class="rp-li"><span class="n">${i + 1}.</span><span>${t}</span></div>`).join('')}</div>
-          ${R.kind === 'week' ? `<div class="rp-t" style="color:#b45309;margin-top:6px">ข้อสังเกตด้านข้อมูล</div><div class="rp-list">${notes.slice(0, 3).map(t => `<div class="rp-li"><span class="n">•</span><span>${t}</span></div>`).join('')}</div>` : ''}</div>
+          ${R.kind === 'week' ? `<div class="rp-t" style="color:#b45309;margin-top:6px">ข้อสังเกตด้านข้อมูล</div><div class="rp-list">${notes.slice(0, 2).concat(RC_FOOT[0]).map(t => `<div class="rp-li"><span class="n">•</span><span>${t}</span></div>`).join('')}</div>` : ''}</div>
       </div>
     </div>
     ${rpFooter('1/' + pages)}
