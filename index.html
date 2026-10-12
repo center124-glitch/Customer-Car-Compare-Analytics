@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <!--
-  Customer & Car Compare Analytics — v25
+  Customer & Car Compare Analytics — v26
+  v26: + หน้าภาพรวมเปิดที่ "รายวัน (ล่าสุด)" เสมอ (เปิดแอป / กลับจากหน้าอื่น)
+       + Edge cases: วันล่าสุดที่กรอกไม่ครบ (ค่า 0) ข้ามไปวันที่ครบพร้อมแจ้ง · เหตุการณ์วันที่ผิดรูปแบบไม่ทำให้หน้าพัง
+         · กันออกรายงานซ้อน · ค่าตั้งค่าที่เสีย/ผิดชนิดไม่ทำให้หยุดดึงข้อมูล · "วันนี้" ใช้เวลาไทยเสมอ
+         · ไม่แสดง error ซ้ำซ้อนเมื่อ Google ตอบเป็น HTML · แจ้งเมื่อกำลังแสดงข้อมูลแคช
   v25: + เทียบแบบ "ปรับตามจำนวนวันหยุด" (Day-mix adjusted) — หน้ารายเดือน (ค่าเริ่มต้น), แถบสรุปใต้ KPI หน้าภาพรวม,
          AI Insight, รายงาน PDF/JPG/LINE · คำตัดสินอ่านง่าย (เพิ่มขึ้นจริง / ลดลงจริง / ผันผวนปกติ) ด้วย Welch t-test บนดัชนีปรับวัน
        + ปฏิทินวันหยุดปี 2570 (เบื้องต้น) · แท่ง MoM ติดลบเป็นโทนแดง · ลบโค้ดข้อมูลตัวอย่างที่ไม่ได้ใช้
@@ -721,7 +725,7 @@
 
     <footer class="px-4 md:px-6 lg:px-8 py-4 text-xs muted flex flex-wrap justify-between gap-2" style="border-top:1px solid var(--border)">
       <span>SBK Customer & Car Compare Analytics · Single File Web App</span>
-      <span>v25.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
+      <span>v26.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
     </footer>
   </div>
 </div>
@@ -1341,7 +1345,7 @@ function makeDate(y, m, d) {
   const key = y + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
   return { key, t, y, m, d, dow: dt.getUTCDay() };
 }
-function dateFromKey(key) { const [y, m, d] = key.split('-').map(Number); return makeDate(y, m, d); }
+function dateFromKey(key) { if (typeof key !== 'string') return null; const [y, m, d] = key.split('-').map(Number); return makeDate(y, m, d); } // v26: key ผิดรูป → null (ไม่ throw)
 function addDaysKey(key, n) { const o = dateFromKey(key); const dt = new Date(o.t + n * DAY_MS); return makeDate(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate()).key; }
 function daysBetween(k1, k2) { return Math.round((dateFromKey(k2).t - dateFromKey(k1).t) / DAY_MS); }
 function daysInMonth(y, m) { return new Date(Date.UTC(y, m, 0)).getUTCDate(); }
@@ -1826,7 +1830,7 @@ function dataQuality(all, holMap) {
 const ok = v => v !== null && v !== undefined && isFinite(v);
 const N = (v, d = 0) => ok(v) ? Number(v).toLocaleString('th-TH', { minimumFractionDigits: d, maximumFractionDigits: d }) : '-';
 const P = (v, d = 1, sign = true) => ok(v) ? ((sign && v > 0 ? '+' : '') + (v * 100).toFixed(d) + '%') : '-';
-const dTH = (key, long) => { if (!key) return '-'; const o = dateFromKey(key); return o.d + ' ' + (long ? TH_MONTHS_LONG : TH_MONTHS)[o.m - 1] + ' ' + (o.y + 543); };
+const dTH = (key, long) => { if (!key) return '-'; const o = dateFromKey(key); if (!o) return '-'; return o.d + ' ' + (long ? TH_MONTHS_LONG : TH_MONTHS)[o.m - 1] + ' ' + (o.y + 543); };
 const dShort = key => { const o = dateFromKey(key); return o.d + ' ' + TH_MONTHS[o.m - 1] + ' ' + String(o.y + 543).slice(2); };
 const ymTH = (ym, long) => { const [y, m] = ym.split('-').map(Number); return (long ? TH_MONTHS_LONG : TH_MONTHS)[m - 1] + ' ' + (long ? (y + 543) : String(y + 543).slice(2)); };
 const compact = v => !ok(v) ? '-' : Math.abs(v) >= 1e6 ? (v / 1e6).toLocaleString('th-TH', { maximumFractionDigits: 2 }) + 'M' : Math.abs(v) >= 1e4 ? (v / 1e3).toLocaleString('th-TH', { maximumFractionDigits: 1 }) + 'K' : N(v);
@@ -1895,7 +1899,7 @@ function hydrateIcons(root = document) { root.querySelectorAll('[data-i]').forEa
 const STORE_KEY = 'sbk_customer_car_compare_v1'; // ใช้ key เดิม เพื่อให้ข้อมูลที่เคยบันทึกจาก v1 ยังอยู่
 const S = {
   page: 'dashboard', theme: 'light', order: 'dmy', org: 'ศูนย์การค้าซีคอน บางแค',
-  all: [], rows: [], prev: [], range: 'all', pk: {}, cmpBase: 'prev', from: null, to: null, rangeStart: null, rangeEnd: null, prevLabel: '',
+  all: [], rows: [], prev: [], range: 'day', pk: {}, cmpBase: 'prev', from: null, to: null, rangeStart: null, rangeEnd: null, prevLabel: '',
   gran: 'auto', monthMode: 'adj', yearMetric: 'cust', yearSel: null, yearBasis: 'ytd',
   holMode: false, carBasis: '24', source: 'local', sheetHol: {}, customHol: {}, customHolText: '', quiet: false,
   dc: { dow: null, a: null, b: null },
@@ -2033,7 +2037,10 @@ function renderNav() {
 }
 const NO_FILTER = ['sheets', 'studio', 'quality', 'hourly', 'events', 'modes']; // หน้าที่มีตัวเลือกช่วงเวลาของตัวเอง
 function goto(page) {
-  S.page = page;
+  const fromPage = S._pageShown; S._pageShown = page; S.page = page;
+  // v26: เข้าหน้าภาพรวมจากหน้าอื่น (หรือเปิดแอปครั้งแรก) → เริ่มที่ "รายวัน (ล่าสุด)" เสมอ
+  //   ถ้าอยู่หน้าภาพรวมแล้วผู้ใช้เลือกช่วงอื่นเอง จะคงตัวเลือกนั้นไว้ (กดเมนูซ้ำไม่รีเซ็ต)
+  if (page === 'dashboard' && fromPage !== 'dashboard') { S.range = 'day'; S.dayAuto = true; S.dayKey = null; applyFilter(); }
   // v8: "รายวัน (ล่าสุด)" มีเฉพาะหน้าภาพรวม — หน้าอื่นกลับไปใช้ช่วง "ทั้งหมด" (การวิเคราะห์รายเดือน/ปี ต้องใช้หลายวัน)
   if (page !== 'dashboard' && S.range === 'day') { S.range = 'all'; applyFilter(); }
   const dBtn = document.querySelector('#rangeSeg [data-range=day]'); if (dBtn) dBtn.style.display = page === 'dashboard' ? '' : 'none';
@@ -2858,7 +2865,20 @@ function renderYearly(body) {
 const EVT_TYPES = ['โปรโมชัน', 'อีเวนต์/กิจกรรม', 'สภาพอากาศ', 'ปิดพื้นที่/ซ่อมบำรุง', 'เหตุขัดข้อง', 'อื่น ๆ'];
 const EVT_COLOR = { 'โปรโมชัน': '#06b6d4', 'อีเวนต์/กิจกรรม': '#6366f1', 'สภาพอากาศ': '#0ea5e9', 'ปิดพื้นที่/ซ่อมบำรุง': '#f59e0b', 'เหตุขัดข้อง': '#ef4444', 'อื่น ๆ': '#64748b' };
 // ---------- ติดป้ายเหตุการณ์ + วันหยุดยาว ให้ทุกแถว (เรียกหลัง annotate ทุกครั้ง) ----------
+// v26: ทำความสะอาดรายการเหตุการณ์ (มาจากชีต Events ที่ผู้ใช้พิมพ์เองได้) — วันที่ผิดรูปแบบถูกตัดทิ้ง,
+//   จาก > ถึง สลับให้ถูก, ชื่อว่าง → "เหตุการณ์" · กันหน้า "ปฏิทินเหตุการณ์"/กราฟพังจากข้อมูลเพียงแถวเดียว
+function normalizeEvents(list) {
+  if (!Array.isArray(list)) return [];
+  const toKey = v => { if (!v) return null; const d = parseDate(v instanceof Date ? v.toISOString().slice(0, 10) : v, 'dmy'); return d ? d.key : null; };
+  return list.map(e => {
+    if (!e || typeof e !== 'object') return null;
+    let from = toKey(e.from), to = toKey(e.to || e.from); if (!from || !to) return null;
+    if (from > to) [from, to] = [to, from];
+    return Object.assign({}, e, { from, to, title: String(e.title == null ? '' : e.title).trim() || 'เหตุการณ์' });
+  }).filter(Boolean);
+}
 function annotateExtra(rows) {
+  S.events = normalizeEvents(S.events);
   markRecorded(rows); // v16: เดือนที่ไม่ได้บันทึกยอด จยย./แท็กซี่/เดลิเวอรี่/MRT → null
   const evs = (S.events || []).filter(e => e && e.from && e.to);
   const hm = holMap();
@@ -3572,6 +3592,8 @@ async function sheetsConnect(silent) {
   } catch (e) {
     SH.connected = false; setLive('err', e.message);
     toast('เชื่อมต่อ Google Drive ไม่สำเร็จ: ' + esc(e.message), 'error', 9000);
+    if (S.all.length && S.offline && S.cacheTime && !silent) toast(`กำลังแสดงข้อมูลแคช (บันทึกเมื่อ ${S.cacheTime.toLocaleString('th-TH')}) — ตัวเลขอาจยังไม่ใช่ล่าสุด`, 'warn', 7000);
+    else if (S.all.length && S.offline && S.cacheTime) setTimeout(() => toast(`ออฟไลน์ — แสดงข้อมูลแคช (บันทึกเมื่อ ${S.cacheTime.toLocaleString('th-TH')})`, 'warn', 7000), 600);
     if (!S.all.length && loadCache()) toast(`แสดงข้อมูลแคชล่าสุด (บันทึกเมื่อ ${S.cacheTime.toLocaleString('th-TH')}) — ตัวเลขอาจไม่เป็นปัจจุบัน`, 'warn', 9000);
     return false;
   } finally { if (!silent) btnLoading(b, false); updateLive(); }
@@ -3714,7 +3736,12 @@ function renderConnBox() {
   $('#btnDisconnect').classList.toggle('hidden', !SH.connected);
   const fs = $('#fStatus'); if (fs) { fs.className = 'chip ' + (SH.connected ? 'chip-up' : 'chip-flat'); fs.textContent = SH.connected ? 'พร้อมบันทึก' : 'ยังไม่เชื่อมต่อ'; }
 }
-function todayKey() { const d = new Date(); return makeDate(d.getFullYear(), d.getMonth() + 1, d.getDate()).key; }
+// v26: "วันนี้" ตามเวลาประเทศไทยเสมอ (ข้อมูลศูนย์ฯ เป็นเวลาไทย) — เครื่องที่ตั้งโซนเวลาอื่นจะไม่ได้วันที่คลาดไป 1 วัน
+function bkkParts(d = new Date()) {
+  try { const o = {}; new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(d).forEach(x => o[x.type] = x.value); return { y: +o.year, m: +o.month, d: +o.day }; }
+  catch (e) { const t = new Date(d.getTime() + 7 * 3600e3); return { y: t.getUTCFullYear(), m: t.getUTCMonth() + 1, d: t.getUTCDate() }; }
+}
+function todayKey() { const p = bkkParts(); return makeDate(p.y, p.m, p.d).key; }
 function renderSheetsPage() {
   if (!$('#fDate').value) $('#fDate').value = todayKey();
   $('#fDate').max = todayKey();
@@ -4150,7 +4177,7 @@ function buildReport() {
   try { q.outliers = dataQuality(S.all, holMap()).outliers.filter(o => o.key >= S.rangeStart && o.key <= S.rangeEnd); } catch (e) { /* ใช้ผลเดิม */ }
   const calDays = daysBetween(S.rangeStart, S.rangeEnd) + 1, cover = rows.length / calDays;
   const basis = 'รถยนต์เข้า ทั้งหมด 24 ชม.';
-  const now = new Date(); const nowKey = makeDate(now.getFullYear(), now.getMonth() + 1, now.getDate()).key;
+  const now = new Date(); const nowKey = todayKey();
   const tm = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
   const docNo = `CCA-${String(now.getFullYear() + 543).slice(2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
   const pc = prev.length ? growth(c.mean, mean(prev.map(x => x.cust))) : null, pv = prev.length ? growth(v.mean, mean(prev.map(x => x.car))) : null, pr = prev.length ? growth(ratio, groupRatio(prev)) : null;
@@ -4258,9 +4285,16 @@ const dayTypeOf = r => r.hol ? 'hol' : r.we ? 'we' : 'wd';
 const DAYTYPE_TH = { wd: 'วันทำงาน', we: 'เสาร์–อาทิตย์', hol: 'วันหยุดนักขัตฤกษ์' };
 function dailyKey() {
   // วันที่เลือกต้องมีข้อมูลจริง — ถ้าไม่มี (เช่น ข้อมูลถูกลบ/เปลี่ยนแหล่ง) ให้ถอยไปวันล่าสุดที่มีข้อมูล
-  const last = S.all[S.all.length - 1].key;
+  if (!S.all.length) return null;
+  // v26: "วันล่าสุด" อัตโนมัติ = วันล่าสุดที่กรอกครบ (ลูกค้า > 0 และรถยนต์ > 0) — ไฟล์รายเดือนอาจกรอกวันนี้ไว้ครึ่งเดียว
+  //   (เช่น ใส่ยอดรถแล้วแต่ยอดลูกค้ายังเป็น 0) ถ้าใช้วันนั้นจะได้ % เทียบ −100% ที่ไม่จริง
+  // ข้ามได้ไม่เกิน 3 วันท้ายสุด — ถ้าไม่ครบมากกว่านั้น/ไม่มีวันไหนครบเลย ถือเป็นลักษณะข้อมูลจริง (ใช้วันล่าสุดตามปกติ)
+  let li = S.all.length - 1; const ok2 = r => r.cust > 0 && r.car > 0;
+  while (li > S.all.length - 4 && li > 0 && !ok2(S.all[li])) li--;
+  if (!ok2(S.all[li])) li = S.all.length - 1;
+  const last = S.all[li].key; S._dayIncomplete = li < S.all.length - 1 ? S.all.slice(li + 1).map(r => r.key) : [];
   // v9: โหมดอัตโนมัติ (ค่าเริ่มต้น) = ตามวันล่าสุดเสมอ แม้มีข้อมูลวันใหม่เข้ามาระหว่างเปิดหน้า · ผู้ใช้เลือกวันเอง = คงวันนั้นไว้
-  if (S.dayAuto !== false || !S.dayKey || S.dayKey > last || !S.all.some(r => r.key === S.dayKey)) { S.dayKey = last; S.dayAuto = true; }
+  if (S.dayAuto !== false || !S.dayKey || !S.all.some(r => r.key === S.dayKey)) { S.dayKey = last; S.dayAuto = true; }
   return S.dayKey;
 }
 const mavg = (list, k) => { const v = list.map(x => x[k]).filter(isNum); return v.length ? mean(v) : null; };
@@ -4355,11 +4389,12 @@ function renderDaily(body) {
   const isLast = key === D.last, isFirst = key === D.first;
   const cmpCell = (cur, b, d = 0) => ok(b) ? `<div class="font-semibold">${N(b, d)}</div><div class="mt-0.5">${chipHTML(g(cur, b))}</div>` : '<span class="muted">—</span>';
   const tone = { wd: '#0d9488', we: '#6366f1', hol: '#f59e0b' }[dayTypeOf(r)];
-  body.innerHTML = `
+  const incNote = S.dayAuto && (S._dayIncomplete || []).length ? `<div class="info-box">${I('info')}<div>ข้อมูลวันที่ ${S._dayIncomplete.map(k => dTH(k)).join(', ')} ยังกรอกไม่ครบ (ยอดลูกค้าหรือยอดรถยนต์เป็น 0) — จึงแสดง <b>${dTH(key)}</b> ซึ่งเป็นวันล่าสุดที่ข้อมูลครบแทน (เลือกดูวันนั้นได้จากปฏิทิน)</div></div>` : '';
+  body.innerHTML = `${incNote}
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 xl:gap-5">
     <div class="card day-hero p-5" style="--kc:${tone}">
       <div class="flex items-center justify-between gap-2">
-        <span class="chip" style="background:${tone};color:#fff">${isLast ? 'วันล่าสุดที่มีข้อมูล' : 'วันที่เลือก'}</span>
+        <span class="chip" style="background:${tone};color:#fff">${isLast ? 'วันล่าสุดที่มีข้อมูล' : S.dayAuto ? 'วันล่าสุดที่ข้อมูลครบ' : 'วันที่เลือก'}</span>
         <div class="flex gap-1.5">
           <button class="icon-btn" style="width:34px;height:34px" data-dnav="-1" ${isFirst ? 'disabled' : ''} title="วันก่อนหน้า">${I('chevronsLeft')}</button>
           <input type="date" id="dayPick" class="field" style="width:auto;padding:5px 9px;font-size:13px" value="${key}" min="${D.first}" max="${D.last}">
@@ -5115,7 +5150,13 @@ function rcChange(e) {
   rcRender();
 }
 
+let _exporting = false; // v26: กันกดออกรายงานซ้อน — รายงานทุกชนิดใช้พื้นที่ #report และกราฟชุดเดียวกัน ถ้าซ้อนกันเนื้อหาจะปนกัน
 async function exportReport(type) {
+  if (_exporting) { toast('กำลังสร้างรายงานก่อนหน้าอยู่ — กรุณารอสักครู่', 'warn'); return false; }
+  _exporting = true;
+  try { return await exportReport_(type); } finally { _exporting = false; }
+}
+async function exportReport_(type) {
   const cmp = type === 'cmppdf' || type === 'cmpjpg', daily = type === 'dailypdf' || type === 'dailyjpg', year = type === 'yearpdf' || type === 'yearjpg', hr = type === 'hrpdf', per = type === 'perpdf' || type === 'perjpg';
   if (per) type = type.slice(3); if (cmp) type = type.slice(3); if (daily) type = type.slice(5); if (year) type = type.slice(4); if (hr) type = 'pdf';
   if (!(cmp || daily || year || hr || per ? S.all.length : S.rows.length)) { toast('ยังไม่มีข้อมูลสำหรับสร้างรายงาน', 'warn'); return false; }
@@ -5343,10 +5384,12 @@ async function init() {
   hydrateIcons();
   try { initSplash(); } catch (e) { console.error('[splash]', e); }
   const saved = load();
-  if (saved) {
-    S.theme = saved.theme || 'light'; S.order = saved.order || 'dmy'; S.org = saved.org || S.org;
-    S.customHolText = saved.holText || ''; S.customHol = parseHolidayText(S.customHolText, S.order); S.holMode = !!saved.holMode; S.carBasis = '24'; // v11: ใช้ยอดรถยนต์ 24 ชม. เสมอ (เลิกให้เลือก 10–22 น.)
-    if (saved.sh) { SH.url = saved.sh.url || DEFAULT_GAS_URL; SH.key = saved.sh.key || ''; SH.interval = [0, 15, 30, 60, 300].includes(saved.sh.interval) ? saved.sh.interval : 60; SH.by = saved.sh.by || ''; }
+  if (saved && typeof saved === 'object') {
+    // v26: ค่าที่บันทึกไว้อาจเสีย/ผิดชนิด (แก้มือ, เวอร์ชันเก่า) → ตรวจชนิดทุกค่า ไม่งั้น URL ผิดจะทำให้ "ไม่ดึงข้อมูลเลย"
+    const str = (v, d) => typeof v === 'string' && v.trim() ? v : d;
+    S.theme = saved.theme === 'dark' ? 'dark' : 'light'; S.order = ['dmy', 'mdy'].includes(saved.order) ? saved.order : 'dmy'; S.org = str(saved.org, S.org);
+    S.customHolText = str(saved.holText, ''); S.customHol = parseHolidayText(S.customHolText, S.order); S.holMode = !!saved.holMode; S.carBasis = '24'; // v11: ใช้ยอดรถยนต์ 24 ชม. เสมอ (เลิกให้เลือก 10–22 น.)
+    if (saved.sh && typeof saved.sh === 'object') { const u = str(saved.sh.url, ''); SH.url = GAS_RE.test(u.trim()) ? u.trim() : DEFAULT_GAS_URL; SH.key = str(saved.sh.key, ''); SH.interval = [0, 15, 30, 60, 300].includes(saved.sh.interval) ? saved.sh.interval : 60; SH.by = str(saved.sh.by, ''); }
   }
   else if (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) S.theme = 'dark';
   $('#holInput').value = S.customHolText; $('#gsUrl').value = SH.url; $('#gsKey').value = SH.key; $('#gsInterval').value = String(SH.interval); $('#fBy').value = SH.by;
@@ -5372,7 +5415,9 @@ function reportError(msg) {
   try { toast('เกิดข้อผิดพลาดที่ไม่คาดคิด: ' + esc(String(msg).slice(0, 160)) + ' — ลองกด "ดึงข้อมูลล่าสุด" หรือรีเฟรชหน้า', 'error', 8000); } catch (e) { /* ignore */ }
 }
 // v9: ข้อผิดพลาดจากสคริปต์ JSONP ของ Google (เช่น ได้หน้า HTML แทนข้อมูล) jsonp() จัดการและแจ้งผู้ใช้เองแล้ว → ไม่แจ้งซ้ำ
-window.addEventListener('error', e => { if (!e || !e.message || /ResizeObserver/.test(e.message)) return; if (e.filename && /script\.google(usercontent)?\.com/.test(e.filename)) return; reportError(e.message); });
+window.addEventListener('error', e => { if (!e || !e.message || /ResizeObserver/.test(e.message)) return;
+  // v26: "Script error." = ข้อผิดพลาดจากสคริปต์ข้ามโดเมน (JSONP ของ Google ตอบเป็น HTML) ไม่มีรายละเอียดให้ใช้ และ jsonp() แจ้งผู้ใช้แล้ว
+  if (/^Script error\.?$/i.test(e.message)) return; if (e.filename && /script\.google(usercontent)?\.com/.test(e.filename)) return; reportError(e.message); });
 window.addEventListener('unhandledrejection', e => reportError((e.reason && e.reason.message) || e.reason || 'Promise rejected'));
 document.addEventListener('DOMContentLoaded', init);
 </script>
