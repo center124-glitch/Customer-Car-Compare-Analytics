@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <!--
-  Customer & Car Compare Analytics — v26
+  Customer & Car Compare Analytics — v28 (คู่กับ Code_CCA_v8.gs · ใช้กับ v7 ได้)
+  v28: หน้าภาพรวมแบบ "รายวัน (ล่าสุด)" ไม่แสดงยอดเดลิเวอรี่ (ตาราง 5 ฐาน + การ์ดช่องทาง) · เอาโลโก้มุมขวาบนของแถบหัวออก
+  v27: + กราฟในรายงานไม่หายเมื่อข้อมูลรีเฟรชอัตโนมัติระหว่างสร้างรายงาน (เลื่อนการดึงข้อมูลออกไป)
+       + บันทึกข้อมูล/เหตุการณ์: URL ยาว → ส่งแบบ POST อัตโนมัติ · อ่านกลับมาตรวจทุกครั้ง · หมดเวลา = ตรวจจากชีตก่อนแจ้งผล
+         · กันเหตุการณ์ซ้ำ (id จากแอป) · จำกัดความยาวหมายเหตุ/ผู้บันทึก · ตัวเลขเกิน 10 ล้านถูกปฏิเสธ
+       + ลิงก์จากข้อมูลภายนอกรับเฉพาะ https://*.google.com · หน้าพักจอไม่ขึ้นระหว่างบันทึก/ออกรายงาน
   v26: + หน้าภาพรวมเปิดที่ "รายวัน (ล่าสุด)" เสมอ (เปิดแอป / กลับจากหน้าอื่น)
        + Edge cases: วันล่าสุดที่กรอกไม่ครบ (ค่า 0) ข้ามไปวันที่ครบพร้อมแจ้ง · เหตุการณ์วันที่ผิดรูปแบบไม่ทำให้หน้าพัง
          · กันออกรายงานซ้อน · ค่าตั้งค่าที่เสีย/ผิดชนิดไม่ทำให้หยุดดึงข้อมูล · "วันนี้" ใช้เวลาไทยเสมอ
@@ -589,9 +594,6 @@
           <button id="btnFull" class="icon-btn hidden sm:inline-flex" title="เต็มจอ" data-i="maximize"></button>
           <button id="btnTheme" class="icon-btn" title="สลับธีม"></button>
           <button id="btnExport" class="btn btn-primary" title="ออกรายงาน รายวัน / รายสัปดาห์ / รายเดือน / รายปี"><span data-i="download"></span><span class="hidden xl:inline">ออกรายงาน</span></button>
-          <div class="hidden 2xl:flex items-center gap-2 pl-1">
-            <img data-logo alt="SBK Compare" style="width:40px;height:40px;border-radius:12px">
-          </div>
         </div>
       </div>
     </header>
@@ -659,8 +661,8 @@
                 <div><label class="text-xs muted">วันที่ <span style="color:var(--down)">*</span></label><input id="fDate" type="date" class="field mt-1"><div id="fDateTH" class="text-xs muted mt-1">-</div></div>
                 <div><label class="text-xs muted">ยอดลูกค้า (คน) <span style="color:var(--down)">*</span></label><input id="fCust" class="field mt-1" inputmode="numeric" placeholder="เช่น 35,210" autocomplete="off"></div>
                 <div><label class="text-xs muted">ยอดรถยนต์ (คัน) <span style="color:var(--down)">*</span></label><input id="fCar" class="field mt-1" inputmode="numeric" placeholder="เช่น 10,420" autocomplete="off"></div>
-                <div><label class="text-xs muted">ผู้บันทึก</label><input id="fBy" class="field mt-1" placeholder="ชื่อผู้บันทึก" autocomplete="off"></div>
-                <div class="sm:col-span-2 lg:col-span-4"><label class="text-xs muted">หมายเหตุ</label><input id="fNote" class="field mt-1" placeholder="เช่น มีกิจกรรมลานกิจกรรม, ฝนตกหนักช่วงเย็น" autocomplete="off"></div>
+                <div><label class="text-xs muted">ผู้บันทึก</label><input id="fBy" class="field mt-1" maxlength="80" placeholder="ชื่อผู้บันทึก" autocomplete="off"></div>
+                <div class="sm:col-span-2 lg:col-span-4"><label class="text-xs muted">หมายเหตุ</label><input id="fNote" class="field mt-1" maxlength="300" placeholder="เช่น มีกิจกรรมลานกิจกรรม, ฝนตกหนักช่วงเย็น" autocomplete="off"></div>
               </div>
               <div id="fPreview" class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4"></div>
               <div id="fExists" class="hidden mt-3 info-box" style="background:var(--downbg);border-color:rgba(239,68,68,.25)"></div>
@@ -725,7 +727,7 @@
 
     <footer class="px-4 md:px-6 lg:px-8 py-4 text-xs muted flex flex-wrap justify-between gap-2" style="border-top:1px solid var(--border)">
       <span>SBK Customer & Car Compare Analytics · Single File Web App</span>
-      <span>v26.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
+      <span>v28.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
     </footer>
   </div>
 </div>
@@ -740,8 +742,11 @@
 <script type="text/plain" id="gasCode">
 /**
  * =====================================================================
- *  SBK Customer & Car Compare Analytics — Google Apps Script Backend v7
- *  ใช้คู่กับไฟล์ Customer_Car_Compare_Analytics_v16.html (แอปรุ่นก่อนใช้ได้ตามเดิม)
+ *  SBK Customer & Car Compare Analytics — Google Apps Script Backend v8
+ *  ใช้คู่กับไฟล์ Customer_Car_Compare_Analytics_v27.html (แอปรุ่นก่อนใช้ได้ตามเดิม)
+ *  v8: + รหัสบันทึก/ลบ ตั้งได้ที่ Project Settings → Script properties ชื่อ CCA_WRITE_KEY (ไม่ต้องใส่รหัสในโค้ด)
+ *      + บันทึกเหตุการณ์ซ้ำด้วย id เดิม (กดซ้ำหลังเน็ตหลุด) → แก้ไขรายการเดิม ไม่สร้างรายการซ้ำ
+ *      + ตรวจค่าตัวเลขสูงผิดปกติ (> 10 ล้าน) และหมายเหตุยาวเกินก่อนบันทึก
  *  v7: + ยอดลูกค้าเข้า/ออก ทางประตู "สะพาน MRT" (mrt / mrtOut) = ผลรวมรายชั่วโมงของแถวประตู MRT ในตารางลูกค้าเข้า/ออก
  *      + แคชเก็บรายชื่อฟิลด์ + รุ่นตัวอ่าน → หลังอัปเดตจะอ่านไฟล์ใหม่ทีละชุดอัตโนมัติ (ระหว่างนั้นใช้แคชเดิมได้ ไม่เพี้ยนคอลัมน์)
  *  v6: + ข้อมูลรายชั่วโมง (action=hourly&ym=YYYY-MM) — รวมยอดทุกประตู/ทุกช่องทางต่อชั่วโมง และตรวจกับยอดรวมรายวัน
@@ -885,7 +890,9 @@ function handle_(p) {
 }
 
 /* ============================ HELPERS ============================ */
-function checkKey_(key) { if (CONFIG.WRITE_KEY && String(key || '') !== CONFIG.WRITE_KEY) throw new Error('รหัสบันทึกข้อมูลไม่ถูกต้อง'); }
+// v8: รหัสจาก Script Properties (CCA_WRITE_KEY) มาก่อนค่าในโค้ด — เปลี่ยนรหัสได้โดยไม่ต้อง Deploy ใหม่
+function writeKey_() { try { return String(props_().getProperty('CCA_WRITE_KEY') || CONFIG.WRITE_KEY || ''); } catch (e) { return String(CONFIG.WRITE_KEY || ''); } }
+function checkKey_(key) { const k = writeKey_(); if (k && String(key || '') !== k) throw new Error('รหัสบันทึกข้อมูลไม่ถูกต้อง — ตรวจรหัสที่หน้า Google Drive / Sheets ในแอป'); }
 function parseJson_(s) { try { return typeof s === 'string' ? JSON.parse(s) : s; } catch (e) { throw new Error('รูปแบบข้อมูลที่ส่งมาไม่ถูกต้อง (JSON)'); } }
 function withLock_(fn) {
   const lock = LockService.getScriptLock();
@@ -1127,6 +1134,8 @@ function buildRow_(rec) {
   if (!d) throw new Error('วันที่ไม่ถูกต้อง: ' + rec.date + ' (ต้องเป็น yyyy-mm-dd)');
   const cust = num_(rec.cust), car = num_(rec.car);
   if (cust === null || car === null || cust < 0 || car < 0) throw new Error('ยอดลูกค้า/ยอดรถยนต์ต้องเป็นตัวเลขไม่ติดลบ (' + rec.date + ')');
+  if (cust > 1e7 || car > 1e7) throw new Error('ตัวเลขสูงผิดปกติ (เกิน 10 ล้าน) — กรุณาตรวจสอบการกรอก (' + rec.date + ')');
+  if (String(rec.note || '').length > 300) throw new Error('หมายเหตุยาวเกิน 300 ตัวอักษร (' + rec.date + ')');
   const now = Utilities.formatDate(new Date(), tz_(), 'yyyy-MM-dd HH:mm:ss');
   return [rec.date, TH_DAYS[d.getUTCDay()], cust, car, car > 0 ? Math.round(cust / car * 10000) / 10000 : '', String(rec.note || '').slice(0, 300), now, String(rec.by || '').slice(0, 80)];
 }
@@ -1167,7 +1176,8 @@ function eventSave_(e) {
   const now = Utilities.formatDate(new Date(), tz_(), 'yyyy-MM-dd HH:mm:ss');
   let id = String(e.id || ''), row = -1;
   if (id && sh.getLastRow() >= 2) { const ids = sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues(); for (let i = 0; i < ids.length; i++) if (String(ids[i][0]) === id) { row = i + 2; break; } }
-  if (!id || row < 0) id = 'E' + Date.now().toString(36);
+  // v8: id จากแอป (ใหม่) ที่ยังไม่มีในชีต → ใช้ id นั้นเลย ครั้งต่อไปที่ส่งซ้ำจะกลายเป็น "แก้ไข" ไม่ใช่เพิ่มแถวซ้ำ
+  if (!id || row < 0) id = /^[A-Za-z0-9_-]{4,40}$/.test(id) ? id : 'E' + Date.now().toString(36);
   const vals = [id, f, t, title.slice(0, 120), type, !!e.exclude, String(e.note || '').slice(0, 300), now, String(e.by || '').slice(0, 80)];
   if (row > 0) sh.getRange(row, 1, 1, EVT_HEAD.length).setValues([vals]); else sh.appendRow(vals);
   return { ok: true, id: id, mode: row > 0 ? 'update' : 'insert', version: bumpVersion_() };
@@ -1834,6 +1844,8 @@ const dTH = (key, long) => { if (!key) return '-'; const o = dateFromKey(key); i
 const dShort = key => { const o = dateFromKey(key); return o.d + ' ' + TH_MONTHS[o.m - 1] + ' ' + String(o.y + 543).slice(2); };
 const ymTH = (ym, long) => { const [y, m] = ym.split('-').map(Number); return (long ? TH_MONTHS_LONG : TH_MONTHS)[m - 1] + ' ' + (long ? (y + 543) : String(y + 543).slice(2)); };
 const compact = v => !ok(v) ? '-' : Math.abs(v) >= 1e6 ? (v / 1e6).toLocaleString('th-TH', { maximumFractionDigits: 2 }) + 'M' : Math.abs(v) >= 1e4 ? (v / 1e3).toLocaleString('th-TH', { maximumFractionDigits: 1 }) + 'K' : N(v);
+// v27: ลิงก์จากข้อมูลภายนอก อนุญาตเฉพาะ https://*.google.com (กัน javascript: / ลิงก์ปลอม)
+const safeUrl = u => { const v = String(u || '').trim(); return /^https:\/\/([a-z0-9-]+\.)*google\.com\//i.test(v) ? v : ''; };
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 function chipHTML(v, opt = {}) {
   if (!ok(v)) return '<span class="chip chip-flat">—</span>';
@@ -2002,7 +2014,8 @@ function mkChart(id, cfg) {
   if (S.quiet) { cfg.options = cfg.options || {}; cfg.options.animation = false; }
   S.charts[id] = new Chart(el, cfg); return S.charts[id];
 }
-function destroyCharts() { Object.keys(S.charts).forEach(k => { S.charts[k].destroy(); delete S.charts[k]; }); }
+// v27: ระหว่างสร้างรายงาน ห้ามทำลายกราฟของรายงาน (rp*) — ถ้าหน้าจอถูกรีเฟรช (ดึงข้อมูลอัตโนมัติ) กลางคัน กราฟในไฟล์ PDF จะว่างเปล่า
+function destroyCharts() { Object.keys(S.charts).forEach(k => { if (_exporting && /^rp/.test(k)) return; try { S.charts[k].destroy(); } catch (e) { /* กราฟถูกทำลายไปแล้ว */ } delete S.charts[k]; }); }
 // แสดงทศนิยม 1 ตำแหน่งเมื่อจำเป็น เพื่อไม่ให้ป้ายแกนซ้ำกัน (เช่น 12.5K กับ 13K ถูกปัดเป็น 13K ทั้งคู่)
 const tickK = v => Math.abs(v) >= 1e6 ? +(v / 1e6).toFixed(2) + 'M' : Math.abs(v) >= 1e3 ? +(v / 1e3).toFixed(1) + 'K' : v;
 function sparkline(id, data, color) {
@@ -2869,7 +2882,7 @@ const EVT_COLOR = { 'โปรโมชัน': '#06b6d4', 'อีเวนต�
 //   จาก > ถึง สลับให้ถูก, ชื่อว่าง → "เหตุการณ์" · กันหน้า "ปฏิทินเหตุการณ์"/กราฟพังจากข้อมูลเพียงแถวเดียว
 function normalizeEvents(list) {
   if (!Array.isArray(list)) return [];
-  const toKey = v => { if (!v) return null; const d = parseDate(v instanceof Date ? v.toISOString().slice(0, 10) : v, 'dmy'); return d ? d.key : null; };
+  const toKey = v => { if (!v) return null; const d = parseDate(v instanceof Date ? (isNaN(v) ? null : `${v.getFullYear()}-${v.getMonth() + 1}-${v.getDate()}`) : v, 'dmy'); return d ? d.key : null; };
   return list.map(e => {
     if (!e || typeof e !== 'object') return null;
     let from = toKey(e.from), to = toKey(e.to || e.from); if (!from || !to) return null;
@@ -2970,17 +2983,28 @@ function longWeekends() {
   }).filter(x => x.n).sort((a, b) => a.s < b.s ? -1 : 1);
 }
 async function saveEvent() {
-  const e = { id: (S.evEdit || {}).id || '', from: $('#evFrom').value, to: $('#evTo').value || $('#evFrom').value, title: $('#evTitle').value.trim(), type: $('#evType').value, exclude: $('#evEx').checked, note: $('#evNote').value.trim(), by: $('#evBy').value.trim() };
+  // v27: รายการใหม่มี id จากแอปตั้งแต่ครั้งแรก (ใช้ id เดิมจนบันทึกสำเร็จ) → ส่งซ้ำ = แก้ไขรายการเดิม (Code_CCA_v8.gs)
+  const isNew = !(S.evEdit || {}).id; if (isNew && !S.evDraftId) S.evDraftId = 'W' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const e = { id: isNew ? S.evDraftId : S.evEdit.id, from: $('#evFrom').value, to: $('#evTo').value || $('#evFrom').value, title: $('#evTitle').value.trim(), type: $('#evType').value, exclude: $('#evEx').checked, note: $('#evNote').value.trim(), by: $('#evBy').value.trim() };
   if (!e.from) { toast('กรุณาเลือกวันเริ่ม', 'warn'); return; }
   if (e.to < e.from) { toast('วันสิ้นสุดต้องไม่ก่อนวันเริ่ม', 'warn'); return; }
   if (!e.title) { toast('กรุณาระบุชื่อเหตุการณ์', 'warn'); $('#evTitle').focus(); return; }
+  // v27: กันเหตุการณ์ซ้ำ — รายการใหม่ที่วันที่และชื่อตรงกับของเดิมทุกตัว ไม่ต้องบันทึกซ้ำ (เช่น กดซ้ำหลังเน็ตหลุด)
+  const same = x => x.from === e.from && x.to === e.to && String(x.title).trim() === e.title;
+  if (isNew && (S.events || []).some(same)) { toast('มีเหตุการณ์นี้ (วันที่และชื่อเดียวกัน) อยู่แล้ว — ไม่ได้บันทึกซ้ำ', 'warn', 5000); return; }
   const b = $('#evSave'); btnLoading(b, true, 'กำลังบันทึก...');
+  const verify = async () => { SH.selfWrite = true; try { await sheetsLoad(true); } finally { SH.selfWrite = false; } return (S.events || []).some(same); };
   try {
-    const r = await jsonp({ action: 'eventSave', key: SH.key, data: JSON.stringify(e) }, 30000);
+    const r = await apiWrite({ action: 'eventSave', key: SH.key, data: JSON.stringify(e) }, 30000);
     if (!r || !r.ok) throw new Error((r && r.error) || 'บันทึกไม่สำเร็จ');
-    S.evEdit = null; SH.selfWrite = true; await sheetsLoad(true); SH.selfWrite = false;
-    toast(`บันทึกเหตุการณ์ "${esc(e.title)}" แล้ว`, 'success'); render();
-  } catch (err) { toast('บันทึกเหตุการณ์ไม่สำเร็จ: ' + esc(err.message), 'error', 7000); }
+    const okv = await verify();
+    if (!okv) throw new Error(r.unverified ? 'ส่งข้อมูลแล้วแต่ไม่พบเหตุการณ์ในชีต (รหัสบันทึกอาจไม่ถูกต้อง) — กรุณาตรวจสอบที่หน้า Google Drive / Sheets' : 'บันทึกแล้วแต่อ่านกลับไม่พบรายการ — กรุณากด "ดึงข้อมูลล่าสุด"');
+    S.evEdit = null; S.evDraftId = null; toast(`บันทึกเหตุการณ์ "${esc(e.title)}" แล้ว · ตรวจสอบกับชีตแล้ว`, 'success'); render();
+  } catch (err) {
+    // หมดเวลา ≠ ไม่สำเร็จเสมอไป (สคริปต์อาจบันทึกเสร็จแต่ตอบช้า) → อ่านกลับก่อนแจ้งผล กันผู้ใช้กดซ้ำจนเกิดรายการซ้ำ
+    if (isTimeoutErr(err)) { try { if (await verify()) { S.evEdit = null; S.evDraftId = null; toast(`บันทึกเหตุการณ์ "${esc(e.title)}" แล้ว (สคริปต์ตอบช้า แต่ตรวจพบในชีต)`, 'success', 6000); render(); return; } } catch (x) { /* อ่านกลับไม่ได้ */ } }
+    toast('บันทึกเหตุการณ์ไม่สำเร็จ: ' + esc(err.message), 'error', 7000);
+  }
   finally { if (b.isConnected) btnLoading(b, false); }
 }
 async function deleteEvent(id) {
@@ -3193,7 +3217,7 @@ function modeCoverage(k) {
 const MODE_DASH = ['moto', 'deli', 'mrt'];
 function modeKpiRow(cur, bases, opt = {}) {
   if (typeof MODE_M === 'undefined' || !S._rec) return '';
-  const list = MODE_M.filter(m => MODE_DASH.includes(m.k) && S._rec[m.k] && S._rec[m.k].size);
+  const list = MODE_M.filter(m => MODE_DASH.includes(m.k) && !(opt.exclude || []).includes(m.k) && S._rec[m.k] && S._rec[m.k].size);
   if (!list.length) return '';
   const one = !!opt.single, avg = (rows, k) => { const v = rows.map(r => r[k]).filter(isNum); return v.length ? { n: v.length, mean: mean(v), total: sum(v) } : null; };
   const cards = list.map(m => {
@@ -3208,7 +3232,7 @@ function modeKpiRow(cur, bases, opt = {}) {
   });
   const sh = mrtShare(cur), shB = bases[0] ? mrtShare(bases[0].rows) : null;
   if (ok(sh)) cards.push(kpiCard({ ico: 'ico-o', icon: 'percent', label: 'สัดส่วนลูกค้าเข้าทาง MRT', value: P(sh, 1, false), unit: '', chip: ok(shB) ? `<span class="chip ${sh >= shB ? 'chip-up' : 'chip-down'}">${sh >= shB ? '+' : ''}${((sh - shB) * 100).toFixed(1)} จุด</span>` : '', note: ok(shB) ? `${bases[0].short} ${P(shB, 1, false)} ของลูกค้าทั้งหมด` : 'ของลูกค้าเข้าทั้งหมด' }));
-  return `<div class="md-strip"><div class="md-strip-h"><span class="font-semibold text-sm">${I('car', 15)} ช่องทางอื่น: จยย. · เดลิเวอรี่ · MRT (ยอดเข้า)</span><span class="text-xs muted">${opt.note || ''}</span><button class="btn btn-sm ml-auto" data-goto="modes">ดูรายละเอียด ${I('chevronsLeft', 13).replace('<svg', '<svg style="transform:scaleX(-1)"')}</button></div>
+  return `<div class="md-strip"><div class="md-strip-h"><span class="font-semibold text-sm">${I('car', 15)} ช่องทางอื่น: ${[['moto', 'จยย.'], ['deli', 'เดลิเวอรี่'], ['mrt', 'MRT']].filter(([k]) => !(opt.exclude || []).includes(k)).map(x => x[1]).join(' · ')} (ยอดเข้า)</span><span class="text-xs muted">${opt.note || ''}</span><button class="btn btn-sm ml-auto" data-goto="modes">ดูรายละเอียด ${I('chevronsLeft', 13).replace('<svg', '<svg style="transform:scaleX(-1)"')}</button></div>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 xl:gap-4">${cards.join('')}</div></div>`;
 }
 
@@ -3563,6 +3587,18 @@ function jsonp(params, timeout = 25000) {
     document.head.appendChild(el);
   });
 }
+// v27: คำสั่งเขียนข้อมูล — URL ของ JSONP ยาวเกิน ~1,800 ตัวอักษรเสี่ยงถูก Google ปฏิเสธ (หมายเหตุภาษาไทย 1 ตัว = ~9 ตัวอักษรเมื่อเข้ารหัส)
+//   → สลับเป็น POST (no-cors อ่านผลไม่ได้) แล้วให้ผู้เรียก "อ่านกลับมาตรวจ" ทุกครั้ง
+async function apiWrite(params, timeout = 25000) {
+  const q = new URLSearchParams(Object.assign({}, params, { callback: '__cca_xxxxxxxxxxxx', _t: Date.now() })).toString();
+  if (SH.url.length + q.length + 1 <= 1800) return jsonp(params, timeout);
+  const ac = typeof AbortController !== 'undefined' ? new AbortController() : null, tm = ac ? setTimeout(() => ac.abort(), timeout) : null;
+  try { await fetch(SH.url, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(params), signal: ac ? ac.signal : undefined }); }
+  catch (e) { throw new Error(e && e.name === 'AbortError' ? 'หมดเวลาเชื่อมต่อ (timeout) — ตรวจสอบอินเทอร์เน็ต' : 'ส่งข้อมูลไม่สำเร็จ — ตรวจสอบอินเทอร์เน็ต'); }
+  finally { if (tm) clearTimeout(tm); }
+  return { ok: true, unverified: true };
+}
+const isTimeoutErr = e => /หมดเวลา|timeout/i.test((e && e.message) || '');
 function holMap() { return Object.assign({}, DEFAULT_HOLIDAYS, S.sheetHol, S.customHol); }
 function reannotate() { annotate(S.all, holMap()); annotateExtra(S.all); }
 function readCfgFromForm() {
@@ -3679,6 +3715,7 @@ function stopPolling() { if (SH.timer) clearInterval(SH.timer); SH.timer = null;
 // ทุกรอบที่ 10 โหลดเต็มเสมอ เผื่อมีการแก้ชีตที่ onEdit จับไม่ได้ (เช่น แก้ผ่าน API/สูตร)
 async function poll(force) {
   if (!SH.connected || SH.busy) return;
+  if (_exporting) return; // v27: เลื่อนการดึงข้อมูลไปรอบถัดไป — ไม่ให้ข้อมูลเปลี่ยนระหว่างสร้างรายงาน (ตัวเลขกับกราฟจะไม่ตรงกัน)
   if (!force && document.hidden) return; // แท็บถูกซ่อน → ไม่ดึง (ประหยัดโควตา)
   // Backoff: ถ้าล้มเหลวติดกัน ให้เว้นรอบมากขึ้น (2, 4, 8 รอบ) ไม่ยิงสคริปต์ถี่ขณะเครือข่ายมีปัญหา
   if (!force && SH.fail > 0) { SH.skip = (SH.skip || 0) + 1; if (SH.skip < Math.min(8, 2 ** Math.min(SH.fail, 3))) return; SH.skip = 0; }
@@ -3728,7 +3765,7 @@ function renderConnBox() {
       <div class="rounded-xl p-2" style="background:var(--card)"><div class="font-bold">${N(SH.files.length)}</div><div class="text-[11px] muted">ไฟล์รายเดือน</div></div>
       <div class="rounded-xl p-2" style="background:var(--card)"><div class="font-bold">${N(S.all.filter(r => r.src === 'file').length)}</div><div class="text-[11px] muted">วันจากไฟล์</div></div>
       <div class="rounded-xl p-2" style="background:var(--card)"><div class="font-bold">${N(S.all.filter(r => r.src === 'manual').length)}</div><div class="text-[11px] muted">วันบันทึกเอง</div></div></div>
-    <div class="flex flex-wrap gap-2 mt-3 text-xs"><a class="chip chip-v" href="${DRIVE_FOLDER_URL}" target="_blank" rel="noopener">${I('link', 13)}เปิดโฟลเดอร์ Drive</a>${SH.manual && SH.manual.url ? `<a class="chip chip-o" href="${esc(SH.manual.url)}" target="_blank" rel="noopener">${I('sheet', 13)}ไฟล์บันทึกเพิ่มเติม</a>` : ''}</div>
+    <div class="flex flex-wrap gap-2 mt-3 text-xs"><a class="chip chip-v" href="${DRIVE_FOLDER_URL}" target="_blank" rel="noopener">${I('link', 13)}เปิดโฟลเดอร์ Drive</a>${SH.manual && SH.manual.url ? `<a class="chip chip-o" href="${esc(safeUrl(SH.manual.url) || DRIVE_FOLDER_URL)}" target="_blank" rel="noopener">${I('sheet', 13)}ไฟล์บันทึกเพิ่มเติม</a>` : ''}</div>
     ${SH.warnings.length ? `<details class="mt-2 text-xs"><summary class="cursor-pointer" style="color:#b45309">ข้อสังเกตจากการอ่านไฟล์ ${N(SH.warnings.length)} รายการ</summary><ul class="mt-1 space-y-1 muted" style="max-height:160px;overflow:auto">${SH.warnings.map(w => `<li>• ${esc(w)}</li>`).join('')}</ul></details>` : ''}
     <details class="mt-2 text-xs"><summary class="cursor-pointer muted">รายชื่อไฟล์ที่อ่าน (${N(SH.files.length)})</summary><ul class="mt-1 space-y-1 muted" style="max-height:200px;overflow:auto">${SH.files.map(f => `<li class="flex justify-between gap-2"><a href="https://docs.google.com/spreadsheets/d/${esc(f.id)}" target="_blank" rel="noopener" class="truncate">${esc(String(f.name).replace(/^สรุป\s*ยอดลูกค้าเข้า และ รถเข้า\s*/, ''))}</a><span>${f.pending ? 'รอคิว' : f.error ? 'อ่านไม่ได้' : N(f.days) + ' วัน'}</span></li>`).join('')}</ul></details>` : ''}
     ${S.sheetErrors && S.sheetErrors.length ? `<div class="text-xs mt-1" style="color:#b45309">ข้ามแถวที่ไม่ถูกต้องในชีต ${S.sheetErrors.length} แถว (เช่น แถว ${S.sheetErrors.slice(0, 3).map(e => e.line).join(', ')})</div>` : ''}`
@@ -3793,6 +3830,7 @@ async function saveRecord() {
   if (!d) bad.push(['#fDate', 'กรุณาเลือกวันที่']);
   if (cust === null || cust < 0) bad.push(['#fCust', 'กรุณากรอกยอดลูกค้าเป็นตัวเลข (ไม่ติดลบ)']);
   if (car === null || car < 0) bad.push(['#fCar', 'กรุณากรอกยอดรถยนต์เป็นตัวเลข (ไม่ติดลบ)']);
+  if (cust > 1e7) bad.push(['#fCust', 'ยอดลูกค้าสูงผิดปกติ (เกิน 10 ล้าน) — กรุณาตรวจสอบ']); if (car > 1e7) bad.push(['#fCar', 'ยอดรถยนต์สูงผิดปกติ (เกิน 10 ล้าน) — กรุณาตรวจสอบ']);
   if (bad.length) { bad.forEach(([id]) => $(id).style.borderColor = 'var(--down)'); toast(bad.map(b => b[1]).join('<br>'), 'error', 5000); $(bad[0][0]).focus(); return; }
   if (key > todayKey()) { toast('ไม่สามารถบันทึกข้อมูลของวันในอนาคตได้', 'error'); return; }
   // ตรวจค่าผิดปกติก่อนส่ง (verify, don't guess)
@@ -3808,11 +3846,14 @@ async function saveRecord() {
   try {
     SH.by = $('#fBy').value.trim(); save();
     const rec = { date: key, cust, car, note: $('#fNote').value.trim(), by: SH.by };
-    const res = await jsonp({ action: 'save', key: SH.key, data: JSON.stringify(rec) });
+    let res;
+    try { res = await apiWrite({ action: 'save', key: SH.key, data: JSON.stringify(rec) }); }
+    catch (er) { if (!isTimeoutErr(er)) throw er; res = { ok: true, unverified: true, timeout: true }; } // v27: หมดเวลา → ตรวจจากการอ่านกลับแทน
     if (!res || !res.ok) throw new Error((res && res.error) || 'บันทึกไม่สำเร็จ');
-    SH.selfWrite = true; await sheetsLoad(true); SH.selfWrite = false;
+    SH.selfWrite = true; try { await sheetsLoad(true); } finally { SH.selfWrite = false; }
     const v = S.all.find(r => r.key === key); // อ่านกลับมาตรวจว่าชีตเก็บค่าถูกต้องจริง
     if (v && v.cust === cust && v.car === car) toast(`${res.mode === 'update' ? 'แก้ไข' : 'บันทึก'}ข้อมูลวันที่ ${dTH(key)} สำเร็จ · ตรวจสอบกับ Google Sheets แล้วตรงกัน`, 'success', 5000);
+    else if (res.unverified) { toast(res.timeout ? 'สคริปต์ตอบช้าเกินกำหนด และยังไม่พบข้อมูลที่บันทึกในชีต — กรุณากด "ดึงข้อมูลล่าสุด" เพื่อตรวจก่อนบันทึกซ้ำ' : 'ส่งข้อมูลแล้วแต่ไม่พบในชีต (รหัสบันทึกอาจไม่ถูกต้อง) — กรุณาตรวจสอบรหัสบันทึก', 'error', 9000); return; }
     else toast('บันทึกแล้ว แต่ข้อมูลที่อ่านกลับจากชีตไม่ตรงกัน — กรุณาตรวจสอบในชีต', 'warn', 8000);
     $('#fCust').value = ''; $('#fCar').value = ''; $('#fNote').value = '';
     const nx = addDaysKey(key, 1); if (nx <= todayKey() && !S.all.some(r => r.key === nx)) $('#fDate').value = nx; // สะดวกต่อการบันทึกย้อนหลังต่อเนื่อง
@@ -4421,7 +4462,7 @@ function renderDaily(body) {
     <div class="card p-5 xl:col-span-2">
       ${(() => {
         // v21: คอลัมน์ช่องทางอื่น แสดงเฉพาะยอดที่มีการบันทึก (วันที่เลือกหรือฐานใดฐานหนึ่ง)
-        const ext = [['moto', 'จยย.', 'คัน'], ['deli', 'เดลิเวอรี่', 'คัน'], ['mrt', 'MRT เข้า', 'คน']].filter(([k]) => isNum(r[k]) || D.base.some(b => ok(b[k])));
+        const ext = [['moto', 'จยย.', 'คัน'], ['mrt', 'MRT เข้า', 'คน']] /* v28: หน้ารายวันไม่แสดงเดลิเวอรี่ (ตามผู้ใช้) */.filter(([k]) => isNum(r[k]) || D.base.some(b => ok(b[k])));
         const extCell = (b, k) => !b.n ? '<span class="muted">—</span>' : ok(b[k]) ? (isNum(r[k]) ? cmpCell(r[k], b[k]) : `<div class="font-semibold">${N(b[k])}</div>`) : '<span class="muted" title="ฐานนี้ไม่ได้บันทึกยอดนี้">—</span>';
         return `${cardHead('เปรียบเทียบกับฐานมาตรฐาน 5 แบบ', `ลูกค้า / รถยนต์ / Ratio${ext.length ? ' / ' + ext.map(e => e[1]).join(' / ') : ''} ของ ${dShort(key)} เทียบกับแต่ละฐาน · % = (วันที่เลือก − ฐาน) ÷ ฐาน`)}
       <div class="scroll-x"><table class="tbl tbl-day"><thead><tr><th>ฐานเปรียบเทียบ</th><th class="num">ลูกค้า (คน)</th><th class="num">รถยนต์ (คัน)</th><th class="num">Ratio</th>${ext.map(([k, l, u], i) => `<th class="num th-ext${i ? '' : ' th-ext1'}">${l} (${u})</th>`).join('')}</tr></thead><tbody>
@@ -4431,7 +4472,7 @@ function renderDaily(body) {
       </tbody></table></div>`; })()}
     </div>
   </div>
-  ${(() => { const by = new Map(S.all.map(x => [x.key, x])), rs = b => b.keys.map(k => by.get(k)).filter(Boolean); return modeKpiRow([r], [{ short: 'สัปดาห์ก่อน', rows: rs(b2) }, { short: 'เมื่อวาน', rows: rs(b1) }, { short: 'ปีก่อน', rows: rs(b5) }], { single: true, note: '% = เทียบวันเดียวกันสัปดาห์ก่อน' }); })()}
+  ${(() => { const by = new Map(S.all.map(x => [x.key, x])), rs = b => b.keys.map(k => by.get(k)).filter(Boolean); return modeKpiRow([r], [{ short: 'สัปดาห์ก่อน', rows: rs(b2) }, { short: 'เมื่อวาน', rows: rs(b1) }, { short: 'ปีก่อน', rows: rs(b5) }], { single: true, exclude: ['deli'], note: '% = เทียบวันเดียวกันสัปดาห์ก่อน' }); })()}
   ${insightHTML(dailyInsights(D), 'สรุปประจำวัน')}
   <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
     <div class="card p-5">${cardHead('14 วันล่าสุด', `ถึง ${dTH(key)} · แท่ง = ลูกค้า · เส้น = รถยนต์ · แท่งเข้ม = วันที่เลือก`)}<div style="height:300px"><canvas id="chDay14"></canvas></div></div>
@@ -4440,7 +4481,7 @@ function renderDaily(body) {
   <div class="card p-5">${cardHead('ตัวชี้วัดทั้งหมดของวัน', `เทียบ${b1.label} และ${b2.label}`)}
     <div class="scroll-x"><table class="tbl"><thead><tr><th>ตัวชี้วัด</th><th class="num">${dShort(key)}</th><th class="num">${b1.short}${b1.keys[0] ? `<div class="th-sub">${dShort(b1.keys[0])}</div>` : ''}</th><th class="num">%</th><th class="num">${b2.short}${b2.keys[0] ? `<div class="th-sub">${dShort(b2.keys[0])}</div>` : ''}</th><th class="num">%</th></tr></thead><tbody>
     ${(() => { const by = new Map(S.all.map(x => [x.key, x])), p1 = b1.keys[0] && by.get(b1.keys[0]), p2 = b2.keys[0] && by.get(b2.keys[0]);
-      return availMetrics().filter(m => isNum(r[m.k]) || (p1 && isNum(p1[m.k]))).map(m => `<tr><td><span class="dot mr-2" style="background:${m.color}"></span>${m.label} <span class="text-xs muted">(${m.unit})</span></td><td class="num font-semibold">${N(r[m.k])}</td>
+      return availMetrics().filter(m => m.k !== 'deli').filter(m => isNum(r[m.k]) || (p1 && isNum(p1[m.k]))).map(m => `<tr><td><span class="dot mr-2" style="background:${m.color}"></span>${m.label} <span class="text-xs muted">(${m.unit})</span></td><td class="num font-semibold">${N(r[m.k])}</td>
         <td class="num">${p1 ? N(p1[m.k]) : '-'}</td><td class="num">${p1 ? chipHTML(g(r[m.k], p1[m.k])) : '-'}</td><td class="num">${p2 ? N(p2[m.k]) : '-'}</td><td class="num">${p2 ? chipHTML(g(r[m.k], p2[m.k])) : '-'}</td></tr>`).join(''); })()}
     </tbody></table></div></div>`;
   const lab14 = D.d14.map(x => `${TH_DAYS_S[dateFromKey(x.k).dow]} ${dateFromKey(x.k).d}`);
@@ -5364,7 +5405,7 @@ function hideSplash() {
   if (SH.connected) poll(false);
   armIdle();
 }
-function armIdle() { clearTimeout(SP.idleT); SP.idleT = setTimeout(() => { if (!SP.mode && !$('#modal').classList.contains('show') && !$('#loading').classList.contains('show')) showSplash('idle'); else armIdle(); }, IDLE_MS); }
+function armIdle() { clearTimeout(SP.idleT); SP.idleT = setTimeout(() => { if (!SP.mode && !_exporting && !document.querySelector('button .spinner') && !$('#modal').classList.contains('show') && !$('#loading').classList.contains('show')) showSplash('idle'); else armIdle(); }, IDLE_MS); }
 function initSplash() {
   // ขณะแสดงหน้าพัก: ปุ่มที่กดเพื่อ "ปลุก" ต้องไม่ไปสั่งงานปุ่ม/ช่องที่โฟกัสอยู่ข้างหลัง (เช่น Space/Enter กดปุ่มสลับธีมโดยไม่ตั้งใจ)
   window.addEventListener('keydown', e => { if (SP.mode) { e.preventDefault(); e.stopPropagation(); hideSplash(); } }, { capture: true });
