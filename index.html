@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <!--
-  Customer & Car Compare Analytics — v28 (คู่กับ Code_CCA_v8.gs · ใช้กับ v7 ได้)
+  Customer & Car Compare Analytics — v29 (คู่กับ Code_CCA_v8.gs · ใช้กับ v7 ได้)
+  v29: แสดงเดลิเวอรี่กลับในการ์ดช่องทางอื่น + ตารางตัวชี้วัดของหน้ารายวัน — ตัดออกเฉพาะตาราง "เปรียบเทียบกับฐานมาตรฐาน 5 แบบ"
   v28: หน้าภาพรวมแบบ "รายวัน (ล่าสุด)" ไม่แสดงยอดเดลิเวอรี่ (ตาราง 5 ฐาน + การ์ดช่องทาง) · เอาโลโก้มุมขวาบนของแถบหัวออก
   v27: + กราฟในรายงานไม่หายเมื่อข้อมูลรีเฟรชอัตโนมัติระหว่างสร้างรายงาน (เลื่อนการดึงข้อมูลออกไป)
        + บันทึกข้อมูล/เหตุการณ์: URL ยาว → ส่งแบบ POST อัตโนมัติ · อ่านกลับมาตรวจทุกครั้ง · หมดเวลา = ตรวจจากชีตก่อนแจ้งผล
@@ -727,7 +728,7 @@
 
     <footer class="px-4 md:px-6 lg:px-8 py-4 text-xs muted flex flex-wrap justify-between gap-2" style="border-top:1px solid var(--border)">
       <span>SBK Customer & Car Compare Analytics · Single File Web App</span>
-      <span>v28.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
+      <span>v29.0 · ข้อมูลประมวลผลภายในเบราว์เซอร์ของคุณเท่านั้น</span>
     </footer>
   </div>
 </div>
@@ -4462,7 +4463,7 @@ function renderDaily(body) {
     <div class="card p-5 xl:col-span-2">
       ${(() => {
         // v21: คอลัมน์ช่องทางอื่น แสดงเฉพาะยอดที่มีการบันทึก (วันที่เลือกหรือฐานใดฐานหนึ่ง)
-        const ext = [['moto', 'จยย.', 'คัน'], ['mrt', 'MRT เข้า', 'คน']] /* v28: หน้ารายวันไม่แสดงเดลิเวอรี่ (ตามผู้ใช้) */.filter(([k]) => isNum(r[k]) || D.base.some(b => ok(b[k])));
+        const ext = [['moto', 'จยย.', 'คัน'], ['mrt', 'MRT เข้า', 'คน']] /* v28–29: ตาราง 5 ฐานของหน้ารายวันไม่แสดงเดลิเวอรี่ (การ์ดช่องทางด้านล่างยังแสดง) */.filter(([k]) => isNum(r[k]) || D.base.some(b => ok(b[k])));
         const extCell = (b, k) => !b.n ? '<span class="muted">—</span>' : ok(b[k]) ? (isNum(r[k]) ? cmpCell(r[k], b[k]) : `<div class="font-semibold">${N(b[k])}</div>`) : '<span class="muted" title="ฐานนี้ไม่ได้บันทึกยอดนี้">—</span>';
         return `${cardHead('เปรียบเทียบกับฐานมาตรฐาน 5 แบบ', `ลูกค้า / รถยนต์ / Ratio${ext.length ? ' / ' + ext.map(e => e[1]).join(' / ') : ''} ของ ${dShort(key)} เทียบกับแต่ละฐาน · % = (วันที่เลือก − ฐาน) ÷ ฐาน`)}
       <div class="scroll-x"><table class="tbl tbl-day"><thead><tr><th>ฐานเปรียบเทียบ</th><th class="num">ลูกค้า (คน)</th><th class="num">รถยนต์ (คัน)</th><th class="num">Ratio</th>${ext.map(([k, l, u], i) => `<th class="num th-ext${i ? '' : ' th-ext1'}">${l} (${u})</th>`).join('')}</tr></thead><tbody>
@@ -4472,7 +4473,7 @@ function renderDaily(body) {
       </tbody></table></div>`; })()}
     </div>
   </div>
-  ${(() => { const by = new Map(S.all.map(x => [x.key, x])), rs = b => b.keys.map(k => by.get(k)).filter(Boolean); return modeKpiRow([r], [{ short: 'สัปดาห์ก่อน', rows: rs(b2) }, { short: 'เมื่อวาน', rows: rs(b1) }, { short: 'ปีก่อน', rows: rs(b5) }], { single: true, exclude: ['deli'], note: '% = เทียบวันเดียวกันสัปดาห์ก่อน' }); })()}
+  ${(() => { const by = new Map(S.all.map(x => [x.key, x])), rs = b => b.keys.map(k => by.get(k)).filter(Boolean); return modeKpiRow([r], [{ short: 'สัปดาห์ก่อน', rows: rs(b2) }, { short: 'เมื่อวาน', rows: rs(b1) }, { short: 'ปีก่อน', rows: rs(b5) }], { single: true, note: '% = เทียบวันเดียวกันสัปดาห์ก่อน' }); })()}
   ${insightHTML(dailyInsights(D), 'สรุปประจำวัน')}
   <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
     <div class="card p-5">${cardHead('14 วันล่าสุด', `ถึง ${dTH(key)} · แท่ง = ลูกค้า · เส้น = รถยนต์ · แท่งเข้ม = วันที่เลือก`)}<div style="height:300px"><canvas id="chDay14"></canvas></div></div>
@@ -4481,7 +4482,7 @@ function renderDaily(body) {
   <div class="card p-5">${cardHead('ตัวชี้วัดทั้งหมดของวัน', `เทียบ${b1.label} และ${b2.label}`)}
     <div class="scroll-x"><table class="tbl"><thead><tr><th>ตัวชี้วัด</th><th class="num">${dShort(key)}</th><th class="num">${b1.short}${b1.keys[0] ? `<div class="th-sub">${dShort(b1.keys[0])}</div>` : ''}</th><th class="num">%</th><th class="num">${b2.short}${b2.keys[0] ? `<div class="th-sub">${dShort(b2.keys[0])}</div>` : ''}</th><th class="num">%</th></tr></thead><tbody>
     ${(() => { const by = new Map(S.all.map(x => [x.key, x])), p1 = b1.keys[0] && by.get(b1.keys[0]), p2 = b2.keys[0] && by.get(b2.keys[0]);
-      return availMetrics().filter(m => m.k !== 'deli').filter(m => isNum(r[m.k]) || (p1 && isNum(p1[m.k]))).map(m => `<tr><td><span class="dot mr-2" style="background:${m.color}"></span>${m.label} <span class="text-xs muted">(${m.unit})</span></td><td class="num font-semibold">${N(r[m.k])}</td>
+      return availMetrics().filter(m => isNum(r[m.k]) || (p1 && isNum(p1[m.k]))).map(m => `<tr><td><span class="dot mr-2" style="background:${m.color}"></span>${m.label} <span class="text-xs muted">(${m.unit})</span></td><td class="num font-semibold">${N(r[m.k])}</td>
         <td class="num">${p1 ? N(p1[m.k]) : '-'}</td><td class="num">${p1 ? chipHTML(g(r[m.k], p1[m.k])) : '-'}</td><td class="num">${p2 ? N(p2[m.k]) : '-'}</td><td class="num">${p2 ? chipHTML(g(r[m.k], p2[m.k])) : '-'}</td></tr>`).join(''); })()}
     </tbody></table></div></div>`;
   const lab14 = D.d14.map(x => `${TH_DAYS_S[dateFromKey(x.k).dow]} ${dateFromKey(x.k).d}`);
